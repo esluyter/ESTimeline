@@ -66,7 +66,12 @@ ESRoutineClip : ESClip {
   }
 
   prDraw { |left, top, width, height|
-    if ((height > 30) and: (width > 30)) {
+    if (left < 0) {
+      width = width + left;
+      left = 0;
+    };
+
+    if ((height > 30) and: (width > 15)) {
       var string = this.funcString;
       var lines = string.split($\n);
       var font = Font.monospace(10);

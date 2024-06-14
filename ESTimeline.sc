@@ -65,6 +65,7 @@ ESTimeline {
 
   now_ { |val|
     playbar = max(val, 0);
+    this.changed(\playbar);
   }
 
   stop {
@@ -161,7 +162,7 @@ ESTimeline {
   prFree {
     this.cleanupFunc.();
     tracks.do(_.free);
-    clock.stop;
+    clock.stop;// why is this making newly created timelines crash bc their clock is stopped?
   }
 
   free {
