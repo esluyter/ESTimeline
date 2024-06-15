@@ -28,6 +28,7 @@ ESTimeline {
     tracks.do { |track, i|
       track.removeDependant(dependantFunc);
       track.addDependant(dependantFunc);
+      track.timeline = this;
     };
     if (resetUndo) {
       undoStack = [];
@@ -187,6 +188,13 @@ ESTimeline {
       ^cs[1..cs.size-2];
     };
     ^"";
+  }
+
+  hasSolo {
+    tracks.do { |track|
+      if (track.solo) { ^true }
+    };
+    ^false;
   }
 }
 

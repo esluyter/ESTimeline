@@ -187,7 +187,7 @@ ESPatternClip : ESClip {
     ^instrument.asArray.join(" / ") ++ ": " ++ this.pattern.class;
   }
 
-  defaultColor { ^Color.hsv(0.4, 0.5, 0.5) }
+  defaultColor { ^Color.hsv(0.4, 0.6, 0.5) }
 
   guiClass { ^ESPatternClipEditView }
 }

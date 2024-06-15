@@ -47,7 +47,7 @@ ESSynthClip : ESClip {
             line = line[0..line.size-2];
           };
         };
-        Pen.stringAtPoint(line, (left+3.5)@(top+22+(i * 6)), font, Color.gray(1.0, 0.4));
+        Pen.stringAtPoint(line, (left+3.5)@(top+22+(i * 6)), font, Color.gray(1.0, 0.55));
       };
     };
     if (freqIndex.notNil) {
