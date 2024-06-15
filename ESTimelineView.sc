@@ -273,8 +273,11 @@ ESTimelineView : UserView {
         var waitTime = 30.reciprocal; // 30 fps
         playheadRout.stop; // just to make sure
         playheadRout = {
-          inf.do {
+          inf.do { |i|
             playheadView.refresh;
+            if (timeline.optimizeView.not) {
+              this.refresh;
+            };
             waitTime.wait;
           };
         }.fork(AppClock) // lower priority clock for GUI updates

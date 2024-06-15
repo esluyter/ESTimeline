@@ -1,7 +1,7 @@
 ESFuncEditView : ESClipEditView {
   *new { |timeline|
     var panelFont = Font("Helvetica", 16);
-    var funcButton, cleanupFuncButton, funcView, cleanupFuncView, sidePanel, bootBox;
+    var funcButton, cleanupFuncButton, funcView, cleanupFuncView, sidePanel, bootBox, envirBox, optimizeBox;
 
     if (editorWindow.notNil) { editorWindow.close };
     editorWindow = Window("Timeline Function Editor", Rect(0, 0, 1000, 600))
@@ -33,7 +33,15 @@ ESFuncEditView : ESClipEditView {
 
     StaticText(sidePanel, Rect(0, 0, 90, 20)).string_("bootOnInit").font_(panelFont);
     bootBox = CheckBox(sidePanel, Rect(0, 15, 20, 20)).value_(timeline.bootOnInit);
-    StaticText(sidePanel, Rect(0, 35, 90, 200)).align_(\topLeft).string_("If this is checked, the initFunc will be wrapped in a waitForBoot");
+    StaticText(sidePanel, Rect(0, 35, 90, 120)).align_(\topLeft).string_("If this is checked, the initFunc will be wrapped in a waitForBoot");
+
+    StaticText(sidePanel, Rect(0, 140, 90, 20)).string_("useEnvir").font_(panelFont);
+    envirBox = CheckBox(sidePanel, Rect(0, 155, 20, 20)).value_(timeline.useEnvir);
+    StaticText(sidePanel, Rect(0, 175, 90, 200)).align_(\topLeft).string_("If this is checked, the timeline will use its own isolated Environment");
+
+    StaticText(sidePanel, Rect(0, 295, 90, 20)).string_("optimizeView").font_(panelFont);
+    optimizeBox = CheckBox(sidePanel, Rect(0, 310, 20, 20)).value_(timeline.optimizeView);
+    StaticText(sidePanel, Rect(0, 330, 90, 200)).align_(\topLeft).string_("Check this for particularly heavy timelines");
 
     Button(sidePanel, Rect(0, 410, 90, 25)).string_("Open in IDE").action_({
       // open / load whichever view is currently visible
@@ -57,6 +65,7 @@ ESFuncEditView : ESClipEditView {
       timeline.initFunc = ("{" ++ funcView.string ++ "}").interpret;
       timeline.cleanupFunc = ("{" ++ cleanupFuncView.string ++ "}").interpret;
       timeline.bootOnInit = bootBox.value;
+      timeline.useEnvir = envirBox.value;
 
       timeline.init(cleanupFirst: true);
       timeline.addUndoPoint;

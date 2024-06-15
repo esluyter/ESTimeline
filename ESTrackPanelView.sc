@@ -16,7 +16,6 @@ ESTrackPanelView : UserView {
     timeline.tracks.do { |track, i|
       trackButts[i][\mute].value = track.mute.asInteger;
       trackButts[i][\solo].value = track.solo.asInteger;
-      //trackViews[i].background = Color.gray(if (track.shouldPlay) { 0.75 }, { 0.6 });
     };
     ^super.refresh;
   }
@@ -34,10 +33,10 @@ ESTrackPanelView : UserView {
 
     trackViews = timeline.tracks.collect { |track, i|
       var top = i * trackHeight;
-      var view = UserView(this, Rect(0, top, width, trackHeight))/*.background_(Color.gray(0.75))*/
+      var view = UserView(this, Rect(0, top, width, trackHeight))
       .drawFunc_({
         Pen.addRect(Rect(0, 0, width, height));
-        Pen.color = Color.gray(if (track.shouldPlay) { 0.78 } { 0.68 });
+        Pen.color = Color.gray(if (track.shouldPlay) { 0.8 } { 0.68 });
         Pen.fill;
         Pen.addRect(Rect(0, 0, width, 1));
         Pen.color = Color.gray(0.55);
