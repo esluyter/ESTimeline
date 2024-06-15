@@ -156,7 +156,6 @@ ESPatternClip : ESClip {
     var string = this.patternString;
     var lines = string.split($\n);
     var font = Font.monospace(10);
-    var funcHeight = lines.size * 10;
     lines.do { |line, i|
       while { max(0, width - 5) < (QtGUI.stringBounds(line, font).width) } {
         if (line.size == 1) {

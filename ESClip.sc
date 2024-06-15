@@ -1,12 +1,12 @@
 ESClip {
-  var <startTime, <duration, >color, <offset;
+  var <startTime, <duration, >color, <offset, <comment;
   var <isPlaying = false;
   var playRout;
 
-  storeArgs { ^[startTime, duration, color, offset] }
+  storeArgs { ^[startTime, duration, color, offset, comment] }
 
-  *new { |startTime, duration, color, offset = 0|
-    ^super.newCopyArgs(startTime, duration, color, offset);
+  *new { |startTime, duration, color, offset = 0, comment = ""|
+    ^super.newCopyArgs(startTime, duration, color, offset, comment);
   }
 
   startTime_ { |val, adjustOffset = false|
@@ -35,6 +35,11 @@ ESClip {
   offset_ { |val|
     offset = val;
     this.changed(\offset, val);
+  }
+
+  comment_ { |val|
+    comment = val;
+    this.changed(\comment, val);
   }
 
   stop {
@@ -100,8 +105,29 @@ ESClip {
   // override these in subclasses
   prStart { }
   prStop { }
-  prDraw { ^"[empty]" }
-  defaultColor { ^Color.hsv(0.5, 0.5, 0.5); }
+  prDraw { |left, top, width, height|
+    var lines = comment.split($\n);
+    var font = Font.sansSerif(14);
+    if (left < 0) {
+      width = width + left;
+      left = 0;
+    };
+    lines.do { |line, i|
+      while { max(0, width - 5) < (QtGUI.stringBounds(line, font).width) } {
+        if (line.size == 1) {
+          line = "";
+        } {
+          line = line[0..line.size-2];
+        };
+      };
+      Pen.stringAtPoint(line, (left+3.5)@(top+2+(i * 16)), if (i > 0) { font } { font.copy.size_(17) }, Color.gray(0.0, 0.7));
+    };
+    Pen.color = Color.gray(0.7);
+    Pen.addRect(left, top, width, height);
+    Pen.stroke;
+    ^""
+  }
+  defaultColor { ^Color.gray(0.9); }
 
   // helper methods
   endTime { ^startTime + duration }
@@ -114,4 +140,6 @@ ESClip {
   rawColor {
     ^color
   }
+
+  guiClass { ^ESClipEditView }
 }
