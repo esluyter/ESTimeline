@@ -9,7 +9,9 @@ ESTimelineView : UserView {
   var hoverTime = 0, hoverTrack = 0, hoverClipIndex = 0;
   var duplicatedClip;
 
-  var <leftPanelWidth = 65;
+  var <editingMode = false;
+
+  editingMode_ { |val| editingMode = val; this.changed(\editingMode, val) }
 
 
   *new { |parent, bounds, timeline, startTime = -2.0, duration = 50.0|
@@ -108,46 +110,48 @@ ESTimelineView : UserView {
       var yDelta = y - clickPoint.y;
       var xDelta = x - clickPoint.x;
 
-      switch (hoverCode)
-      {1} { // drag left edge
-        hoverClip.startTime_(this.pixelsToAbsoluteTime(x), true);
-        dragView.bounds_(dragView.bounds.left_(this.absoluteTimeToPixels(hoverClip.startTime)));
-      }
-      {2} { // drag right edge
-        hoverClip.endTime = this.pixelsToAbsoluteTime(x);
-        dragView.bounds_(dragView.bounds.left_(this.absoluteTimeToPixels(hoverClip.endTime) - 2));
-      }
-      {0} { // drag clip
-        if (mods.isCmd) {
-          hoverClip.offset = hoverClipOffset - this.pixelsToRelativeTime(xDelta);
-        } {
-          var currentHoverTrack = this.trackAtY(y);
+      if (editingMode.not) {
+        switch (hoverCode)
+        {1} { // drag left edge
+          hoverClip.startTime_(this.pixelsToAbsoluteTime(x), true);
+          dragView.bounds_(dragView.bounds.left_(this.absoluteTimeToPixels(hoverClip.startTime)));
+        }
+        {2} { // drag right edge
+          hoverClip.endTime = this.pixelsToAbsoluteTime(x);
+          dragView.bounds_(dragView.bounds.left_(this.absoluteTimeToPixels(hoverClip.endTime) - 2));
+        }
+        {0} { // drag clip
+          if (mods.isCmd) {
+            hoverClip.offset = hoverClipOffset - this.pixelsToRelativeTime(xDelta);
+          } {
+            var currentHoverTrack = this.trackAtY(y);
 
-          if (duplicatedClip.notNil) {
-            timeline.tracks[hoverTrack].addClip(duplicatedClip);
-            hoverClip = duplicatedClip;
-            hoverClipIndex = timeline.tracks[hoverTrack].clips.indexOf(duplicatedClip);
-            duplicatedClip = nil;
-          };
+            if (duplicatedClip.notNil) {
+              timeline.tracks[hoverTrack].addClip(duplicatedClip);
+              hoverClip = duplicatedClip;
+              hoverClipIndex = timeline.tracks[hoverTrack].clips.indexOf(duplicatedClip);
+              duplicatedClip = nil;
+            };
 
-          hoverClip.startTime = hoverClipStartTime + this.pixelsToRelativeTime(xDelta);
-          if (currentHoverTrack != hoverTrack) {
-            timeline.tracks[hoverTrack].removeClip(timeline.tracks[hoverTrack].clips.indexOf(hoverClip));
-            timeline.tracks[currentHoverTrack].addClip(hoverClip);
-            hoverTrack = currentHoverTrack;
-            hoverClipIndex = timeline.tracks[hoverTrack].clips.indexOf(hoverClip);
+            hoverClip.startTime = hoverClipStartTime + this.pixelsToRelativeTime(xDelta);
+            if (currentHoverTrack != hoverTrack) {
+              timeline.tracks[hoverTrack].removeClip(timeline.tracks[hoverTrack].clips.indexOf(hoverClip));
+              timeline.tracks[currentHoverTrack].addClip(hoverClip);
+              hoverTrack = currentHoverTrack;
+              hoverClipIndex = timeline.tracks[hoverTrack].clips.indexOf(hoverClip);
+            };
           };
         };
-      };
 
-      // draw clip guides
-      if (hoverCode.notNil) {
-        leftGuideView.bounds_(leftGuideView.bounds.left_(this.absoluteTimeToPixels(hoverClip.startTime)));
-        rightGuideView.bounds_(rightGuideView.bounds.left_(this.absoluteTimeToPixels(hoverClip.endTime)));
-        [leftGuideView, rightGuideView].do(_.visible_(true));
-      } {
-        [leftGuideView, rightGuideView].do(_.visible_(false));
-      };
+        // draw clip guides
+        if (hoverCode.notNil) {
+          leftGuideView.bounds_(leftGuideView.bounds.left_(this.absoluteTimeToPixels(hoverClip.startTime)));
+          rightGuideView.bounds_(rightGuideView.bounds.left_(this.absoluteTimeToPixels(hoverClip.endTime)));
+          [leftGuideView, rightGuideView].do(_.visible_(true));
+        } {
+          [leftGuideView, rightGuideView].do(_.visible_(false));
+        };
+      }; // end editingMode.not
     }).mouseOverAction_({ |view, x, y|
       var i, j;
       # hoverClip, i, j, hoverCode = this.clipAtPoint(x@y);
@@ -155,17 +159,19 @@ ESTimelineView : UserView {
       hoverClipIndex = j;
       hoverTime = this.pixelsToAbsoluteTime(x);
 
-      switch (hoverCode)
-      {1} { // left edge
-        dragView.bounds_(dragView.bounds.origin_(this.absoluteTimeToPixels(hoverClip.startTime)@(i * trackHeight)));
-        dragView.visible_(true);
-      }
-      {2} { // right edge
-        dragView.bounds_(dragView.bounds.origin_((this.absoluteTimeToPixels(hoverClip.endTime) - 2)@(i * trackHeight)));
-        dragView.visible_(true);
-      }
-      { // default
-        dragView.visible_(false);
+      if (editingMode.not) {
+        switch (hoverCode)
+        {1} { // left edge
+          dragView.bounds_(dragView.bounds.origin_(this.absoluteTimeToPixels(hoverClip.startTime)@(i * trackHeight)));
+          dragView.visible_(true);
+        }
+        {2} { // right edge
+          dragView.bounds_(dragView.bounds.origin_((this.absoluteTimeToPixels(hoverClip.endTime) - 2)@(i * trackHeight)));
+          dragView.visible_(true);
+        }
+        { // default
+          dragView.visible_(false);
+        };
       };
     }).keyDownAction_({ |view, char, mods, unicode, keycode, key|
       //key.postln;
@@ -190,6 +196,10 @@ ESTimelineView : UserView {
       };
       if (char == $e) {
         hoverClip.guiClass.new(hoverClip, timeline);
+      };
+      // cmd-E toggles editing mode
+      if ((key == 69) and: mods.isCmd) {
+        this.editingMode = editingMode.not
       };
       // delete - remove clip, cmd - remove track
       if (key == 16777219) {
