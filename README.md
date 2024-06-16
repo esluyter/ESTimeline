@@ -6,7 +6,14 @@ Latest working test code
 ~timeline.free;
 ~view.release;
 
-~timeline = ESTimeline([ ESTrack([ ESPatternClip(0.0, 50.0, {Pbind(
+~timeline = ESTimeline([ ESTrack([ ESClip(1.34, 6.6928763809125, nil, 0, "hello
+
+this is a test
+of the comment system.
+
+will this be useful???
+..
+we will see."), ESClip(9.1205806355435, 18.57431739072, nil, -0.072697454367784, "part 1"), ESClip(28.23, 10.393658670243, nil, 0, "part 2"), ESClip(38.93, 12.023820275648, nil, 0, "outtro") ]), ESTrack([ ESPatternClip(0.0, 50.0, {Pbind(
   \instrument, \sin,
   \verbbus, ~verbbus,
   \verbamt, Penv([6, 1, 1, 6, 1, 1], [15, 5, 15, 5, inf]),
@@ -15,9 +22,29 @@ Latest working test code
     Pwrand([1, 2, 3], [2, 5, 0.4].normalizeSum, inf)
   ).wrap(30, 120),
   \dur, Pbrown(0.1, 2) + Pwhite(-0.1, 0.1)
-)}, 805771862) ]), ESTrack([ ESSynthClip(0.0, 37.51, {'verb'}, {[
+)}, 805771862), ESSynthClip(56.489889203478, 0.45849025486955, {'default'}, {[
+  freq: ~freq
+]}, {}, {'addToHead'}), ESSynthClip(57.230472977932, 0.45849025486955, {'default'}, {[
+  freq: ~freq
+]}, {}, {'addToHead'}), ESSynthClip(58.22036218141, 0.45849025486955, {'default'}, {[
+  freq: ~freq
+]}, {}, {'addToHead'}) ]), ESTrack([ ESClip(5.69, 5.0, Color(0.71764705882353, 0.87450980392157, 0.89803921568627), 0, "
+what to do here..."), ESSynthClip(55.346017235015, 0.45849025486955, {'default'}, {[
+  freq: ~freq
+]}, {}, {'addToHead'}), ESSynthClip(56.262581312309, 0.45849025486955, {'default'}, {[
+  freq: ~freq
+]}, {}, {'addToHead'}), ESSynthClip(57.604431121468, 0.45849025486955, {'default'}, {[
+  freq: ~freq
+]}, {}, {'addToHead'}), ESSynthClip(58.902285854917, 0.45849025486955, {'default'}, {[
+  freq: ~freq
+]}, {}, {'addToHead'}), ESSynthClip(59.547546965333, 0.45849025486955, {'default'}, {[
+  freq: ~freq
+]}, {}, {'addToHead'}) ]), ESTrack([ ESSynthClip(2.7364332816384, 34.076391603115, {'verb'}, {[
   verbbus: ~verbbus
-]}, {}, {'addToHead'}) ]), ESTrack([ ESRoutineClip(9.35, 4.67, {var syn;
+]}, {}, {'addToHead'}), ESRoutineClip(55.08, 5.0, { 50.do {
+   ~freq = exprand(100, 500);
+   exprand(0.1, 1).wait;
+ };}, 241754095, true, false, 1, {}) ]), ESTrack([ ESRoutineClip(9.35, 4.67, {var syn;
 10.do { |i|
   s.bind { syn = Synth(\default, [freq: (40 + i).midicps]) };
   0.2.wait;
@@ -27,7 +54,7 @@ Latest working test code
 s.bind { syn = Synth(\default) };
 0.2.wait;
 s.bind { syn.free };
-}), ESSynthClip(28.287937743191, 10, 'default', [ 'freq', 220, 'amp', 0.1, 'pan', 0 ]) ]) ], 2.9658994189469, {SynthDef(\sin, { |out, freq = 100, gate = 1, amp = 0.1, preamp = 1.5, attack = 0.001, release = 0.01, pan, verbbus, verbamt, vibrato = 0.2|
+}), ESSynthClip(28.287937743191, 9.2433078648483, 'default', [ 'freq', 220, 'amp', 0.1, 'pan', 0 ]) ]) ], 2.9658994189469, {SynthDef(\sin, { |out, freq = 100, gate = 1, amp = 0.1, preamp = 1.5, attack = 0.001, release = 0.01, pan, verbbus, verbamt, vibrato = 0.2|
   var env, sig;
   var lfo = XLine.ar(0.01, vibrato, ExpRand(0.5, 2.0)) * SinOsc.ar(5.4 + (LFDNoise3.kr(0.1) * 0.5));
   gate = gate + Impulse.kr(0);
@@ -47,7 +74,7 @@ SynthDef(\testSustain, { |out, freq = 122, sustain = 1, amp = 0.1, pan = 0|
 
 SynthDef(\verb, { |out, verbbus, gate = 1|
   var in = In.ar(verbbus, 2);
-  var env = Env.adsr(0.01, 0, 1, 1.0).ar(2, gate);
+  var env = Env.adsr(10, 0, 1, 1.0).ar(2, gate);
   var verb = NHHall.ar(in) * env;
   Out.ar(out, verb);
 }).add;
@@ -58,7 +85,15 @@ SynthDef(\verb, { |out, verbbus, gate = 1|
 .onClose_({ /*~view.release;*/ })
 .acceptsMouseOver_(true).front;
 
-~topPanel = UserView(~window, Rect(0, 0, ~window.bounds.width, 40)).background_(Color.gray(0.75));
+~leftPanelWidth = 80;
+~rightPanelWidth = ~window.bounds.width - ~leftPanelWidth;
+
+~topPanel = UserView(~window, Rect(0, 0, ~window.bounds.width, 40)).background_(Color.gray(0.8));
+~topPlug = UserView(~window, Rect(0, 40, ~leftPanelWidth, 20)).background_(Color.gray(0.85)).drawFunc_({ |view|
+  Pen.addRect(Rect(view.bounds.width - 1, 0, 1, view.bounds.height));
+  Pen.color = Color.gray(0.7);
+  Pen.fill;
+});
 
 ~tempoKnob = EZKnob(~topPanel, Rect(~topPanel.bounds.width - 200, 0, 140, 40),
   label: "Tempo (bpm)",
@@ -82,6 +117,7 @@ SynthDef(\verb, { |out, verbbus, gate = 1|
 ~loadIDEButt = Button(~window, Rect(485, 5, 100, 30)).states_([["Load from IDE"]]).action_({
   var bounds = ~view.bounds;
   ~rulerView.release;
+  ~trackPanelView.release;
   ~view.release;
   ~view.remove;
   ~timeline.free;
@@ -89,15 +125,17 @@ SynthDef(\verb, { |out, verbbus, gate = 1|
   ~view = ESTimelineView(~scrollView, bounds, ~timeline);
   ~rulerView.timelineView = ~view;
   ~rulerView.timeline = ~timeline;
+  ~trackPanelView.init(~view);
   ~makeDependant.();
   ~makeViewDependant.();
   ~rulerView.refresh;
+  ~view.focus;
 });
 
-~undoButt = Button(~window, Rect(725, 5, 70, 30)).states_([["Undo"]]).action_({ ~timeline.undo });
-~redoButt = Button(~window, Rect(800, 5, 70, 30)).states_([["Redo"]]).action_({ ~timeline.redo });
+~undoButt = Button(~window, Rect(725, 5, 70, 30)).states_([["Undo"]]).action_({ ~timeline.undo; ~view.focus; });
+~redoButt = Button(~window, Rect(800, 5, 70, 30)).states_([["Redo"]]).action_({ ~timeline.redo; ~view.focus; });
 
-~funcEditButt = Button(~window, Rect(1000, 5, 150, 30)).states_([["Edit init/cleanup funcs"]]).action_({ ESFuncEditView(~timeline) });
+~funcEditButt = Button(~window, Rect(1000, 5, 150, 30)).states_([["Edit init/cleanup funcs"]]).action_({ ESFuncEditView(~timeline); ~view.focus });
 
 [~newButt, ~openButt, ~saveButt, ~saveAsButt].do(_.visible_(false));
 [~newButt, ~openButt, ~saveButt, ~saveAsButt, ~saveIDEButt, ~loadIDEButt, ~funcEditButt, ~undoButt, ~redoButt, ~tempoKnob.numberView, ~tempoKnob.knobView].do { |thing|
@@ -106,14 +144,14 @@ SynthDef(\verb, { |out, verbbus, gate = 1|
   });
 };
 
-
-~scrollView = ScrollView(~window, Rect(0, 60, ~window.bounds.width, ~window.bounds.height - 60)).hasHorizontalScroller_(false).hasBorder_(false);
-~view = ESTimelineView(~scrollView, Rect(0, 0, ~window.bounds.width, ~window.bounds.height - 60), ~timeline, duration:60);
-~rulerView = ESRulerView(~window, Rect(0, 40, ~window.bounds.width, 20), ~timeline, ~view);
+~scrollView = ScrollView(~window, Rect(0, 60, ~window.bounds.width, ~window.bounds.height - 60)).hasHorizontalScroller_(false).hasBorder_(false).background_(Color.gray(0.97));
+~view = ESTimelineView(~scrollView, Rect(~leftPanelWidth, 0, ~rightPanelWidth, ~window.bounds.height - 60), ~timeline, duration:60);
+~trackPanelView = ESTrackPanelView(~scrollView, Rect(0, 0, ~leftPanelWidth, ~window.bounds.height - 60), ~view);
+~rulerView = ESRulerView(~window, Rect(~leftPanelWidth, 40, ~rightPanelWidth, 20), ~timeline, ~view).background_(Color.gray(0.94));
 
 ~makeDependant = {
   ~timeline.addDependant { |self, what, args|
-    //[what, args].postln;
+    [what, args].postln;
     //~view.refresh;
     defer {
       switch (what)
@@ -132,7 +170,12 @@ SynthDef(\verb, { |out, verbbus, gate = 1|
         ~tempoKnob.value_(args * 60);
       }
       { \track } {
-        ~view.trackViews[args[0]].refresh;
+        if ((args[2] == \mute) or: (args[2] == \solo)) {
+          ~trackPanelView.refresh;
+          ~view.refresh;
+        } {
+          ~view.trackViews[args[0]].refresh;
+        };
       }
       { \tracks } {
         ~view.makeTrackViews;
@@ -149,6 +192,7 @@ SynthDef(\verb, { |out, verbbus, gate = 1|
     switch (what)
     { \startTime } { ~rulerView.refresh }
     { \duration } { ~rulerView.refresh }
+    { \makeTrackViews } { ~trackPanelView.makeTrackViews }
   });
 
   ~timeline.addDependant(~rulerView);
