@@ -1,6 +1,9 @@
 ESSynthClip : ESClip {
-  var <>defName, <>args, <>target, <>addAction;
+  var <defName, <args, <>target, <>addAction;
   var <synth;
+
+  defName_ { |val| defName = val; this.changed(\defName, val); }
+  args_ { |val| args = val; this.changed(\args, val); }
 
   storeArgs { ^[startTime, duration, defName, args, target, addAction, color] }
 
@@ -59,13 +62,13 @@ ESSynthClip : ESClip {
         amp = argsValue[ampIndex + 1];
       };
       Pen.addRect(Rect(left, y, width, 2));
-      Pen.color = Color.gray(1, amp.ampdb.linexp(-60.0, 0.0, 0.05, 1.0));
+      Pen.color = Color.gray(1, if (amp.isNumber) { amp.ampdb.linexp(-60.0, 0.0, 0.05, 1.0) } { 0.5 });
       Pen.fill;
     };
     ^defName.value.asString ++ ": Synth";
   }
 
-  defaultColor { ^Color.hsv(0.85, 0.5, 0.5) }
+  defaultColor { ^Color.hsv(0.85, 0.45, 0.5) }
 
   guiClass { ^ESSynthClipEditView }
 

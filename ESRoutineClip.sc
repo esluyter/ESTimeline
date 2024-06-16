@@ -62,7 +62,7 @@ ESRoutineClip : ESClip {
 
   func_ { |val|
     func = val;
-    //routine = ESRoutine(func);
+    this.changed(\func, val);
   }
 
   prDraw { |left, top, width, height|

@@ -18,6 +18,9 @@ ESClipEditView {
     .front;
 
     funcView = CodeView(editorWindow, Rect(0, 0, 800, 600)).font_(panelFont).string_(clip.comment);
+    if (timeline.useEnvir) {
+      funcView.interpretEnvir_(timeline.envir);
+    };
 
     sidePanel = View(editorWindow, Rect(810, 30, 180, 550));
     StaticText(sidePanel, Rect(0, 0, 180, 20)).string_("startTime").font_(panelFont);

@@ -4,7 +4,7 @@ CodeView : SCViewHolder {
   var <customTokens, <customColors;
   var <>modKeyHandler, <>keyUpAction;
   var paste, suppressKeyPress = false;
-  var <>interpretArgs;
+  var <>interpretArgs, <>interpretEnvir;
 
   *new { |parent, bounds|
     ^super.new.init(parent, bounds);
@@ -461,7 +461,14 @@ CodeView : SCViewHolder {
         ^false;
       };
 
-      ("-> " ++ compiledFunc.valueArray(argValues)).postln;
+      if (interpretEnvir.notNil) {
+        interpretEnvir.use {
+          ("-> " ++ compiledFunc.valueArray(argValues)).postln;
+        };
+      } {
+        ("-> " ++ compiledFunc.valueArray(argValues)).postln;
+      };
+
       ^true;
     } { |error|
       error.reportError;
@@ -772,7 +779,7 @@ CodeView : SCViewHolder {
     if (key == 84 && mod.isCmd && (mod.isShift && mod.isAlt).not) { // cmd-T
       if (mod.isShift) {
         Server.default.queryAllNodes(true);
-        PostView.postln("WARNING: Server dump only visible in IDE post window. Use alt-cmd-T for graphical view.")
+        //PostView.postln("WARNING: Server dump only visible in IDE post window. Use alt-cmd-T for graphical view.")
         ^true
       };
       if (mod.isAlt) {
@@ -780,7 +787,7 @@ CodeView : SCViewHolder {
         ^true
       };
       Server.default.queryAllNodes;
-      PostView.postln("WARNING: Server dump only visible in IDE post window. Use alt-cmd-T for graphical view.")
+      //PostView.postln("WARNING: Server dump only visible in IDE post window. Use alt-cmd-T for graphical view.")
       ^true;
     };
 

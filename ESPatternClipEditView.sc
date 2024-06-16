@@ -9,6 +9,11 @@ ESPatternClipEditView : ESClipEditView {
     .front;
 
     codeView = CodeView(editorWindow, Rect(0, 0, 800, 600)).font_(Font.monospace(16)).string_(clip.patternString);
+
+    if (timeline.useEnvir) {
+      codeView.interpretEnvir_(timeline.envir);
+    };
+
     sidePanel = View(editorWindow, Rect(810, 30, 180, 550));
     StaticText(sidePanel, Rect(0, 0, 180, 20)).string_("startTime").font_(panelFont);
     startTimeView = NumberBox(sidePanel, Rect(0, 20, 180, 20)).font_(Font.monospace(16)).value_(clip.startTime);

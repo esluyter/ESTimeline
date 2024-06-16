@@ -1,7 +1,9 @@
 ESSynthClipEditView : ESClipEditView {
+  classvar <codeView;
+
   *new { |clip, timeline|
     var panelFont = Font("Helvetica", 16);
-    var defNameView, targetView, addActionView, codeView, sidePanel, startTimeView, durationView, offsetView, colorView, randSeedField;
+    var defNameView, targetView, addActionView, sidePanel, startTimeView, durationView, offsetView, colorView, randSeedField;
 
     if (editorWindow.notNil) { editorWindow.close };
     editorWindow = Window("Synth Clip Editor", Rect(0, 0, 800, 600))
@@ -19,6 +21,9 @@ ESSynthClipEditView : ESClipEditView {
 
     StaticText(editorWindow, Rect(20, 175, 180, 20)).string_("args").font_(panelFont);
     codeView = CodeView(editorWindow, Rect(10, 200, 590, 400)).font_(Font.monospace(16)).string_(clip.argsString);
+    if (timeline.useEnvir) {
+      codeView.interpretEnvir_(timeline.envir);
+    };
 
     sidePanel = View(editorWindow, Rect(610, 30, 180, 550));
     StaticText(sidePanel, Rect(0, 0, 180, 20)).string_("startTime").font_(panelFont);
