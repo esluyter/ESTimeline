@@ -29,7 +29,7 @@ The distant goal is that anything you can do in SuperCollider could be sequenced
   - Precisely align clips with each other and with grid
 - More live interaction - e.g. map a controller to a bus and record its movements to an envelope
 - Higher dimensional envelopes - e.g. movement through x/y space
-- Playback and record audio files
+- Playback and record audio files; easily access this Buffer for further manipulation
 - Non-linearity: loop points, wait points, etc.
 - Indeterminacy: chance for clip not to play?
 - Clock follow: e.g. sync up with an Ableton timeline or midi show control
