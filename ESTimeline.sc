@@ -11,6 +11,7 @@ ESTimeline {
 
   *new { |tracks, tempo = 1, initFunc, cleanupFunc, bootOnInit = true, useEnvir = true, optimizeView = false|
     var clock = TempoClock(tempo).permanent_(true);
+    tracks = tracks ?? [ESTrack()];
     ^super.newCopyArgs(tracks, clock, initFunc, cleanupFunc, bootOnInit, useEnvir, optimizeView).initEnvir.initDependantFunc.init(true);
   }
 
@@ -233,7 +234,7 @@ ESTimeline {
   }
 
   duration {
-    ^tracks.collect(_.clips).flat.collect(_.endTime).maxItem
+    ^tracks.collect(_.clips).flat.collect(_.endTime).maxItem ?? 0
   }
 }
 

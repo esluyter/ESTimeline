@@ -57,7 +57,7 @@ ESTimelineWindow : Window {
       timelineView.remove;
       timeline.free;
       timeline = Document.current.string.interpret;
-      timelineView = ESTimelineView(scrollView, bounds, timeline, duration: (timeline.duration + 5));
+      timelineView = ESTimelineView(scrollView, bounds, timeline, duration: max(timeline.duration + 5, 60));
       rulerView.timelineView = timelineView;
       rulerView.timeline = timeline;
       trackPanelView.init(timelineView);
@@ -76,11 +76,12 @@ ESTimelineWindow : Window {
       });
     };
 
+
     scrollView = ScrollView(this, Rect(0, 60, this.bounds.width, this.bounds.height - 60)).hasHorizontalScroller_(false).hasBorder_(false).background_(Color.gray(0.93)).resize_(5).onResize_{ |view|
       timelineView.bounds = Rect(leftPanelWidth, 0, view.bounds.width - leftPanelWidth, view.bounds.height * timelineView.heightRatio);
       timelineView.makeTrackViews;
     };
-    timelineView = ESTimelineView(scrollView, Rect(leftPanelWidth, 0, rightPanelWidth, this.bounds.height - 60), timeline, duration: timeline.duration + 5);
+    timelineView = ESTimelineView(scrollView, Rect(leftPanelWidth, 0, rightPanelWidth, this.bounds.height - 60), timeline, duration: max(timeline.duration + 5, 60));
     trackPanelView = ESTrackPanelView(scrollView, Rect(0, 0, leftPanelWidth, this.bounds.height - 60), timelineView);
     rulerView = ESRulerView(this, Rect(leftPanelWidth, 40, rightPanelWidth, 20), timeline, timelineView).background_(Color.gray(0.97)).resize_(2);
 
