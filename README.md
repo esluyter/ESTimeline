@@ -72,6 +72,16 @@ The distant goal is that anything you can do in SuperCollider could be sequenced
 
 ## Latest working test code
 
+Empty timeline
+```
+(
+~timeline.free;
+~timeline = ESTimeline();
+~window = ESTimelineWindow(timeline: ~timeline);
+)
+```
+
+Test timeline with all elements
 ```
 (
 ~timeline.free;
