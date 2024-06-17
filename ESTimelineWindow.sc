@@ -57,6 +57,8 @@ ESTimelineWindow : Window {
       timelineView.remove;
       timeline.free;
       timeline = Document.current.string.interpret;
+      ESTimelineWindow(timeline: timeline);
+      /* TODO: replace contents of same timeline
       timelineView = ESTimelineView(scrollView, bounds, timeline, duration: max(timeline.duration + 5, 60));
       rulerView.timelineView = timelineView;
       rulerView.timeline = timeline;
@@ -65,6 +67,7 @@ ESTimelineWindow : Window {
       this.makeViewDependant;
       rulerView.refresh;
       timelineView.focus;
+      */
     });
 
     undoButt = Button(this, Rect(705, 5, 70, 30)).states_([["Undo"]]).action_({ timeline.undo; timelineView.focus; });
