@@ -4,7 +4,7 @@ A hypothetical general purpose SuperCollider timeline
 The distant goal is that anything you can do in SuperCollider could be sequenced on a timeline...
 
 ![screenshot](img/ss.png)
-<img src="img/rss.png" width="500" /><img src="img/fss.png" width="500" />
+<img src="img/rss.png" width="600" /><img src="img/fss.png" width="600" />
 
 ## Features
 - Comment, Synth, Pattern, Routine, and Env clips
@@ -16,7 +16,7 @@ The distant goal is that anything you can do in SuperCollider could be sequenced
 - Each Timeline can have its own TempoClock and Environment, and has an init / free hook that save with the timeline
 - DAW-like GUI with key commands for editing and playback
 - Undo and redo
-- Easy to export timeline to IDE as SCLang compile string and load it back again
+- Easy to export timeline to IDE as compile string and load it back again
 
 ## Hypothetical features
 - Timeline Clip -- embed one timeline in another!
