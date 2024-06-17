@@ -9,6 +9,7 @@ The distant goal is that anything you can do in SuperCollider could be sequenced
 ## Features
 - Comment, Synth, Pattern, Routine, and Env clips
 - Tracks can contain all clip types, and can be muted/soloed
+- Gray playhead is "scheduling playhead" and black playhead is "sounding playhead" -- to take into account server latency. Routines can be played with additional latency so non-sounding events line up with the sounding playhead.
 - Most fields can take a Function, so playback params can be generated on the fly
 - Where possible, clips can start playing in the middle
 - Where possible, clips can be seeded so random number generation is deterministic
