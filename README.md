@@ -31,7 +31,7 @@ we will see."), ESClip(9.1205806355435, 18.57431739072, nil, -0.072697454367784,
 ]}, {}, {'addToHead'}) ]), ESTrack([ ESEnvClip(13.0, 8, Env([ 0] ++ [1, 0].dup(100).flat, 0.005.dup(200) * (1, 1.04..9.0), 'sin'), {~lfoar}, offset: -2), ESPatternClip(35.89, 5.0, {Pbind(
   \instrument, \sin,
   \dur, Pfunc { ~dur }
-)}, 121648384), ESSynthClip(55.346017235015, 0.45849025486955, {'default'}, {[
+)}, 121648384), ESEnvClip(42.587500627836, 10.009801591488, Env([ 0.0, 0.66236162361624, 1.0, 0.0, 0.37822878228782 ], [ 1.1941517688091, 2.9583476033554, 0.3080087054461, 3.1609899762595 ], [ 'sin', 'sin', 'sin', 'sin' ]), {~lfoctrl}, {}, {'addToHead'}, 100.0, 1000.0, 0.0, false), ESSynthClip(55.346017235015, 0.45849025486955, {'default'}, {[
   freq: ~freq
 ]}, {}, {'addToHead'}), ESSynthClip(56.262581312309, 0.45849025486955, {'default'}, {[
   freq: ~freq
@@ -47,7 +47,11 @@ we will see."), ESClip(9.1205806355435, 18.57431739072, nil, -0.072697454367784,
 ]}, {}, {'addToHead'}), ESRoutineClip(35.74, 6.01, { 10.do {
    ~dur = rrand(0.1, 1.0);
    0.5.wait;
- }}, 1216896044, true, false, 1, {}) ]), ESTrack([ ESSynthClip(2.7364332816384, 34.076391603115, {'verb'}, {[
+ }}, 1216896044, true, false, 1, {}), ESSynthClip(42.584699114862, 9.24, {'default'}, {[
+  freq: ~lfoctrl.asMap,
+  amp: 0.2,
+  pan: 0,
+]}, {}, {'addToHead'}) ]), ESTrack([ ESSynthClip(2.7364332816384, 34.076391603115, {'verb'}, {[
   verbbus: ~verbbus
 ]}, {}, {'addToHead'}), ESRoutineClip(55.08, 5.0, { 50.do {
    ~freq = exprand(100, 500);
@@ -141,7 +145,7 @@ SynthDef(\verb, { |out, verbbus, gate = 1|
   ~view.remove;
   ~timeline.free;
   ~timeline = Document.current.string.interpret;
-  ~view = ESTimelineView(~scrollView, bounds, ~timeline);
+  ~view = ESTimelineView(~scrollView, bounds, ~timeline, duration: (~timeline.duration + 5));
   ~rulerView.timelineView = ~view;
   ~rulerView.timeline = ~timeline;
   ~trackPanelView.init(~view);
@@ -163,10 +167,10 @@ SynthDef(\verb, { |out, verbbus, gate = 1|
   });
 };
 
-~scrollView = ScrollView(~window, Rect(0, 60, ~window.bounds.width, ~window.bounds.height - 60)).hasHorizontalScroller_(false).hasBorder_(false).background_(Color.gray(0.97));
-~view = ESTimelineView(~scrollView, Rect(~leftPanelWidth, 0, ~rightPanelWidth, ~window.bounds.height - 60), ~timeline, duration:60);
+~scrollView = ScrollView(~window, Rect(0, 60, ~window.bounds.width, ~window.bounds.height - 60)).hasHorizontalScroller_(false).hasBorder_(false).background_(Color.gray(0.93));
+~view = ESTimelineView(~scrollView, Rect(~leftPanelWidth, 0, ~rightPanelWidth, ~window.bounds.height - 60), ~timeline, duration: ~timeline.duration + 5);
 ~trackPanelView = ESTrackPanelView(~scrollView, Rect(0, 0, ~leftPanelWidth, ~window.bounds.height - 60), ~view);
-~rulerView = ESRulerView(~window, Rect(~leftPanelWidth, 40, ~rightPanelWidth, 20), ~timeline, ~view).background_(Color.gray(0.94));
+~rulerView = ESRulerView(~window, Rect(~leftPanelWidth, 40, ~rightPanelWidth, 20), ~timeline, ~view).background_(Color.gray(0.97));
 
 ~makeDependant = {
   ~timeline.addDependant { |self, what, args|
