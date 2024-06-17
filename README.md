@@ -20,6 +20,7 @@ The distant goal is that anything you can do in SuperCollider could be sequenced
 ## Hypothetical features
 - Timeline Clip -- embed one timeline in another!
 - Name clips to access them from other clips
+- Reference clips to create clones that all change together
 - Better GUI editing
   - Selecting / bulk editing clips
   - Insert / delete time
