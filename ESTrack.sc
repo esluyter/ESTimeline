@@ -124,4 +124,8 @@ ESTrack {
     };
     ^mute.not;
   }
+
+  index {
+    ^timeline.tracks.indexOf(this);
+  }
 }

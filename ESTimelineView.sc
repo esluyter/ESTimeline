@@ -87,6 +87,11 @@ ESTimelineView : UserView {
       if (mods.isAlt) {
         duplicatedClip = hoverClip.deepCopy;
       };
+
+      if (hoverClip.notNil and: editingMode) {
+        // again, not the best:
+        hoverClip.prMouseDown(x, y - (trackHeight * hoverClip.track.index), mods, buttNum, clickCount, *this.clipBounds(hoverClip))
+      };
     }).mouseUpAction_({ |view, x, y, mods|
       // if the mouse didn't move during the click, move the playhead to the click point:
       if (clickPoint == (x@y)) {
@@ -152,9 +157,15 @@ ESTimelineView : UserView {
         } {
           [leftGuideView, rightGuideView].do(_.visible_(false));
         };
-      }; // end editingMode.not
+      } {  // if editingMode
+        if (hoverClip.notNil) {
+          //                        not the best
+          hoverClip.prMouseMove(x, y - (trackHeight * hoverClip.track.index), xDelta, yDelta, *this.clipBounds(hoverClip));
+        };
+      };// end editingMode
     }).mouseOverAction_({ |view, x, y|
       var i, j;
+      var oldHoverClip = hoverClip;
       # hoverClip, i, j, hoverCode = this.clipAtPoint(x@y);
       hoverTrack = i;
       hoverClipIndex = j;
@@ -172,6 +183,14 @@ ESTimelineView : UserView {
         }
         { // default
           dragView.visible_(false);
+        };
+      } {
+        if (oldHoverClip.notNil and: (oldHoverClip != hoverClip)) {
+          oldHoverClip.prHoverLeave;
+        };
+        if (hoverClip.notNil) {
+          //                  this is bad:
+          hoverClip.prHover(x, y - (trackHeight * hoverClip.track.index), hoverTime, *this.clipBounds(hoverClip));
         };
       };
     }).keyDownAction_({ |view, char, mods, unicode, keycode, key|
@@ -340,6 +359,12 @@ ESTimelineView : UserView {
   absoluteTimeToPixels { |clipStartTime| ^this.relativeTimeToPixels(clipStartTime - startTime) }
   pixelsToRelativeTime { |pixels| ^(pixels / this.bounds.width) * duration }
   pixelsToAbsoluteTime { |pixels| ^this.pixelsToRelativeTime(pixels) + startTime }
+
+  clipBounds { |clip|
+    var left = this.absoluteTimeToPixels(clip.startTime);
+    var width = this.relativeTimeToPixels(clip.duration);
+    ^[left, 3, width, trackHeight - 4, editingMode];
+  }
 
   startTime_ { |val|
     startTime = val;

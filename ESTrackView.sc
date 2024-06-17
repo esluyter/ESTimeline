@@ -17,9 +17,7 @@ ESTrackView : UserView {
         track.clips.reverse.do { |clip, j|
           if ((clip.startTime < timelineView.endTime) and: (clip.endTime > timelineView.startTime)) {
             // only draw clips in the timeline view bounds
-            var left = timelineView.absoluteTimeToPixels(clip.startTime);
-            var width = timelineView.relativeTimeToPixels(clip.duration);
-            clip.draw(left, 3, width, this.bounds.height - 4, timelineView.editingMode);
+            clip.draw(*timelineView.clipBounds(clip));
           };
         };
         if (track.shouldPlay.not) {
