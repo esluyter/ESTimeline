@@ -25,6 +25,7 @@ The distant goal is that anything you can do in SuperCollider could be sequenced
 - Better GUI editing
   - Selecting / bulk editing clips
   - Insert / delete time
+  - Precisely align clips with each other and with grid
 - More live interaction - e.g. map a controller to a bus and record its movements to an envelope
 - Higher dimensional envelopes - e.g. movement through x/y space
 - Playback and record audio files
