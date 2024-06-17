@@ -44,6 +44,10 @@ The distant goal is that anything you can do in SuperCollider could be sequenced
 - cmd-scroll zoom horizontally
 - opt-scroll zoom vertically
 - right click to see action menu
+- Envelope breakpoint editing (cmd-e to toggle this mode)
+  - click and drag to move breakpoints
+  - shift-click to add breakpoint
+  - opt-click to remvove breakpoint
 
 ## Key commands
 - space toggles play
