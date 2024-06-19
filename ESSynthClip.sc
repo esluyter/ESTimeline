@@ -34,6 +34,7 @@ ESSynthClip : ESClip {
     var argsValue = args.value.asArray;
     var freqIndex = argsValue.indexOf(\freq);
     var ampIndex = argsValue.indexOf(\amp);
+    var strTop;
 
     if (left < 0) {
       width = width + left;
@@ -50,13 +51,16 @@ ESSynthClip : ESClip {
             line = line[0..line.size-2];
           };
         };
-        Pen.stringAtPoint(line, (left+3.5)@(top+22+(i * 6)), font, Color.gray(1.0, 0.55));
+        strTop = 22 + (i * 6);
+        if (strTop < height) {
+          Pen.stringAtPoint(line, (left+3.5)@(top + strTop), font, Color.gray(1.0, 0.55));
+        };
       };
     };
 
     if (freqIndex.notNil and: { argsValue[freqIndex + 1].isNumber }) {
       var freq = argsValue[freqIndex + 1];
-      var y = freq.explin(20, 20000, height, top);
+      var y = freq.explin(20, 20000, top + height, top);
       var amp = 0.2;
       if (ampIndex.notNil) {
         amp = argsValue[ampIndex + 1];

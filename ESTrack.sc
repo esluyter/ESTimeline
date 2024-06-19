@@ -83,9 +83,11 @@ ESTrack {
     this.changed(\clips);
   }
 
-  removeClip { |index|
+  removeClip { |index, doFree = true|
     var clip = clips.removeAt(index);
-    clip.removeDependant(dependantFunc);
+    if (doFree) {
+      clip.free;
+    };
     this.changed(\clips);
   }
 
@@ -101,7 +103,7 @@ ESTrack {
   }
 
   free {
-    clips.do(_.release);
+    clips.do(_.free);
     this.release;
   }
 

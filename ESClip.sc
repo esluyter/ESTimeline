@@ -75,7 +75,7 @@ ESClip {
   }
 
   // draw this clip on a UserView using Pen
-  draw { |left, top, width, height, editingMode|
+  draw { |left, top, width, height, editingMode = false|
     if (track.shouldPlay) {
       Pen.color = this.color;
     } {
@@ -88,16 +88,20 @@ ESClip {
     Pen.addRect(Rect(left + width - 1, top, 1, height));
     Pen.fill;
 
-    // if it's more than 5 pixels wide, call the prDraw function
-    if (width > 5) {
+    // if it's more than 5 pixels wide and high, call the prDraw function
+    if ((width > 5) and: (height > 10)) {
       var font = Font("Helvetica", 14, true);
       var title;
-      if (track.timeline.useEnvir) {
-        track.timeline.envir.use {
+      try {
+        if (track.timeline.useEnvir) {
+          track.timeline.envir.use {
+            title = this.prDraw(left, top, width, height, editingMode);
+          }
+        } {
           title = this.prDraw(left, top, width, height, editingMode);
-        }
+        };
       } {
-        title = this.prDraw(left, top, width, height, editingMode);
+        title = ""
       };
 
       if (left < 0) {
@@ -115,12 +119,19 @@ ESClip {
     };
   }
 
+  free {
+    this.prFree;
+    this.release;
+  }
+
   // override these in subclasses
+  prFree { }
   prStart { }
   prStop { }
   prDraw { |left, top, width, height|
     var lines = comment.split($\n);
     var font = Font.sansSerif(14);
+    var strTop;
     if (left < 0) {
       width = width + left;
       left = 0;
@@ -133,7 +144,10 @@ ESClip {
           line = line[0..line.size-2];
         };
       };
-      Pen.stringAtPoint(line, (left+3.5)@(top+2+(i * 16)), if (i > 0) { font } { font.copy.size_(17) }, Color.gray(0.0, 0.7));
+      strTop = (2+(i * 16));
+      if (strTop < height) {
+        Pen.stringAtPoint(line, (left+3.5)@(strTop + top), if (i > 0) { font } { font.copy.size_(17) }, Color.gray(0.0, 0.7));
+      };
     };
     Pen.color = Color.gray(0.7);
     Pen.addRect(left, top, width, height);
@@ -152,6 +166,10 @@ ESClip {
 
   rawColor {
     ^color
+  }
+
+  duplicate {
+    ^this.asCompileString.postln.interpret;
   }
 
   guiClass { ^ESClipEditView }

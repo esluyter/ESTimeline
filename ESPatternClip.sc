@@ -171,7 +171,7 @@ ESPatternClip : ESClip {
         var eventHeight = 2;
         event.freq.asArray.do { |freq, i|
           var eventWidth = event.sustain.asArray.wrapAt(i) * width / duration;
-          var y = freq.explin(20, 20000, height, top);
+          var y = freq.explin(20, 20000, top + height, top);
           Pen.color = Color.gray(1, event.amp.asArray.wrapAt(i).ampdb.linexp(-60.0, 0.0, 0.05, 1.0));
           Pen.addRect(Rect(x, y, eventWidth, eventHeight));
           Pen.fill;

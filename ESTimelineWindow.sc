@@ -1,6 +1,6 @@
 ESTimelineWindow : Window {
   var <timeline;
-  var <topPanel, <topPlug, <tempoKnob, <saveIDEButt, <loadIDEButt, <undoButt, <redoButt, <funcEditButt;
+  var <topPanel, <topPlug, <tempoKnob, <saveIDEButt, <loadIDEButt, <undoButt, <redoButt, <funcEditButt, <useParentClockBox;
   var <scrollView, <timelineView, <trackPanelView, <rulerView;
   var playheadRout;
 
@@ -27,14 +27,15 @@ ESTimelineWindow : Window {
     });
 
     tempoKnob = EZKnob(topPanel, Rect(20, 2.5, 140, 35),
-      label: "Tempo (bpm)",
+      label: "tempoBPM",
       controlSpec: ControlSpec(10, 500, 2, 0.0, 60.0),
       action: { |knob|
-        timeline.tempo = knob.value / 60
+        timeline.tempoBPM = knob.value
       },
       layout: 'line2',
-      initVal: timeline.tempo * 60,
+      initVal: timeline.tempoBPM,
     );
+    tempoKnob.knobView.mode_(\vert).step_(0.001).shift_scale_(5);
 
     funcEditButt = Button(this, Rect(210, 5, 150, 30)).states_([["Edit init/cleanup funcs"]]).action_({ ESFuncEditView(timeline); timelineView.focus });
 
@@ -46,10 +47,12 @@ ESTimelineWindow : Window {
     */
 
     saveIDEButt = Button(this, Rect(430, 5, 100, 30)).states_([["Open in IDE"]]).action_({
-      Document.new("Timeline Score", timeline.asCompileString).front;
+      Document.new("Timeline Score", timeline.currentState).front;
       timelineView.focus;
     });
     loadIDEButt = Button(this, Rect(535, 5, 100, 30)).states_([["Load from IDE"]]).action_({
+      timeline.restoreUndoPoint(Document.current.string);
+      /*
       var bounds = timelineView.bounds;
       rulerView.release;
       trackPanelView.release;
@@ -58,7 +61,7 @@ ESTimelineWindow : Window {
       timeline.free;
       timeline = Document.current.string.interpret;
       ESTimelineWindow(timeline: timeline);
-      /* TODO: replace contents of same timeline
+      * TODO: replace contents of same timeline
       timelineView = ESTimelineView(scrollView, bounds, timeline, duration: max(timeline.duration + 5, 60));
       rulerView.timelineView = timelineView;
       rulerView.timeline = timeline;
@@ -73,6 +76,19 @@ ESTimelineWindow : Window {
     undoButt = Button(this, Rect(705, 5, 70, 30)).states_([["Undo"]]).action_({ timeline.undo; timelineView.focus; });
     redoButt = Button(this, Rect(780, 5, 70, 30)).states_([["Redo"]]).action_({ timeline.redo; timelineView.focus; });
 
+    if (timeline.parentClip.notNil) {
+      useParentClockBox = CheckBox(this, Rect(900, 10, 20, 20)).value_(timeline.parentClip.useParentClock).action_({ |view|
+        timeline.parentClip.useParentClock = view.value;
+        timelineView.focus;
+      });
+      StaticText(this, Rect(920, 10, 120, 20)).string_("useParentClock").font_(Font.sansSerif(16));
+    } {
+      Button(this, Rect(925, 5, 200, 30)).states_([["Open as clip in new timeline"]]).action_({
+        ESTimelineWindow(bounds: this.bounds, timeline: ESTimeline([ESTrack([ESTimelineClip(0, timeline.duration, timeline)])], timeline.tempo));
+        this.close;
+      })
+    };
+
     [saveIDEButt, loadIDEButt, funcEditButt, undoButt, redoButt, tempoKnob.numberView, tempoKnob.knobView].do { |thing|
       thing.keyDownAction_({ |...args|
         timelineView.keyDownAction.(*args);
@@ -84,7 +100,7 @@ ESTimelineWindow : Window {
       timelineView.bounds = Rect(leftPanelWidth, 0, view.bounds.width - leftPanelWidth, view.bounds.height * timelineView.heightRatio);
       timelineView.makeTrackViews;
     };
-    timelineView = ESTimelineView(scrollView, Rect(leftPanelWidth, 0, rightPanelWidth, this.bounds.height - 60), timeline, duration: max(timeline.duration + 5, 60));
+    timelineView = ESTimelineView(scrollView, Rect(leftPanelWidth, 0, rightPanelWidth, this.bounds.height - 60), timeline, duration: max(timeline.duration + 5, 15));
     trackPanelView = ESTrackPanelView(scrollView, Rect(0, 0, leftPanelWidth, this.bounds.height - 60), timelineView);
     rulerView = ESRulerView(this, Rect(leftPanelWidth, 40, rightPanelWidth, 20), timeline, timelineView).background_(Color.gray(0.97)).resize_(2);
 
@@ -126,11 +142,11 @@ ESTimelineWindow : Window {
             }.fork(AppClock) // lower priority clock for GUI updates
           } {
             playheadRout.stop;
-            timelineView.playheadView.refresh;
+            timelineView.refresh;
           };
         }
         { \tempo } {
-          tempoKnob.value_(args * 60);
+          tempoKnob.value_(timeline.tempoBPM);
         }
         { \track } {
           if ((args[2] == \mute) or: (args[2] == \solo)) {
@@ -141,11 +157,16 @@ ESTimelineWindow : Window {
           };
         }
         { \tracks } {
-          timelineView.makeTrackViews;
+          {
+            0.01.wait; // this solves a weird bug?
+            timelineView.makeTrackViews;
+          }.fork(AppClock);
         }
         { \restoreUndoPoint } {
-          timelineView.makeTrackViews;
-          ESClipEditView.closeWindow;
+          {
+            timelineView.makeTrackViews;
+            ESClipEditView.closeWindow;
+          }.fork(AppClock);
         };
       };
     };

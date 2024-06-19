@@ -32,10 +32,14 @@ ESTimelineView : UserView {
     this.setContextMenuActions(
       Menu(
         MenuAction("Add Comment (C)", { timeline.tracks[hoverTrack].addClip(ESClip(hoverTime, 5)) }),
-        MenuAction("Add Synth Clip (S)", { timeline.tracks[hoverTrack].addClip(ESSynthClip(hoverTime, 5, \default)) }),
+        MenuAction("Add Synth Clip (S)", { timeline.tracks[hoverTrack].addClip(ESSynthClip(hoverTime, 0.5, \default, {[
+  freq: 220,
+  amp: 0.2
+]})) }),
         MenuAction("Add Pattern Clip (P)", { timeline.tracks[hoverTrack].addClip(ESPatternClip(hoverTime, 5, {Pbind()})) }),
         MenuAction("Add Routine Clip (R)", { timeline.tracks[hoverTrack].addClip(ESRoutineClip(hoverTime, 5, {})) }),
         MenuAction("Add Env Clip (E)", { timeline.tracks[hoverTrack].addClip(ESEnvClip(hoverTime, 5, Env([0, 1, 0], [2.5, 2.5], \sin))); }),
+        MenuAction("Add Timeline Clip (T)", { timeline.tracks[hoverTrack].addClip(ESTimelineClip(hoverTime, 10, ESTimeline())); })
       ).title_("Add Clip"),
       MenuAction("Edit Clip (e)", { hoverClip.guiClass.new(hoverClip, timeline) }),
       MenuAction("Split Clip (s)", { if (hoverClip.notNil) { timeline.tracks[hoverTrack].splitClip(hoverClipIndex, hoverTime) } }),
@@ -85,7 +89,7 @@ ESTimelineView : UserView {
 
       // alt to duplicate clip
       if (mods.isAlt) {
-        duplicatedClip = hoverClip.deepCopy;
+        duplicatedClip = hoverClip.duplicate;
       };
 
       if (hoverClip.notNil and: editingMode) {
@@ -100,7 +104,11 @@ ESTimelineView : UserView {
         };
       };
 
-      duplicatedClip = nil;
+      if (duplicatedClip.notNil) {
+        // this means alt was pressed but mouse did not move
+        duplicatedClip.free;
+        duplicatedClip = nil;
+      };
 
       [leftGuideView, rightGuideView].do(_.visible_(false));
 
@@ -141,7 +149,7 @@ ESTimelineView : UserView {
 
             hoverClip.startTime = hoverClipStartTime + this.pixelsToRelativeTime(xDelta);
             if (currentHoverTrack != hoverTrack) {
-              timeline.tracks[hoverTrack].removeClip(timeline.tracks[hoverTrack].clips.indexOf(hoverClip));
+              timeline.tracks[hoverTrack].removeClip(timeline.tracks[hoverTrack].clips.indexOf(hoverClip), false);
               timeline.tracks[currentHoverTrack].addClip(hoverClip);
               hoverTrack = currentHoverTrack;
               hoverClipIndex = timeline.tracks[hoverTrack].clips.indexOf(hoverClip);
@@ -199,11 +207,17 @@ ESTimelineView : UserView {
       if (char == $ ) { timeline.togglePlay };
       // s - split clip
       if (char == $s) { if (hoverClip.notNil) { timeline.tracks[hoverTrack].splitClip(hoverClipIndex, hoverTime) } };
+      if (char == $S) {
+        timeline.tracks[hoverTrack].addClip(ESSynthClip(hoverTime, 0.5, \default, {[
+  freq: 220,
+  amp: 0.2
+]}));
+      };
+      if (char == $T) {
+        timeline.tracks[hoverTrack].addClip(ESTimelineClip(hoverTime, 10, ESTimeline()));
+      };
       if (char == $C) {
         timeline.tracks[hoverTrack].addClip(ESClip(hoverTime, 5));
-      };
-      if (char == $S) {
-        timeline.tracks[hoverTrack].addClip(ESSynthClip(hoverTime, 5, \default));
       };
       if (char == $P) {
         timeline.tracks[hoverTrack].addClip(ESPatternClip(hoverTime, 5, {Pbind()}));
