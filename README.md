@@ -6,10 +6,12 @@ The distant goal is that anything you can do in SuperCollider could be sequenced
 ![screenshot](img/ss2.png)
 <img src="img/sse.png" width="500" />
 
-Timelines inside of timelines with optionally separate play clocks:
-<img src="img/ss3.png" />
 <img src="img/ssee.png" width="400" /><img src="img/sss.png" width="400" /><img src="img/rss.png" width="400" /><img src="img/ssep.png" width="400" />
 <img src="img/fss.png" width="400" />
+
+Timelines inside of timelines with optionally separate play clocks:
+
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/8jcxcfvS_08/0.jpg)](http://www.youtube.com/watch?v=8jcxcfvS_08 "Video Title")
 
 ## Features
 - Comment, Synth, Pattern, Routine, and Env clip types
