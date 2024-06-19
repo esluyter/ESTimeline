@@ -92,23 +92,18 @@ ESTimeline {
       tracks.do(_.stop);
     };
 
-    if (clock.notNil) { clock.stop; clock = nil };
+    //if (clock.notNil) { clock.stop; clock = nil };
 
     //playbar = this.now;
     isPlaying = false;
     this.changed(\isPlaying, false);
   }
 
-  play { |startTime, altClock|
-
+  prMakeClock { |altClock|
     // stop if playing
     if (isPlaying) { this.stop };
     isPlaying = true;
     this.changed(\isPlaying, true);
-
-    if (startTime.notNil) {
-      playbar = startTime;
-    };
 
     if (clock.notNil) { clock.stop; clock = nil };
 
@@ -116,6 +111,18 @@ ESTimeline {
       playClock = parentClip.track.timeline.clock;
     } {
       playClock = altClock ?? { clock = TempoClock(tempo); };
+    };
+
+    ^playClock;
+  }
+
+  play { |startTime, altClock, makeClock = true|
+    if (makeClock) {
+      this.prMakeClock(altClock);
+    };
+
+    if (startTime.notNil) {
+      playbar = startTime;
     };
 
     // save the starting conditions

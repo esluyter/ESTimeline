@@ -7,11 +7,12 @@ ESTimelineView : UserView {
   var clickPoint, clickTime, scrolling = false, originalDuration;
   var hoverClip, hoverCode, hoverClipStartTime, hoverClipOffset;
   var hoverTime = 0, hoverTrack = 0, hoverClipIndex = 0;
-  var duplicatedClip;
+  var duplicatedClip, <timeSelection;
 
   var <editingMode = false;
 
-  editingMode_ { |val| editingMode = val; this.changed(\editingMode, val) }
+  timeSelection_ { |val| timeSelection = val; this.changed(\timeSelection, val); }
+  editingMode_ { |val| editingMode = val; this.changed(\editingMode, val); }
 
 
   *new { |parent, bounds, timeline, startTime = -2.0, duration = 50.0|
@@ -51,7 +52,17 @@ ESTimelineView : UserView {
     );
 
     this.drawFunc_({
-
+      if (timeSelection.notNil) {
+        var left = this.absoluteTimeToPixels(timeSelection[0]);
+        var width = this.relativeTimeToPixels(timeSelection[1] - timeSelection[0]);
+        Pen.addRect(Rect(left, 0, width, this.bounds.height));
+        Pen.color = Color.gray(0.5, 0.2);
+        Pen.fill;
+        Pen.addRect(Rect(left - 1, 0, 1, this.bounds.height));
+        Pen.addRect(Rect(left + width, 0, 1, this.bounds.height));
+        Pen.color = Color.gray(0.6);
+        Pen.fill;
+      };
     }).mouseWheelAction_({ |view, x, y, mods, xDelta, yDelta|
       var xTime = view.pixelsToAbsoluteTime(x);
       if (mods.isCmd) { view.duration = view.duration * (-1 * yDelta).linexp(-100, 100, 0.5, 2, nil); };
@@ -80,11 +91,21 @@ ESTimelineView : UserView {
       if (hoverClip.notNil) {
         hoverClipStartTime = hoverClip.startTime;
         hoverClipOffset = hoverClip.offset;
+      } {
+        if (clickCount > 1) {
+          // double click on empty area to remove time selection
+          this.timeSelection = nil;
+        };
       };
 
       if ((clickCount > 1) and: hoverClip.notNil) {
-        // edit the clip on double click
-        hoverClip.guiClass.new(hoverClip, timeline);
+        if (mods.isShift) {
+          // shift double click to select the clip's time
+          this.timeSelection = [hoverClip.startTime, hoverClip.endTime];
+        } {
+          // edit the clip on double click
+          hoverClip.guiClass.new(hoverClip, timeline);
+        };
       };
 
       // alt to duplicate clip
@@ -123,6 +144,13 @@ ESTimelineView : UserView {
     }).mouseMoveAction_({ |view, x, y, mods|
       var yDelta = y - clickPoint.y;
       var xDelta = x - clickPoint.x;
+
+      // select time if start dragging from empty area
+      if (hoverClip.isNil) {
+        if (xDelta.abs > 1) {
+          this.timeSelection = [this.pixelsToAbsoluteTime(clickPoint.x), this.pixelsToAbsoluteTime(x)].sort;
+        };
+      };
 
       if (editingMode.not) {
         switch (hoverCode)
@@ -229,7 +257,11 @@ ESTimelineView : UserView {
         timeline.tracks[hoverTrack].addClip(ESEnvClip(hoverTime, 5, Env([0, 1, 0], [2.5, 2.5], \sin)));
       };
       if (char == $e) {
-        hoverClip.guiClass.new(hoverClip, timeline);
+        if (hoverClip.class == ESTimelineClip) {
+          ESFuncEditView(hoverClip.timeline);
+        } {
+          hoverClip.guiClass.new(hoverClip, timeline);
+        };
       };
       // cmd-E toggles editing mode
       if ((key == 69) and: mods.isCmd) {
