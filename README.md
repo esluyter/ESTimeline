@@ -104,7 +104,7 @@ Test timeline with all elements
 ```
 (
 ~timeline.free;
-~timeline = ESTimeline([
+~timeline = ESTimeline([ESTrack([ESTimelineClip(2, 60, ESTimeline([
   ESTrack([
     ESClip(1.34, 6.6928763809125, nil, 0, "hello
 
@@ -145,7 +145,7 @@ we will see."),
   \instrument, \sin,
   \dur, Pfunc { ~dur }
 )}, 121648384),
-    ESEnvClip(42.587500627836, 10.009801591488, Env([ 0.0, 0.66236162361624, 1.0, 0.0, 0.37822878228782 ], [ 1.1941517688091, 2.9583476033554, 0.3080087054461, 3.1609899762595 ], [ 'sin', 'sin', 'sin', 'sin' ]), {~lfoctrl}, {}, {'addToHead'}, 100.0, 1000.0, 0.0, false),
+    ESEnvClip(42.587500627836, 10.009801591488, Env([ 0.0, 0.66236162361624, 1.0, 0.0, 0.37822878228782 ], [ 1.1941517688091, 2.9583476033554, 0.3080087054461, 3.1609899762595 ], [ 'sin', 'sin', 'sin', 'sin' ]), {~lfoctrl}, {}, {'addToHead'}, 100.0, 1000.0, 0.0, true),
     ESSynthClip(55.346017235015, 0.45849025486955, {'default'}, {[
   freq: ~freq
 ]}, {}, {'addToHead'}), ESSynthClip(56.262581312309, 0.45849025486955, {'default'}, {[
@@ -232,7 +232,138 @@ SynthDef(\verb, { |out, verbbus, gate = 1|
 ~lfoctrl = Bus.control(s, 1);
 ~lfoar = Bus.audio(s, 1);}, {~verbbus.free;
 ~lfoctrl.free;
-~lfoar.free;});
+~lfoar.free;}, useEnvir: true), false ),
+ESTimelineClip(70, 50, ESTimeline([ ESTrack([ ESRoutineClip(0.0, 39.23, {inf.do {
+  ~timeline.tempoBPM = rrand(20, 60);
+  1.wait;
+}}, 1897888992, true, false, 1, {}) ]), ESTrack([ ESPatternClip(0.0, 11.97783166732, {Pbind(
+  \type, \grain,
+  \instrument, \rim, //Pwrand([\rim, \thump], [0.99, 0.01], inf),
+  \dur, 0.1,
+  //\tempo, Pfunc { ~timeline.tempo },//Pbrown(0.0, 1.0, Pbrown(0.01, 0.25, 0.01)).lincurve(0, 1, 0.9, 20, 3),
+  \freq, Pbrown(385, 410, 10) + (Pwhite(15, 50) * Pfunc({ ~timeline.tempo }).linlin(1, 20, 0, 1)),
+  \accent, Prand([1, 0, 0, 0], inf),
+  \restdummy, Pwrand([Rest(), 1], [1/11, 10/11], inf),
+  \db, Pseq([-16, -19, -17, -20] * 1.2, inf) + (Pkey(\accent) * 9),
+  \decay, Pseq([0.11, 0.08, 0.09, 0.08], inf),
+  \damt, Pseq([0.5, 0.0, 0.0, 0.0], inf),
+);}, 1756120386), ESPatternClip(12.081747390425, 0.82335309956894, {Pbind(
+  \type, \grain,
+  \instrument, \rim, //Pwrand([\rim, \thump], [0.99, 0.01], inf),
+  \dur, 0.1,
+  //\tempo, Pfunc { ~timeline.tempo },//Pbrown(0.0, 1.0, Pbrown(0.01, 0.25, 0.01)).lincurve(0, 1, 0.9, 20, 3),
+  \freq, Pbrown(385, 410, 10) + (Pwhite(15, 50) * Pfunc({ ~timeline.tempo }).linlin(1, 20, 0, 1)),
+  \accent, Prand([1, 0, 0, 0], inf),
+  \restdummy, Pwrand([Rest(), 1], [1/11, 10/11], inf),
+  \db, Pseq([-16, -19, -17, -20] * 1.2, inf) + (Pkey(\accent) * 9),
+  \decay, Pseq([0.11, 0.08, 0.09, 0.08], inf),
+  \damt, Pseq([0.5, 0.0, 0.0, 0.0], inf),
+);}, 1756120386, true, 12.081747390425), ESPatternClip(13.060287116335, 1.9322799239727, {Pbind(
+  \type, \grain,
+  \instrument, \rim, //Pwrand([\rim, \thump], [0.99, 0.01], inf),
+  \dur, 0.1,
+  //\tempo, Pfunc { ~timeline.tempo },//Pbrown(0.0, 1.0, Pbrown(0.01, 0.25, 0.01)).lincurve(0, 1, 0.9, 20, 3),
+  \freq, Pbrown(385, 410, 10) + (Pwhite(15, 50) * Pfunc({ ~timeline.tempo }).linlin(1, 20, 0, 1)),
+  \accent, Prand([1, 0, 0, 0], inf),
+  \restdummy, Pwrand([Rest(), 1], [1/11, 10/11], inf),
+  \db, Pseq([-16, -19, -17, -20] * 1.2, inf) + (Pkey(\accent) * 9),
+  \decay, Pseq([0.11, 0.08, 0.09, 0.08], inf),
+  \damt, Pseq([0.5, 0.0, 0.0, 0.0], inf),
+);}, 1756120386, true, 13.060287116335), ESPatternClip(15.070937342894, 0.62696242068811, {Pbind(
+  \type, \grain,
+  \instrument, \rim, //Pwrand([\rim, \thump], [0.99, 0.01], inf),
+  \dur, 0.1,
+  //\tempo, Pfunc { ~timeline.tempo },//Pbrown(0.0, 1.0, Pbrown(0.01, 0.25, 0.01)).lincurve(0, 1, 0.9, 20, 3),
+  \freq, Pbrown(385, 410, 10) + (Pwhite(15, 50) * Pfunc({ ~timeline.tempo }).linlin(1, 20, 0, 1)),
+  \accent, Prand([1, 0, 0, 0], inf),
+  \restdummy, Pwrand([Rest(), 1], [1/11, 10/11], inf),
+  \db, Pseq([-16, -19, -17, -20] * 1.2, inf) + (Pkey(\accent) * 9),
+  \decay, Pseq([0.11, 0.08, 0.09, 0.08], inf),
+  \damt, Pseq([0.5, 0.0, 0.0, 0.0], inf),
+);}, 1756120386, true, 15.070937342894), ESPatternClip(15.784519571703, 22.925480428297, {Pbind(
+  \type, \grain,
+  \instrument, \rim, //Pwrand([\rim, \thump], [0.99, 0.01], inf),
+  \dur, 0.1,
+  //\tempo, Pfunc { ~timeline.tempo },//Pbrown(0.0, 1.0, Pbrown(0.01, 0.25, 0.01)).lincurve(0, 1, 0.9, 20, 3),
+  \freq, Pbrown(385, 410, 10) + (Pwhite(15, 50) * Pfunc({ ~timeline.tempo }).linlin(1, 20, 0, 1)),
+  \accent, Prand([1, 0, 0, 0], inf),
+  \restdummy, Pwrand([Rest(), 1], [1/11, 10/11], inf),
+  \db, Pseq([-16, -19, -17, -20] * 1.2, inf) + (Pkey(\accent) * 9),
+  \decay, Pseq([0.11, 0.08, 0.09, 0.08], inf),
+  \damt, Pseq([0.5, 0.0, 0.0, 0.0], inf),
+);}, 1756120386, true, 15.784519571703) ]), ESTrack([ ESPatternClip(0.0, 38.674655870445, {Pbind(
+  \type, \grain,
+  \instrument, \rim,
+  \dur, 1,
+  \restdummy, Pwrand([Rest(), 1], [1/8, 7/8], inf),
+  \db, Pseq([Rest(), Rest(), Rest(), -9], inf),
+  \decay, Pseq([0.2], inf)
+);}, 491802508) ]), ESTrack([ ESPatternClip(3.6948987854251, 35.769230769231, {Pbind(
+  \type, \grain,
+  \instrument, \thump,
+  \dur, 4,
+  \db, -6,
+  \spread, 1,
+  \release, 0.2
+)}, 1748685261, true, 3.6948987854251) ]), ESTrack([ ESPatternClip(0.0, 40.101781376518, {Pbind(
+  \type, \grain,
+  \instrument, \sub,
+  \dur, 1,
+  \freq, 50,
+  \db, Pseq([Rest(), -9], inf)
+);}, 654848795) ]) ], 0.78333333333333, {SynthDef(\thump, { |out, freq = 50, amp = 0.1, preamp = 1.0, spread = 0, attack = 0.0, release = 1.0|
+  var sig, env, freqEnv;
+
+  env = Env.perc(attack, release).ar(2);
+  freqEnv = env.linexp(0, 1, freq, freq * 100);
+  sig = PinkNoise.ar(preamp!2) * env;
+  sig = VAMoogLadderOS.ar(sig, freqEnv, 0.0) * 3;
+  //sig = RLPF.ar(sig, freqEnv, 3);
+  sig = LeakDC.ar(sig);
+  sig = Splay.ar(sig, spread);
+
+  Out.ar(out, sig * amp);
+}).add;
+
+SynthDef(\rim, { |out, freq = 400, amp = 0.1, decay = 0.08, bamt = 0.2, camt = 0.9, damt = 0.5|
+  var sig;
+  var a, b, c, d;
+
+  d = SinOsc.ar(454, pi/2) * Env.perc(0, 0.017).ar;
+  c = LPF.ar(Hasher.ar(Sweep.ar(Impulse.ar(10), 1) + Rand(0, 1)), 1000) * Env([0, 1], [0.02]).ar;
+  b = SinOsc.ar(freq * 4.378);
+  a = DynKlang.ar(
+    `[
+      [4, 6, 9],
+      [0.7, 0.2, 0.4],
+      (0)!3
+    ],
+    freq
+    * Env([0.8, 1.0], [decay], \exp).ar
+    * b.exprange(1 - bamt, (1 - bamt).reciprocal)
+    * c.exprange(1 - camt, (1 - camt).reciprocal)
+    * d.exprange(1 - damt, (1 - damt).reciprocal)
+  );
+
+  sig = a * Env.perc(0, decay * 4, curve: -20).ar(2);
+
+  Out.ar(out, sig!2 * amp);
+}).add;
+
+SynthDef(\sub, { |out, freq = 50, attack, release = 0.3, amp = 0.1|
+  var sig = SinOsc.ar(freq, pi/2) * Env.perc(attack, release).ar(2);
+  Out.ar(out, sig!2 * amp);
+}).add;
+
+SynthDef(\fx, { |out, gate = 1|
+  var in = In.ar(out, 2);
+  var verb = NHHall.ar(in, 0.5, 1, 200, 1.5, 2000, 0.5, 0.7);
+  var env = Env.asr(0.01, 1.0, 2.0).kr(2, gate);
+  var sig = (in + ((in * 4).tanh / 4)) / 2;
+  sig = sig + (verb * -6.dbamp);
+  ReplaceOut.ar(out, sig);
+}).add;}, {}, useEnvir: false), true)
+])]);
 
 
 ~window = ESTimelineWindow("Timeline", Rect(0, Window.availableBounds.height - 630, Window.availableBounds.width, 630), ~timeline);
