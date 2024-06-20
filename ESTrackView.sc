@@ -10,6 +10,7 @@ ESTrackView : UserView {
     track = argtrack;
 
     this.drawFunc_({ |view|
+      var timeline = track.timeline;
       Pen.use {
         Pen.addRect(Rect(0, 0, this.bounds.width, 1));
         Pen.color_(Color.gray(0.7));
@@ -24,6 +25,19 @@ ESTrackView : UserView {
           Pen.addRect(Rect(0, 0, this.bounds.width, this.bounds.height));
           Pen.color_(Color.gray(0.5, 0.25));
           Pen.fill;
+        };
+        if (timeline.parentClip.notNil) {
+          if (timeline.parentClip.offset > timelineView.startTime) {
+            Pen.addRect(Rect(0, 0, timelineView.absoluteTimeToPixels(timeline.parentClip.offset), this.bounds.height));
+            Pen.color = (Color.gray(0.5, 0.5));
+            Pen.fill;
+          };
+          if (timeline.parentClip.offset + timeline.parentClip.duration < timelineView.endTime) {
+            var left = timelineView.absoluteTimeToPixels(timeline.parentClip.offset + timeline.parentClip.duration);
+            Pen.addRect(Rect(left, 0, this.bounds.width, this.bounds.height));
+            Pen.color = (Color.gray(0.5, 0.5));
+            Pen.fill;
+          };
         };
       };
     });

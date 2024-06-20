@@ -84,8 +84,9 @@ ESTimelineWindow : Window {
       StaticText(this, Rect(920, 10, 120, 20)).string_("useParentClock").font_(Font.sansSerif(16));
     } {
       Button(this, Rect(925, 5, 200, 30)).states_([["Open as clip in new timeline"]]).action_({
-        ESTimelineWindow(bounds: this.bounds, timeline: ESTimeline([ESTrack([ESTimelineClip(0, if (timeline.duration == 0) { 10 } { timeline.duration }, timeline)])], timeline.tempo));
-        this.close;
+        //ESTimelineWindow(bounds: this.bounds, timeline: ESTimeline([ESTrack([ESTimelineClip(0, if (timeline.duration == 0) { 10 } { timeline.duration }, timeline)])], timeline.tempo));
+        //this.close;
+        timeline.encapsulateSelf;
       })
     };
 
@@ -166,6 +167,12 @@ ESTimelineWindow : Window {
           }.fork(AppClock);
         }
         { \restoreUndoPoint } {
+          {
+            timelineView.makeTrackViews;
+            ESClipEditView.closeWindow;
+          }.fork(AppClock);
+        }
+        { \encapsulateSelf } {
           {
             timelineView.makeTrackViews;
             ESClipEditView.closeWindow;
