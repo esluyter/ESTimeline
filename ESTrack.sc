@@ -66,7 +66,12 @@ ESTrack {
           (startTime - t).wait;
           // ...and play the clip
           if (this.shouldPlay) {
-            clip.play(offset, clock);
+            if (timeline.parentClip.notNil) {
+              var maxDuration = timeline.parentClip.offset + timeline.parentClip.duration - t;
+              clip.play(offset, clock, maxDuration);
+            } {
+              clip.play(offset, clock);
+            };
           };
           // adjust t to the current time
           t = startTime;

@@ -128,7 +128,7 @@ ESTimelineWindow : Window {
           rulerView.refresh;
         }
         { \isPlaying } {
-          if (args) { // in this case args is just true or false
+          if (timeline.isPlaying) {
             var waitTime = 30.reciprocal; // 30 fps
             playheadRout.stop; // just to make sure
             playheadRout = {
@@ -142,7 +142,7 @@ ESTimelineWindow : Window {
             }.fork(AppClock) // lower priority clock for GUI updates
           } {
             playheadRout.stop;
-            timelineView.refresh;
+            defer { timelineView.refresh };
           };
         }
         { \tempo } {
