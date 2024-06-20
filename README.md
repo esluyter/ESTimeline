@@ -104,7 +104,7 @@ Test timeline with all elements
 ```
 (
 ~timeline.free;
-~timeline = ESTimeline([ESTrack([ESTimelineClip(2, 60, ESTimeline([
+~timeline = ESTimeline([ESTrack([ESRoutineClip(0, 5, {~timeline.tempoBPM = 120}), ESClip(6, 20, comment: "the timeline clip below\n\nuses its own independent tempo\n\n |\n |\nV"), ESRoutineClip(28, 5, {~timeline.tempoBPM = 300}), ESClip(34, 20, comment: "these routine clips\n\nset this timeline's tempo\n\n<--------"), ESClip(72, 20, comment: "the timeline clip below\n\nis able to set this timeline's tempo\nbecause it has 'useEnvir' unchecked.\nit also plays on this timeline's clock.\n\n |\n |\nV")]), ESTrack([ESTimelineClip(2, 60, ESTimeline([
   ESTrack([
     ESClip(1.34, 6.6928763809125, nil, 0, "hello
 
@@ -363,7 +363,7 @@ SynthDef(\fx, { |out, gate = 1|
   sig = sig + (verb * -6.dbamp);
   ReplaceOut.ar(out, sig);
 }).add;}, {}, useEnvir: false), true)
-])]);
+]), ESTrack(100.collect { |i| ESSynthClip(i, 0.05, \default, [freq: rrand(80, 110).midicps, amp: rrand(-30, 0).dbamp]) })]);
 
 
 ~window = ESTimelineWindow("Timeline", Rect(0, Window.availableBounds.height - 630, Window.availableBounds.width, 630), ~timeline);
