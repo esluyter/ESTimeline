@@ -182,7 +182,5 @@ ESTimelineWindow : Window {
       { \editingMode } { timelineView.refresh }
       { \timeSelection } { timelineView.refresh; rulerView.refresh }
     });
-
-    timeline.addDependant(rulerView);
   }
 }

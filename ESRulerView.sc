@@ -108,8 +108,6 @@ ESRulerView : UserView {
         };
       };
     });
-
-    this.onClose = { timeline.removeDependant(this) };
   }
 
   startTime { ^timelineView.startTime }
