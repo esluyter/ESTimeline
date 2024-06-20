@@ -76,7 +76,7 @@ Platform.userExtensionDir
 - space toggles play
 - s splits clip at mouse pointer
 - delete deletes clip at mouse pointer
-- e opens edit window for clip at mouse pointer
+- e opens edit window for clip at mouse pointer, or init/cleanup func window for a timeline clip
 - cmd-e toggles mouse editing of envelope breakpoints
 - C inserts comment clip at mouse
 - S inserts synth clip at mouse
