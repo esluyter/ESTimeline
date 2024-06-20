@@ -6,10 +6,12 @@ The distant goal is that anything you can do in SuperCollider could be sequenced
 ![screenshot](img/ss2.png)
 <img src="img/sse.png" width="500" />
 
-Timelines inside of timelines with optionally separate play clocks:
-<img src="img/ss3.png" />
 <img src="img/ssee.png" width="400" /><img src="img/sss.png" width="400" /><img src="img/rss.png" width="400" /><img src="img/ssep.png" width="400" />
 <img src="img/fss.png" width="400" />
+
+Timelines inside of timelines with optionally separate play clocks:
+
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/8jcxcfvS_08/0.jpg)](http://www.youtube.com/watch?v=8jcxcfvS_08 "Video Title")
 
 ## Features
 - Comment, Synth, Pattern, Routine, and Env clip types
@@ -44,7 +46,7 @@ Timelines inside of timelines with optionally separate play clocks:
 - ddwPlug integration -- simplify bus routing for modulation
 - jitlib integration -- ditto
 - clothesline integration -- put whole .scd files on the timeline
-- ....dare I suggest VSTPlugin integration?
+- VSTPlugin integration, somehow..... this could be a can of worms
 
 ## Issues
 1. Although I've tried to make it pleasant, the GUI based code editing environment does not syntax highlight, autocomplete, etc -- for this reason I've added "Open in IDE" / "Copy from IDE" buttons as necessary.
