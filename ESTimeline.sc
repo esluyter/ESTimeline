@@ -85,18 +85,20 @@ ESTimeline {
     this.changed(\playbar);
   }
 
-  stop {
+  stop { |hard = false|
     if (useEnvir) {
-      envir.use { tracks.do(_.stop); };
+      envir.use { tracks.do(_.stop(hard)); };
     } {
-      tracks.do(_.stop);
+      tracks.do(_.stop(hard));
     };
 
     //if (clock.notNil) { clock.stop; clock = nil };
 
     //playbar = this.now;
     {
-      (Server.default.latency * playClock.tempo).wait;
+      if (hard.not) {
+        (Server.default.latency * playClock.tempo).wait;
+      };
       isPlaying = false;
       this.changed(\isPlaying, false);
     }.fork(playClock);
@@ -114,7 +116,7 @@ ESTimeline {
       playClock = altClock ?? { clock = TempoClock(tempo); };
     };
 
-    ^playClock.postln;
+    ^playClock;
   }
 
   play { |startTime, altClock, makeClock = true|
@@ -145,7 +147,7 @@ ESTimeline {
   }
 
   togglePlay {
-    if (this.isPlaying) { this.stop } { this.play }
+    if (this.isPlaying) { this.stop(true) } { this.play }
   }
 
   addTrack { |index, track|

@@ -43,9 +43,9 @@ ESClip {
     this.changed(\comment, val);
   }
 
-  stop {
+  stop { |hard = false|
     // stop the clip
-    this.prStop;
+    this.prStop(hard);
     isPlaying = false;
     // in case of premature stop:
     playRout.stop;

@@ -35,9 +35,9 @@ ESTrack {
     ^clips.select(_.isPlaying)
   }
 
-  stop {
+  stop { |hard = false|
     playRout.stop;
-    this.currentClips.do(_.stop);
+    this.currentClips.do(_.stop(hard));
   }
 
   play { |startTime = 0.0, clock|
