@@ -1,7 +1,7 @@
 ESRulerView : UserView {
   var <>timeline, <>timelineView;
   var clickPoint, clickTime, originalDuration;
-  var playheadView, playheadRout;
+  var <playheadView, playheadRout;
 
   *new { |parent, bounds, timeline, timelineView|
     ^super.new(parent, bounds).init(timeline, timelineView);
@@ -110,25 +110,6 @@ ESRulerView : UserView {
     });
 
     this.onClose = { timeline.removeDependant(this) };
-  }
-
-  // called when the timeline is changed
-  update { |argtimeline, what, value|
-    if (what == \isPlaying) {
-      if (value) {
-        var waitTime = 30.reciprocal; // 30 fps
-        playheadRout.stop; // just to make sure
-        playheadRout = {
-          inf.do {
-            playheadView.refresh;
-            waitTime.wait;
-          };
-        }.fork(AppClock) // lower priority clock for GUI updates
-      } {
-        playheadRout.stop;
-        defer { playheadView.refresh };
-      };
-    };
   }
 
   startTime { ^timelineView.startTime }
