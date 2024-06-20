@@ -47,11 +47,11 @@ ESTimelineWindow : Window {
     */
 
     saveIDEButt = Button(this, Rect(430, 5, 100, 30)).states_([["Open in IDE"]]).action_({
-      Document.new("Timeline Score", timeline.currentState).front;
+      Document.new("Timeline Score", timeline.currentState.asCompileString).front;
       timelineView.focus;
     });
     loadIDEButt = Button(this, Rect(535, 5, 100, 30)).states_([["Load from IDE"]]).action_({
-      timeline.restoreUndoPoint(Document.current.string);
+      timeline.restoreUndoPoint(Document.current.string.interpret);
       timelineView.focus;
       /*
       var bounds = timelineView.bounds;
@@ -88,6 +88,8 @@ ESTimelineWindow : Window {
         this.close;
       })
     };
+
+    //Button(this, Rect(1200, 5, 100, 30)).states_([["Load legacy"]]).action_({timeline.restoreUndoPoint(Document.current.string, false, true); timelineView.focus;});
 
     [saveIDEButt, loadIDEButt, funcEditButt, undoButt, redoButt, tempoKnob.numberView, tempoKnob.knobView].do { |thing|
       thing.keyDownAction_({ |...args|
