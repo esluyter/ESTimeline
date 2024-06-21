@@ -25,7 +25,7 @@ Timelines inside of timelines with optionally separate play clocks:
   - (there is no way to fast forward a Synth, that I know of....)
 - Pattern and Routine clips can be seeded so random number generation is deterministic
 - Each timeline (and timeline clip) has an init / free hook for e.g. allocating and freeing resources
-- DAW-like GUI with key commands for editing and playback
+- DAW-like GUI for editing and playback
 - Undo and redo at each timeline level
 - Easy to export timeline to IDE as plain text and load it back again
 
