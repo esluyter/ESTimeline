@@ -1,5 +1,4 @@
 # ESTimeline
-A hypothetical general purpose SuperCollider timeline
 
 The distant goal is that anything you can do in SuperCollider could be sequenced on a timeline...
 
