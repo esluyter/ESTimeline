@@ -7,10 +7,11 @@ ESTimelineView : UserView {
   var clickPoint, clickTime, scrolling = false, originalDuration;
   var hoverClip, hoverCode, hoverClipStartTime, hoverClipOffset;
   var hoverTime = 0, hoverTrack = 0, hoverClipIndex = 0;
-  var duplicatedClip, <timeSelection;
+  var duplicatedClip, <timeSelection, clipSelection, stagedClipSelection;
 
   var <editingMode = false;
 
+  selectedClips { ^(clipSelection ++ stagedClipSelection) }
   timeSelection_ { |val| timeSelection = val; this.changed(\timeSelection, val); }
   editingMode_ { |val| editingMode = val; this.changed(\editingMode, val); }
 
@@ -25,6 +26,9 @@ ESTimelineView : UserView {
 
     startTime = argstartTime;
     duration = argduration;
+
+    clipSelection = Set[];
+    stagedClipSelection = Set[];
 
     timeline = argtimeline;
 
@@ -86,12 +90,24 @@ ESTimelineView : UserView {
       clickTime = this.pixelsToAbsoluteTime(x);
       originalDuration = duration;
       if (hoverClip.notNil) {
-        hoverClipStartTime = hoverClip.startTime;
-        hoverClipOffset = hoverClip.offset;
+        if (this.selectedClips.includes(hoverClip)) {
+          hoverClipStartTime = this.selectedClips.asArray.collect(_.startTime);
+          hoverClipOffset = this.selectedClips.asArray.collect(_.offset);
+        } {
+          hoverClipStartTime = hoverClip.startTime;
+          hoverClipOffset = hoverClip.offset;
+        };
       } {
         if (clickCount > 1) {
-          // double click on empty area to remove time selection
-          this.timeSelection = nil;
+          // double click on empty area to remove time and clip selection
+          if (mods.isAlt.not) {
+            clipSelection = Set[];
+            this.changed(\clipSelection);
+          };
+
+          if (mods.isCmd.not) {
+            this.timeSelection = nil;
+          };
         };
       };
 
@@ -106,7 +122,7 @@ ESTimelineView : UserView {
       };
 
       // alt to duplicate clip
-      if (mods.isAlt) {
+      if (mods.isAlt and: hoverClip.notNil) {
         duplicatedClip = hoverClip.duplicate;
       };
 
@@ -120,6 +136,12 @@ ESTimelineView : UserView {
         if (timeline.isPlaying.not) {
           timeline.now = clickTime;
         };
+      };
+
+      if (hoverClip.isNil) {
+        clipSelection = clipSelection ++ stagedClipSelection;
+        stagedClipSelection = Set[];
+        this.changed(\selectedClips);
       };
 
       if (duplicatedClip.notNil) {
@@ -142,10 +164,25 @@ ESTimelineView : UserView {
       var yDelta = y - clickPoint.y;
       var xDelta = x - clickPoint.x;
 
-      // select time if start dragging from empty area
+      // select time/clips if start dragging from empty area
       if (hoverClip.isNil) {
         if (xDelta.abs > 1) {
-          this.timeSelection = [this.pixelsToAbsoluteTime(clickPoint.x), this.pixelsToAbsoluteTime(x)].sort;
+          var timeA = this.pixelsToAbsoluteTime(clickPoint.x);
+          var timeB = this.pixelsToAbsoluteTime(x);
+
+          if (mods.isAlt.not) {
+            if (mods.isShift.not) {
+              clipSelection = Set[];
+            };
+            stagedClipSelection = Set.newFrom(timeline.clipsInRange(this.trackAtY(clickPoint.y), this.trackAtY(y), timeA, timeB));
+            this.changed(\selectedClips);
+          } {
+            stagedClipSelection = Set[];
+          };
+
+          if (mods.isCmd.not) {
+            this.timeSelection = [timeA, timeB].sort;
+          };
         };
       };
 
@@ -172,7 +209,13 @@ ESTimelineView : UserView {
               duplicatedClip = nil;
             };
 
-            hoverClip.startTime = hoverClipStartTime + this.pixelsToRelativeTime(xDelta);
+            if (this.selectedClips.includes(hoverClip)) {
+              this.selectedClips.do { |clip, i|
+                clip.startTime = hoverClipStartTime[i] + this.pixelsToRelativeTime(xDelta);
+              };
+            } {
+              hoverClip.startTime = hoverClipStartTime + this.pixelsToRelativeTime(xDelta);
+            };
             if (currentHoverTrack != hoverTrack) {
               timeline.tracks[hoverTrack].removeClip(timeline.tracks[hoverTrack].clips.indexOf(hoverClip), false);
               timeline.tracks[currentHoverTrack].addClip(hoverClip);
@@ -390,7 +433,7 @@ ESTimelineView : UserView {
   clipBounds { |clip|
     var left = this.absoluteTimeToPixels(clip.startTime);
     var width = this.relativeTimeToPixels(clip.duration);
-    ^[left, 3, width, trackHeight - 4, editingMode];
+    ^[left, 3, width, trackHeight - 4, editingMode, nil, nil, this.selectedClips.includes(clip)];
   }
 
   startTime_ { |val|

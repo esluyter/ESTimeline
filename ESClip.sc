@@ -75,14 +75,16 @@ ESClip {
   }
 
   // draw this clip on a UserView using Pen
-  draw { |left, top, width, height, editingMode = false, clipLeft, clipWidth| // these last two are for ESTimelineClips
+  draw { |left, top, width, height, editingMode = false, clipLeft, clipWidth, selected = false| // these last two are for ESTimelineClips
     if (track.shouldPlay) {
       Pen.color = this.color;
     } {
       Pen.color = Color.white.lighten(this.color, 0.5);
     };
+    Pen.strokeColor = Color.cyan;
+    Pen.width = 2;
     Pen.addRect(Rect(left, top, width, height));
-    Pen.fill;
+    if (selected) { Pen.fillStroke } { Pen.fill };
 
     Pen.color = Color.gray(0.8, 0.5);
     Pen.addRect(Rect(left + width - 1, top, 1, height));
