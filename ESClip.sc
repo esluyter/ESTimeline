@@ -97,10 +97,10 @@ ESClip {
       try {
         if (track.timeline.useEnvir) {
           track.timeline.envir.use {
-            title = this.prDraw(left, top, width, height, editingMode, clipLeft, clipWidth, selected);
+            title = this.prDraw(left, top, width, height, editingMode, clipLeft, clipWidth, selected, drawBorder);
           }
         } {
-          title = this.prDraw(left, top, width, height, editingMode, clipLeft, clipWidth, selected);
+          title = this.prDraw(left, top, width, height, editingMode, clipLeft, clipWidth, selected, drawBorder);
         };
       } {
         title = ""

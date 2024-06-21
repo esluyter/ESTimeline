@@ -65,10 +65,14 @@ ESRoutineClip : ESClip {
     this.changed(\func, val);
   }
 
-  prDraw { |left, top, width, height|
+  prDraw { |left, top, width, height, editingMode, clipLeft, clipWidth|
     if (left < 0) {
       width = width + left;
       left = 0;
+    };
+    if (clipLeft.notNil and: { left < clipLeft }) {
+      width = width - (clipLeft - left);
+      left = clipLeft;
     };
 
     if ((height > 30) and: (width > 15)) {
