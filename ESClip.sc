@@ -182,6 +182,10 @@ ESClip {
     ^this.asCompileString.interpret;
   }
 
+  index {
+    ^track.clips.indexOf(this);
+  }
+
   guiClass { ^ESClipEditView }
 
   prHover { |x, y, hoverTime, left, top, width, height| }

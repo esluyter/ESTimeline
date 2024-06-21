@@ -314,19 +314,28 @@ ESTimelineView : UserView {
           hoverClip.guiClass.new(hoverClip, timeline);
         };
       };
-      // cmd-E toggles editing mode
+      // cmd-e toggles editing mode
       if ((key == 69) and: mods.isCmd) {
         this.editingMode = editingMode.not
+      };
+      // cmd-a selects all
+      if ((key == 65) and: mods.isCmd) {
+        clipSelection = timeline.clips.asSet;
+        this.changed(\selectedClips);
       };
       // delete - remove clip, cmd - remove track
       if (key == 16777219) {
         if (mods.isCmd) {
           timeline.removeTrack(hoverTrack);
         } {
-          if (hoverClipIndex.notNil) {
+          if (hoverClipIndex.notNil and: this.selectedClips.includes(hoverClip).not) {
             timeline.tracks[hoverTrack].removeClip(hoverClipIndex);
             hoverClip = nil;
             hoverClipIndex = nil;
+          } {
+            this.selectedClips.do { |clip|
+              clip.track.removeClip(clip.index);
+            };
           };
         };
       };
