@@ -56,12 +56,7 @@ ESPatternClip : ESClip {
   }
 
   patternString {
-    if (pattern.isFunction) {
-      var cs = pattern.asCompileString;
-      if (cs.size == 2) { ^"" };
-      ^cs[1..cs.size-2];
-    };
-    ^pattern.asCompileString;
+    ^pattern.asESDisplayString;
   }
 
   // helper method to return the actual pattern that will be played

@@ -10,13 +10,13 @@ ESEnvClipEditView : ESClipEditView {
     .front;
 
     StaticText(editorWindow, Rect(20, 30, 180, 20)).string_("bus").font_(panelFont);
-    busView = TextField(editorWindow, Rect(10, 50, 590, 40)).string_(clip.busString).font_(Font.monospace(16));
+    busView = TextField(editorWindow, Rect(10, 50, 590, 40)).string_(clip.bus.asESDisplayString).font_(Font.monospace(16));
 
     StaticText(editorWindow, Rect(20, 100, 180, 20)).string_("target").font_(panelFont);
-    targetView = TextField(editorWindow, Rect(10, 120, 290, 40)).string_(clip.targetString).font_(Font.monospace(16));
+    targetView = TextField(editorWindow, Rect(10, 120, 290, 40)).string_(clip.target.asESDisplayString).font_(Font.monospace(16));
 
     StaticText(editorWindow, Rect(315, 100, 180, 20)).string_("addAction").font_(panelFont);
-    addActionView = TextField(editorWindow, Rect(305, 120, 290, 40)).string_(clip.addActionString).font_(Font.monospace(16));
+    addActionView = TextField(editorWindow, Rect(305, 120, 290, 40)).string_(clip.addAction.asESDisplayString).font_(Font.monospace(16));
 
     StaticText(editorWindow, Rect(20, 175, 50, 20)).string_("env").font_(panelFont);
     StaticText(editorWindow, Rect(50, 177, 480, 20)).string_("... edit if you must (curves) but otherwise use cmd-e for breakpoint editor mode").font_(Font.sansSerif(13));

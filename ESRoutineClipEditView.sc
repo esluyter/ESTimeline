@@ -27,8 +27,8 @@ ESRoutineClipEditView : ESClipEditView {
     .font_(panelFont)
     .focusColor_(Color.clear);
 
-    funcView = CodeView(editorWindow, Rect(0, 30, 800, 570)).font_(Font.monospace(16)).string_(clip.funcString);
-    cleanupFuncView = CodeView(editorWindow, Rect(0, 30, 800, 570)).font_(Font.monospace(16)).string_(clip.cleanupFuncString).visible_(false);
+    funcView = CodeView(editorWindow, Rect(0, 30, 800, 570)).font_(Font.monospace(16)).string_(clip.func.asESDisplayString);
+    cleanupFuncView = CodeView(editorWindow, Rect(0, 30, 800, 570)).font_(Font.monospace(16)).string_(clip.cleanupFunc.asESDisplayString).visible_(false);
 
     if (timeline.useEnvir) {
       funcView.interpretEnvir_(timeline.envir);

@@ -26,8 +26,8 @@ ESFuncEditView : ESClipEditView {
     .font_(panelFont)
     .focusColor_(Color.clear);
 
-    funcView = CodeView(editorWindow, Rect(0, 30, 900, 570)).font_(Font.monospace(16)).string_(timeline.initFuncString);
-    cleanupFuncView = CodeView(editorWindow, Rect(0, 30, 900, 570)).font_(Font.monospace(16)).string_(timeline.cleanupFuncString).visible_(false);
+    funcView = CodeView(editorWindow, Rect(0, 30, 900, 570)).font_(Font.monospace(16)).string_(timeline.initFunc.asESDisplayString);
+    cleanupFuncView = CodeView(editorWindow, Rect(0, 30, 900, 570)).font_(Font.monospace(16)).string_(timeline.cleanupFunc.asESDisplayString).visible_(false);
 
     if (timeline.useEnvir) {
       funcView.interpretEnvir_(timeline.envir);
