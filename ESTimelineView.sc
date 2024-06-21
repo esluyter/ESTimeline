@@ -5,7 +5,7 @@ ESTimelineView : UserView {
   var <startTime, <duration;
   var <trackHeight, <heightRatio = 1;
   var clickPoint, clickTime, scrolling = false, originalDuration;
-  var hoverClip, hoverCode, hoverClipStartTime, hoverClipOffset;
+  var hoverClip, hoverCode, hoverClipStartTime, hoverClipEndTime, hoverClipOffset;
   var hoverTime = 0, hoverTrack = 0, hoverClipIndex = 0;
   var duplicatedClip, <timeSelection, clipSelection, stagedClipSelection;
 
@@ -92,9 +92,11 @@ ESTimelineView : UserView {
       if (hoverClip.notNil) {
         if (this.selectedClips.includes(hoverClip)) {
           hoverClipStartTime = this.selectedClips.asArray.collect(_.startTime);
+          hoverClipEndTime = this.selectedClips.asArray.collect(_.endTime);
           hoverClipOffset = this.selectedClips.asArray.collect(_.offset);
         } {
           hoverClipStartTime = hoverClip.startTime;
+          hoverClipEndTime = hoverClip.endTime;
           hoverClipOffset = hoverClip.offset;
         };
       } {
@@ -189,11 +191,23 @@ ESTimelineView : UserView {
       if (editingMode.not) {
         switch (hoverCode)
         {1} { // drag left edge
-          hoverClip.startTime_(this.pixelsToAbsoluteTime(x), true);
+          if (this.selectedClips.includes(hoverClip)) {
+            this.selectedClips.do { |clip, i|
+              clip.startTime_(hoverClipStartTime[i] + this.pixelsToRelativeTime(xDelta), true);
+            };
+          } {
+            hoverClip.startTime_(this.pixelsToAbsoluteTime(x), true);
+          };
           dragView.bounds_(dragView.bounds.left_(this.absoluteTimeToPixels(hoverClip.startTime)));
         }
         {2} { // drag right edge
-          hoverClip.endTime = this.pixelsToAbsoluteTime(x);
+          if (this.selectedClips.includes(hoverClip)) {
+            this.selectedClips.do { |clip, i|
+              clip.endTime = hoverClipEndTime[i] + this.pixelsToRelativeTime(xDelta);
+            };
+          } {
+            hoverClip.endTime = this.pixelsToAbsoluteTime(x);
+          };
           dragView.bounds_(dragView.bounds.left_(this.absoluteTimeToPixels(hoverClip.endTime) - 2));
         }
         {0} { // drag clip
