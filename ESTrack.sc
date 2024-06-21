@@ -149,4 +149,43 @@ ESTrack {
     };
     ^ret;
   }
+
+  insertTime { |timeA, timeB|
+    var thisStartTime, thisEndTime, thisDuration;
+    #thisStartTime, thisEndTime = [timeA, timeB].sort;
+    thisDuration = thisEndTime - thisStartTime;
+    clips.copy.do { |clip|
+      if ((clip.startTime < thisStartTime) and: (clip.endTime > thisStartTime)) {
+        this.splitClip(clip.index, thisStartTime);
+      };
+    };
+    clips.do { |clip|
+      if (clip.startTime >= thisStartTime) {
+        clip.startTime = clip.startTime + thisDuration;
+      };
+    };
+  }
+
+  deleteTime { |timeA, timeB|
+    var thisStartTime, thisEndTime, thisDuration;
+    #thisStartTime, thisEndTime = [timeA, timeB].sort;
+    thisDuration = thisEndTime - thisStartTime;
+    clips.copy.do { |clip|
+      if ((clip.startTime < thisStartTime) and: (clip.endTime > thisStartTime)) {
+        this.splitClip(clip.index, thisStartTime);
+      };
+      if ((clip.startTime < thisEndTime) and: (clip.endTime > thisEndTime)) {
+        this.splitClip(clip.index, thisEndTime);
+      };
+    };
+    clips.copy.do { |clip|
+      if (clip.startTime >= thisStartTime) {
+        if (clip.startTime < thisEndTime) {
+          this.removeClip(clip.index);
+        } {
+          clip.startTime = clip.startTime - thisDuration;
+        };
+      };
+    };
+  }
 }

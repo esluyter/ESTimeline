@@ -323,10 +323,22 @@ ESTimelineView : UserView {
         clipSelection = timeline.clips.asSet;
         this.changed(\selectedClips);
       };
+      // cmd-i insert time
+      if ((key == 73) and: mods.isCmd) {
+        if (timeSelection.notNil) {
+          timeline.insertTime(*timeSelection);
+        };
+      };
       // delete - remove clip, cmd - remove track
       if (key == 16777219) {
         if (mods.isCmd) {
-          timeline.removeTrack(hoverTrack);
+          if (mods.isShift) {
+            if (timeSelection.notNil) {
+              timeline.deleteTime(*timeSelection);
+            };
+          } {
+            timeline.removeTrack(hoverTrack);
+          };
         } {
           if (hoverClipIndex.notNil and: this.selectedClips.includes(hoverClip).not) {
             timeline.tracks[hoverTrack].removeClip(hoverClipIndex);
