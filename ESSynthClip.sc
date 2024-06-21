@@ -103,4 +103,14 @@ ESSynthClip : ESClip {
     };
     ^ret;
   }
+
+  setArg { |key, val|
+    var index = args.indexOf(key);
+    if (index.notNil) {
+      args[index + 1] = val;
+      this.changed(\args, args);
+    } {
+      this.args = args.add(key).add(val);
+    };
+  }
 }
