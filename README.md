@@ -16,22 +16,22 @@ Timelines inside of timelines with optionally separate play clocks:
 ## Features
 - Non-prescriptive: no server architecture is forced on you, possible to disable timeline-specific clock and environment so as to interact with the timeline as part of a larger project; the basic goal is only to "execute this code at this particular time"
 - Comment, Synth, Pattern, Routine, and Env clip types
+  - Bulk editing selected clip parameters
+  - Pattern, Routine, Env, and Timeline clips can "fast forward" to start playing in the middle
+    - (there is no way to fast forward a Synth, that I know of....)
+  - Pattern and Routine clips can be seeded so random number generation is deterministic
+  - Most fields can take a Function, so params can be generated on the fly
 - Timeline Clip -- embed one timeline in another!
-  - Each timeline clip can optionally use its own TempoClock, and optionally use its own Environment
+  - Each timeline clip can optionally use its own TempoClock, and optionally use its own Environment 
+  - Each timeline (and timeline clip) has an init / free hook for e.g. allocating and freeing resources
 - Tracks can contain all clip types, and can be muted/soloed
 - Gray playhead is "scheduling playhead" and black playhead is "sounding playhead" -- to take into account server latency. Routines can be played with additional latency so non-sounding events line up with the sounding playhead.
-- Most fields can take a Function, so params can be generated on the fly
-- Pattern, Routine, Env, and Timeline clips can "fast forward" to start playing in the middle
-  - (there is no way to fast forward a Synth, that I know of....)
-- Pattern and Routine clips can be seeded so random number generation is deterministic
-- Each timeline (and timeline clip) has an init / free hook for e.g. allocating and freeing resources
 - DAW-like GUI for editing and playback
 - Undo and redo at each timeline level
 - Easy to export timeline to IDE as plain text and load it back again
 
 ## Hypothetical features
 - GUI editing
-  - Bulk editing selected clip parameters
   - Snap to clips and/or to grid
 - Time features
   - Non-linearity: loop points, wait points, etc.
