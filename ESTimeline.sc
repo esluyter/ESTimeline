@@ -242,7 +242,7 @@ ESTimeline {
     if (duration > 0) {
       var newTimeline = ESTimeline().restoreUndoPoint(currentState);
       this.prFree;
-      tracks = [ESTrack([ESTimelineClip(0, duration, newTimeline)])];
+      tracks = [ESTrack([ESTimelineClip(0, duration, timeline: newTimeline)])];
       initFunc = {};
       cleanupFunc = {};
       this.init;
@@ -273,6 +273,18 @@ ESTimeline {
 
   clips {
     ^tracks.collect(_.clips).flat;
+  }
+
+  at { |name|
+    var contenders = [];
+    this.clips.do { |clip|
+      if (clip.name == name) {
+        contenders = contenders.add(clip);
+      };
+    };
+    if (contenders.size == 0) { ^nil };
+    contenders.sort({ |a, b| (a.startTime + (a.duration / 2) - this.now).abs < (b.startTime + (b.duration / 2) - this.now).abs });
+    ^contenders[0];
   }
 
   insertTime { |timeA, timeB|

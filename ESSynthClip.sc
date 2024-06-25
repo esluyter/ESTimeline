@@ -7,11 +7,11 @@ ESSynthClip : ESClip {
   defName_ { |val| defName = val; this.changed(\defName, val); }
   args_ { |val| args = val; this.changed(\args, val); }
 
-  storeArgs { ^[startTime, duration, defName, args, target, addAction, color] }
+  storeArgs { ^[startTime, duration, offset, color, name, defName, args, target, addAction] }
 
-  *new { |startTime, duration, defName, args, target, addAction = 'addToHead', color|
+  *new { |startTime, duration, offset = 0, color, name, defName, args, target, addAction = 'addToHead'|
     args = args ?? [];
-    ^super.new(startTime, duration, color).init(defName, args, target, addAction);
+    ^super.new(startTime, duration, offset, color, name).init(defName, args, target, addAction);
   }
 
   init { |argDefName, argArgs, argTarget, argAddAction|

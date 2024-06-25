@@ -6,16 +6,15 @@ ESTimelineClip : ESClip {
     timeline.changed(\useParentClock, val);
   }
 
-  storeArgs { ^[startTime, duration, timeline, useParentClock, color, offset] }
+  storeArgs { ^[startTime, duration, offset, color, name, timeline, useParentClock] }
 
-  *new { |startTime, duration, timeline, useParentClock = true, color, offset = 0|
-    ^super.new(startTime, duration, color).init(timeline, useParentClock, offset);
+  *new { |startTime, duration, offset = 0, color, name, timeline, useParentClock = true|
+    ^super.new(startTime, duration, offset, color, name).init(timeline, useParentClock);
   }
 
-  init { |argTimeline, argUseParentClock, argOffset|
+  init { |argTimeline, argUseParentClock|
     timeline = argTimeline;
     useParentClock = argUseParentClock;
-    offset = argOffset;
     timeline.parentClip = this;
     timeline.addDependant(this);
   }
@@ -131,7 +130,7 @@ ESTimelineClip : ESClip {
       };
 
 
-      if (timeline.isPlaying) {
+      if (timeline.isPlaying and: useParentClock.not) {
         // sounding playhead in black
         thisLeft = ((timeline.soundingNow - offset) * tratio) + left;
         Pen.addRect(Rect(thisLeft, top, 2, height));
