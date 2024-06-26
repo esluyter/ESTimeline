@@ -46,10 +46,10 @@ ESTimelineView : UserView {
       MenuAction("Edit Clip (e)", { hoverClip.guiClass.new(hoverClip, timeline) }),
       Menu(
         MenuAction("Bulk edit synth arguments", {
-          ESBulkEditWindow.keyValue(callback: { |key, val|
+          ESBulkEditWindow.keyValue(callback: { |key, val, hardCode|
             this.selectedClips.do { |clip|
               if (clip.class == ESSynthClip) {
-                clip.setArg(key, val);
+                clip.setArg(key, if (hardCode) { val.value } { val });
               };
             };
           });
