@@ -254,8 +254,23 @@ ESTimelineView : UserView {
               hoverClip.startTime = hoverClipStartTime + this.pixelsToRelativeTime(xDelta);
             };
             if (currentHoverTrack != hoverTrack) {
+              var trackDelta = currentHoverTrack - hoverTrack;
+              var clips;
+              if (this.selectedClips.includes(hoverClip)) {
+                clips = this.selectedClips;
+              } {
+                clips = [hoverClip]
+              };
+              clips.do { |clip|
+                var oldTrack = clip.track.index;
+                var newTrack = (oldTrack + trackDelta).clip(0, timeline.tracks.size - 1);
+                clip.track.removeClip(clip.index, false);
+                timeline.tracks[newTrack].addClip(clip);
+              };
+              /*
               timeline.tracks[hoverTrack].removeClip(timeline.tracks[hoverTrack].clips.indexOf(hoverClip), false);
               timeline.tracks[currentHoverTrack].addClip(hoverClip);
+              */
               hoverTrack = currentHoverTrack;
               hoverClipIndex = timeline.tracks[hoverTrack].clips.indexOf(hoverClip);
             };
