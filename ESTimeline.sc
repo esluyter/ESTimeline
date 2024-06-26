@@ -1,5 +1,5 @@
 ESTimeline {
-  var <tracks, <tempo, <>initFunc, <>cleanupFunc, <>bootOnInit, <>useEnvir, <>optimizeView;
+  var <tracks, <tempo, <>prepFunc, <>cleanupFunc, <>bootOnPrep, <>useEnvir, <>optimizeView;
   var <isPlaying = false;
   var <playbar = 0.0;
   var playBeats, playStartTime, <playClock;
@@ -14,13 +14,13 @@ ESTimeline {
   tempoBPM { ^tempo * 60 }
   tempoBPM_ { |val| this.tempo_(val / 60); }
 
-  storeArgs { ^[tracks, this.tempo, initFunc, cleanupFunc, bootOnInit, useEnvir, optimizeView] }
+  storeArgs { ^[tracks, this.tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView] }
 
-  *new { |tracks, tempo = 1, initFunc, cleanupFunc, bootOnInit = true, useEnvir = true, optimizeView = false|
+  *new { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = false|
     //var clock = TempoClock(tempo).permanent_(true);
 
     tracks = tracks ?? [ESTrack()];
-    ^super.newCopyArgs(tracks, tempo, initFunc, cleanupFunc, bootOnInit, useEnvir, optimizeView).initEnvir.initDependantFunc.init(true);
+    ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView).initEnvir.initDependantFunc.init(true);
   }
 
   initEnvir {
@@ -52,14 +52,14 @@ ESTimeline {
       currentState = this.asUndoPoint;
     };
 
-    if (bootOnInit) {
+    if (bootOnPrep) {
       Server.default.waitForBoot {
-        this.doInitFunc;
+        this.prep;
         Server.default.sync;
         this.changed(\init);
       };
     } {
-      this.doInitFunc;
+      this.prep;
       this.changed(\init);
     };
   }
@@ -185,7 +185,7 @@ ESTimeline {
     {
       this.prFree;
       Server.default.sync;
-      #tracks, thisTempo, initFunc, cleanupFunc, bootOnInit, useEnvir, optimizeView = Object.fromESArray(currentState);
+      #tracks, thisTempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView = Object.fromESArray(currentState);
       this.tempo = thisTempo;
       if (clearUndoStack) {
         undoStack = [];
@@ -210,11 +210,14 @@ ESTimeline {
     };
   }
 
-  doInitFunc {
+  prep {
     if (useEnvir) {
-      envir.use { this.initFunc.(); };
+      envir.use { this.prepFunc.(); };
     } {
-      this.initFunc.();
+      this.prepFunc.();
+    };
+    this.clips.do { |clip|
+      clip.prep;
     };
   }
 
@@ -223,7 +226,10 @@ ESTimeline {
       envir.use { this.cleanupFunc.(); }
     } {
       this.cleanupFunc.();
-    }
+    };
+    this.clips.do { |clip|
+      clip.cleanup;
+    };
   }
 
   prFree {
@@ -243,7 +249,7 @@ ESTimeline {
       var newTimeline = ESTimeline().restoreUndoPoint(currentState);
       this.prFree;
       tracks = [ESTrack([ESTimelineClip(0, duration, timeline: newTimeline)])];
-      initFunc = {};
+      prepFunc = {};
       cleanupFunc = {};
       this.init;
       this.changed(\encapsulateSelf);

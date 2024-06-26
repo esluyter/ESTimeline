@@ -100,7 +100,11 @@ ESSynthClip : ESClip {
   prArgsValue { |clock|
     var ret = [];
     args.pairsDo { |key, val|
-      ret = ret.add(key).add(val.value);
+      val = val.value;
+      if (val.class == Symbol) { val = track.timeline[val]; };
+      if (val.class == ESEnvClip) { val = val.bus; };
+      if (val.class == Bus) { val = val.asMap; };
+      ret = ret.add(key).add(val);
     };
     if (ret.indexOf(\sustain).isNil and: clock.notNil) {
       ret = ret ++ [sustain: this.duration * clock.tempo.reciprocal];

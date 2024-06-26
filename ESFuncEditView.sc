@@ -9,8 +9,8 @@ ESFuncEditView : ESClipEditView {
     .front;
 
     funcButton = Button(editorWindow, Rect(668, 0, 100, 30)).states_(
-      [["initFunc", Color.gray(0.3), Color.gray(0.7)],
-        ["initFunc", Color.black, Color.white]])
+      [["prepFunc", Color.gray(0.3), Color.gray(0.7)],
+        ["prepFunc", Color.black, Color.white]])
     .value_(1).action_({
       funcButton.value_(1); cleanupFuncButton.value_(0);
       funcView.visible_(true); cleanupFuncView.visible_(false); })
@@ -26,7 +26,7 @@ ESFuncEditView : ESClipEditView {
     .font_(panelFont)
     .focusColor_(Color.clear);
 
-    funcView = CodeView(editorWindow, Rect(0, 30, 900, 570)).font_(Font.monospace(16)).string_(timeline.initFunc.asESDisplayString);
+    funcView = CodeView(editorWindow, Rect(0, 30, 900, 570)).font_(Font.monospace(16)).string_(timeline.prepFunc.asESDisplayString);
     cleanupFuncView = CodeView(editorWindow, Rect(0, 30, 900, 570)).font_(Font.monospace(16)).string_(timeline.cleanupFunc.asESDisplayString).visible_(false);
 
     if (timeline.useEnvir) {
@@ -36,9 +36,9 @@ ESFuncEditView : ESClipEditView {
 
     sidePanel = View(editorWindow, Rect(905, 30, 90, 550));
 
-    StaticText(sidePanel, Rect(0, 0, 90, 20)).string_("bootOnInit").font_(panelFont);
-    bootBox = CheckBox(sidePanel, Rect(0, 15, 20, 20)).value_(timeline.bootOnInit);
-    StaticText(sidePanel, Rect(0, 35, 90, 120)).align_(\topLeft).string_("If this is checked, the initFunc will be wrapped in a waitForBoot");
+    StaticText(sidePanel, Rect(0, 0, 90, 20)).string_("bootOnPrep").font_(panelFont);
+    bootBox = CheckBox(sidePanel, Rect(0, 15, 20, 20)).value_(timeline.bootOnPrep);
+    StaticText(sidePanel, Rect(0, 35, 90, 120)).align_(\topLeft).string_("If this is checked, the prepFunc will be wrapped in a waitForBoot");
 
     StaticText(sidePanel, Rect(0, 140, 90, 20)).string_("useEnvir").font_(panelFont);
     envirBox = CheckBox(sidePanel, Rect(0, 155, 20, 20)).value_(timeline.useEnvir);
@@ -67,9 +67,9 @@ ESFuncEditView : ESClipEditView {
 
     Button(sidePanel, Rect(0, 485, 90, 30)).string_("Cancel").font_(panelFont.copy.size_(14)).action_({ editorWindow.close });
     Button(sidePanel, Rect(0, 520, 90, 30)).string_("Save").font_(panelFont.copy.size_(14)).action_({
-      timeline.initFunc = ("{" ++ funcView.string ++ "}").interpret;
+      timeline.prepFunc = ("{" ++ funcView.string ++ "}").interpret;
       timeline.cleanupFunc = ("{" ++ cleanupFuncView.string ++ "}").interpret;
-      timeline.bootOnInit = bootBox.value;
+      timeline.bootOnPrep = bootBox.value;
       timeline.useEnvir = envirBox.value;
 
       timeline.init(cleanupFirst: true);

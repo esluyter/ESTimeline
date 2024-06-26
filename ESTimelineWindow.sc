@@ -37,7 +37,7 @@ ESTimelineWindow : Window {
     );
     tempoKnob.knobView.mode_(\vert).step_(0.001).shift_scale_(5);
 
-    funcEditButt = Button(this, Rect(210, 5, 150, 30)).states_([["Edit init/cleanup funcs"]]).action_({ ESFuncEditView(timeline); timelineView.focus });
+    funcEditButt = Button(this, Rect(210, 5, 150, 30)).states_([["Edit prep/cleanup funcs"]]).action_({ ESFuncEditView(timeline); timelineView.focus });
 
     /*
     newButt = Button(this, Rect(50, 5, 70, 30)).states_([["New"]]);
