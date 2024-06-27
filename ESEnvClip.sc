@@ -69,15 +69,15 @@ ESEnvClip : ESClip {
 
   prep {
     if (makeBus) {
-      "allocating bus".postln;
+      //"allocating bus".postln;
       bus = Bus.perform(makeBusRate, Server.default, 1);
     };
   }
 
   cleanup {
     if (makeBus) {
-      "freeing bus".postln;
-      bus.free;
+      //"freeing bus".postln;
+      if (bus.index.notNil) { bus.free; };
     };
   }
 
