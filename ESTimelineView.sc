@@ -48,13 +48,15 @@ ESTimelineView : UserView {
         MenuAction("Add Env for Synth argument", {
           if (hoverClip.class == ESSynthClip) {
             var names = hoverClip.argControls.collect(_.name);
+            var thisHoverClip = hoverClip;
+            var thisTrackIndex = thisHoverClip.track.index + 1;
             ESBulkEditWindow.menu("Add Env for Synth argument",
               "arg", names, names.indexOf(\amp),
               "add track", true,
               callback: { |argument, addTrack|
                 var envClip;
                 var name = argument.asSymbol;
-                var value = hoverClip.getArg(name).value;
+                var value = thisHoverClip.getArg(name).value;
                 var i = 0, envName, min = 0, max = 1, isExponential = false;
                 if (value.isNumber.not) { value = 0 };
                 min = min(min, value);
@@ -67,21 +69,21 @@ ESTimelineView : UserView {
                 };
                 while { timeline[envName = (name ++ i).asSymbol].notNil } { i = i + 1 };
                 if (addTrack) {
-                  timeline.addTrack(hoverTrack + 1);
+                  timeline.addTrack(thisTrackIndex);
                 };
                 envClip = ESEnvClip(
-                  hoverClip.startTime, hoverClip.duration,
+                  thisHoverClip.startTime, thisHoverClip.duration,
                   name: envName,
-                  target: hoverClip.target,
+                  target: thisHoverClip.target,
                   min: min,
                   max: max,
                   isExponential: isExponential,
                   prep: true
                 );
-                envClip.env = Env(envClip.prValueUnscale(value).dup(2), [hoverClip.duration]);
-                timeline.tracks[(hoverTrack + 1)].addClip(envClip);
+                envClip.env = Env(envClip.prValueUnscale(value).dup(2), [thisHoverClip.duration]);
+                timeline.tracks[thisTrackIndex].addClip(envClip);
 
-                hoverClip.setArg(name, envName);
+                thisHoverClip.setArg(name, envName);
               }
             );
           };
