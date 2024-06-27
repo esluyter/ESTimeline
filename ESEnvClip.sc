@@ -1,7 +1,7 @@
 ESEnvClip : ESClip {
   var <env, <bus, <>target, <>addAction, <>min, <>max, <>curve, <>isExponential, <makeBus = false, <>makeBusRate;
   var <synth;
-  var <hoverIndex;
+  var <hoverIndex, <editingFirst;
 
   env_ { |val| env = val; this.changed(\env); }
   bus_ { |val| bus = val; this.changed(\bus); }
@@ -157,6 +157,8 @@ ESEnvClip : ESClip {
         Pen.addOval(Rect(point.x - 3, point.y - 3, 6, 6));
         Pen.strokeColor = Color.white;
         if (i == hoverIndex) {
+          var val = this.valueAtIndex(i);
+          Pen.stringAtPoint(val.asString, point.x@(if (point.y - 20 < top) { point.y + 20 } { point.y - 20 }), Font.sansSerif(15), Color.white);
           Pen.fillColor = Color.white;
         } {
           Pen.fillColor = this.color;
@@ -212,6 +214,13 @@ ESEnvClip : ESClip {
   }
 
   prMouseMove { |x, y, xDelta, yDelta, left, top, width, height|
+    if (hoverIndex == 0) {
+      var thisEnv = this.envToPlay;
+      env = Env([thisEnv.levels[0]] ++ thisEnv.levels, [0] ++ thisEnv.times, if (thisEnv.curves.isArray) { [thisEnv.curves[0]] ++ thisEnv.curves } { thisEnv.curves });
+      offset = 0;
+      hoverIndex = 1;
+      editingFirst = true;
+    };
     if (hoverIndex.notNil) {
       var thisEnv = this.envToPlay;
       var points = this.envBreakPoints(thisEnv, left, top, width, height);
@@ -219,14 +228,16 @@ ESEnvClip : ESClip {
       var nextPoint = if (hoverIndex < (points.size - 1)) { points[hoverIndex + 1] } { (left + width)@0 };
       var adjustedX = x.clip(prevPoint.x, nextPoint.x).clip(left, left + width);
       var adjustedY = y.clip(top, top + height);
-      if (hoverIndex == 0) { adjustedX = left };
       points[hoverIndex] = adjustedX@adjustedY;
+      if (editingFirst) { points[0] = left@adjustedY; };
       #env, offset = this.envFromBreakPoints(points, left, top, width, height);
       this.changed(\env);
     };
   }
 
   prMouseDown { |x, y, mods, buttNum, clickCount, left, top, width, height|
+    editingFirst = false;
+
     if (mods.isShift) {
       var pratio = duration / width;
       var tratio = pratio.reciprocal;
@@ -238,9 +249,12 @@ ESEnvClip : ESClip {
       var curves = [];
       var time = 0;
       var inserted = false;
+
+      var curve;
+      var level;
       thisEnv.times.do { |timeDiff, i|
-        var curve = if (thisEnv.curves.isArray) { thisEnv.curves[i] } { thisEnv.curves };
-        var level = thisEnv.levels[i + 1];
+        curve = if (thisEnv.curves.isArray) { thisEnv.curves[i] } { thisEnv.curves };
+        level = thisEnv.levels[i + 1];
         if (inserted.not) {
           if ((time + timeDiff) > thisTime) {
             levels = levels.add(thisLevel);
@@ -261,6 +275,11 @@ ESEnvClip : ESClip {
           times = times.add(timeDiff);
           curves = curves.add(curve);
         }
+      };
+      if (inserted.not) {
+        levels = levels.add(thisLevel);
+        times = times.add(thisTime - time);
+        curves = curves.add(curve);
       };
       this.env = Env(levels, times, curves);
       offset = 0;
@@ -413,7 +432,18 @@ ESEnvClip : ESClip {
   }
 
   valueNow {
-    var val = env.at(track.timeline.now - startTime);
+    ^this.valueAtTime(track.timeline.now - startTime);
+  }
+
+  valueAtIndex { |i|
+    ^this.prValueScale(this.envToPlay.levels[i]);
+  }
+
+  valueAtTime { |time|
+    ^this.prValueScale(this.envToPlay.at(time));
+  }
+
+  prValueScale { |val|
     if (isExponential) {
       ^val.linexp(0.0, 1.0, min, max);
     } {
