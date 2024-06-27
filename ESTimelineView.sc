@@ -51,20 +51,35 @@ ESTimelineView : UserView {
               "arg", names, names.indexOf(\amp),
               "add track", true,
               callback: { |argument, addTrack|
+                var envClip;
                 var name = argument.asSymbol;
                 var value = hoverClip.getArg(name).value;
-                var i = 0, envName;
+                var i = 0, envName, min = 0, max = 1, isExponential = false;
                 if (value.isNumber.not) { value = 0 };
+                min = min(min, value);
+                max = max(max, value);
+                if (name.asSpec.notNil) {
+                  var spec = name.asSpec;
+                  min = spec.minval;
+                  max = spec.maxval;
+                  isExponential = (spec.warp.class == ExponentialWarp);
+                };
                 while { timeline[envName = (name ++ i).asSymbol].notNil } { i = i + 1 };
                 if (addTrack) {
                   timeline.addTrack(hoverTrack + 1);
                 };
-                timeline.tracks[(hoverTrack + 1)].addClip(ESEnvClip(
+                envClip = ESEnvClip(
                   hoverClip.startTime, hoverClip.duration,
                   name: envName,
-                  env: Env([value, value], [hoverClip.duration]),
+                  target: hoverClip.target,
+                  min: min,
+                  max: max,
+                  isExponential: isExponential,
                   prep: true
-                ));
+                );
+                envClip.env = Env(envClip.prValueUnscale(value).dup(2), [hoverClip.duration]);
+                timeline.tracks[(hoverTrack + 1)].addClip(envClip);
+
                 hoverClip.setArg(name, envName);
               }
             );
