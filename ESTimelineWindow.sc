@@ -147,14 +147,16 @@ ESTimelineWindow : Window {
             trackPanelView.refresh;
             timelineView.refresh;
           } {
+            //args.postcs;
             timelineView.trackViews[args[0]].refresh;
+            //~window.timelineView.trackViews[]
           };
         }
         { \tracks } {
-          {
-            0.01.wait; // this solves a weird bug?
+          //{
+            //0.01.wait; // this solves a weird bug?
             timelineView.makeTrackViews;
-          }.fork(AppClock);
+          //}.fork(AppClock);
         }
         { \restoreUndoPoint } {
           {

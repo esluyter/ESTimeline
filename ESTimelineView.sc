@@ -44,6 +44,32 @@ ESTimelineView : UserView {
         MenuAction("Add Timeline Clip (T)", { timeline.tracks[hoverTrack].addClip(ESTimelineClip(hoverTime, 10, timeline: ESTimeline())); })
       ).title_("Add Clip"),
       Menu(
+        MenuAction("Add Env for Synth argument", {
+          if (hoverClip.class == ESSynthClip) {
+            var names = hoverClip.argControls.collect(_.name);
+            ESBulkEditWindow.menu("Add Env for Synth argument",
+              "arg", names, names.indexOf(\amp),
+              "add track", true,
+              callback: { |argument, addTrack|
+                var name = argument.asSymbol;
+                var value = hoverClip.getArg(name).value;
+                var i = 0, envName;
+                if (value.isNumber.not) { value = 0 };
+                while { timeline[envName = (name ++ i).asSymbol].notNil } { i = i + 1 };
+                if (addTrack) {
+                  timeline.addTrack(hoverTrack + 1);
+                };
+                timeline.tracks[(hoverTrack + 1)].addClip(ESEnvClip(
+                  hoverClip.startTime, hoverClip.duration,
+                  name: envName,
+                  env: Env([value, value], [hoverClip.duration]),
+                  prep: true
+                ));
+                hoverClip.setArg(name, envName);
+              }
+            );
+          };
+        }),
         MenuAction("Set Env range keeping breakpoint values", {
           var minDefault = 0, maxDefault = 1, curveDefault = 0, isExponentialDefault = false;
           if (hoverClip.class == ESEnvClip) {
@@ -52,8 +78,7 @@ ESTimelineView : UserView {
             curveDefault = hoverClip.curve;
             isExponentialDefault = hoverClip.isExponential;
           };
-          ESBulkEditWindow.keyValue(
-            "Set Env range keeping breakpoint values",
+          ESBulkEditWindow.keyValue("Set Env range keeping breakpoint values",
             "min", minDefault, "max", maxDefault, "isExponential", isExponentialDefault, true, "curve", curveDefault,
             callback: { |min, max, isExponential, curve|
               min = min.interpret;
