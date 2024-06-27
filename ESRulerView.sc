@@ -55,6 +55,14 @@ ESRulerView : UserView {
           Pen.fill;
         };
       };
+
+      // draw clip guides
+      if (timelineView.drawClipGuides) {
+        Pen.addRect(Rect(this.absoluteTimeToPixels(timelineView.hoverClip.startTime), 0, 1, this.bounds.height));
+        Pen.addRect(Rect(this.absoluteTimeToPixels(timelineView.hoverClip.endTime), 0, 1, this.bounds.height));
+        Pen.color = Color.gray(0.6);
+        Pen.fill;
+      };
     }).mouseWheelAction_({ |view, x, y, mods, xDelta, yDelta|
       var xTime = timelineView.pixelsToAbsoluteTime(x);
       timelineView.duration = timelineView.duration * (-1 * yDelta).linexp(-100, 100, 0.5, 2, nil);
@@ -69,8 +77,6 @@ ESRulerView : UserView {
       if (clickPoint == (x@y)) {
         timeline.now = clickTime;
       };
-
-      //[leftGuideView, rightGuideView].do(_.visible_(false));
 
       clickPoint = nil;
       clickTime = nil;
@@ -87,17 +93,6 @@ ESRulerView : UserView {
       timelineView.startTime = (clickTime - this.pixelsToRelativeTime(clickPoint.x));
       timelineView.startTime = (xDelta.linlin(0, this.bounds.width, timelineView.startTime, timelineView.startTime - timelineView.duration, nil));
       //this.refresh;
-
-      /*
-      // draw clip guides
-      if (hoverCode.notNil) {
-        leftGuideView.bounds_(leftGuideView.bounds.left_(this.absoluteTimeToPixels(hoverClip.startTime)));
-        rightGuideView.bounds_(rightGuideView.bounds.left_(this.absoluteTimeToPixels(hoverClip.endTime)));
-        [leftGuideView, rightGuideView].do(_.visible_(true));
-      } {
-        [leftGuideView, rightGuideView].do(_.visible_(false));
-      };
-      */
     }).keyDownAction_({ |view, char, mods, unicode, keycode, key|
       timelineView.keyDownAction.(view, char, mods, unicode, keycode, key);
     });

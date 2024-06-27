@@ -183,6 +183,8 @@ ESTimelineWindow : Window {
       { \editingMode } { timelineView.refresh }
       { \timeSelection } { timelineView.refresh; rulerView.refresh }
       { \selectedClips } { timelineView.refresh }
+      { \mouseMove } { rulerView.refresh }
+      { \mouseUp } { rulerView.refresh }
     });
   }
 }
