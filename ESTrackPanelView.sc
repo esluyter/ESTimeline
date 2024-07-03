@@ -44,6 +44,18 @@ ESTrackPanelView : UserView {
         Pen.addRect(Rect(width - 1, 0, 1, trackHeight));
         Pen.color = Color.gray(0.65);
         Pen.fill;
+      })
+      .mouseMoveAction_({
+        view.beginDrag;
+      })
+      .beginDragAction_({
+        track;
+      })
+      .canReceiveDragHandler_(true)
+      .receiveDragHandler_({
+        var thisTrack = View.currentDrag;
+        timeline.removeTrack(thisTrack.index, false);
+        timeline.addTrack(i, thisTrack);
       });
       StaticText(view, Rect(2, 2, 18, 20)).string_(i.asString).stringColor_(Color.gray(0.4)).font_(Font.monospace(14));
       trackButts = trackButts.add((
