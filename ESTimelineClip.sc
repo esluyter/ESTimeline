@@ -96,7 +96,7 @@ ESTimelineClip : ESClip {
       // };
 
       division = (60 / (width / duration)).ceil;
-      Pen.color = if (useParentClock) { Color.gray(0.3, 0.5) } { Color.gray(0.3) };
+      Pen.color = if (useParentClock) { Color.gray(0.3, 0.3) } { Color.gray(0.3) };
       (offset + duration + 1).asInteger.do { |i|
         if (i % division == 0) {
           if (i >= offset) {
