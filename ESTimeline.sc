@@ -291,7 +291,13 @@ ESTimeline {
         contenders = contenders.add(clip);
       };
     };
-    if (contenders.size == 0) { ^nil };
+    if (contenders.size == 0) {
+      if (parentClip.isNil) {
+        ^nil
+      } {
+        ^parentClip.track.timeline.at(name);
+      };
+    };
     contenders.sort({ |a, b| (a.startTime + (a.duration / 2) - this.now).abs < (b.startTime + (b.duration / 2) - this.now).abs });
     ^contenders[0];
   }
