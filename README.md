@@ -105,16 +105,84 @@ Platform.userExtensionDir
 - cmd-z undo
 - cmd-Z redo
 
-## Latest working test code
-
-Empty timeline
+## Basic workflow example
 ```
 (
-~timeline.free;
 ~timeline = ESTimeline();
 ~window = ESTimelineWindow(timeline: ~timeline);
 )
 ```
+- by default, this boots the default server. You can make it not do this.
+- put your SynthDef in the timeline's prep function (click the "edit prep/cleanup funcs" button) e.g.
+```
+SynthDef(\sin, { |out, freq = 100, gate = 1, amp = 0.1, preamp = 1.5, attack = 0.001, release = 0.01, pan, verbbus, verbamt, vibrato = 0.2|
+  var env, sig;
+  var lfo = XLine.ar(0.01, vibrato, ExpRand(0.5, 2.0)) * SinOsc.ar(5.4 + (LFDNoise3.kr(0.1) * 0.5));
+  gate = gate + Impulse.kr(0);
+  env = Env.adsr(attack, 0.1, 0.4, release).ar(2, gate);
+  sig = SinOsc.ar(freq * lfo.midiratio) * env;
+  sig = (sig * preamp).tanh;
+  sig = Pan2.ar(sig, pan, amp);
+  Out.ar(out, sig);
+  Out.ar(verbbus, sig * verbamt);
+}).add;
+```
+- hit save when you're done to save the prepFunc and load it.
+- create a bunch of Synth clips (point the mouse where you want it and press shift-S, or use right click menu)
+- if you play now by clicking to place the playhead and pressing space, you will hear they play the default synth
+- click in an empty area and drag to select all the Synth clips, right click, "clip actions > bulk edit synth defName", and set them to use your SynthDef.
+- double-click in an empty area to remove selection
+- play again and you hear this has happened
 
-Test timeline with all elements
-https://gist.github.com/esluyter/5aae7b7a15c2aa41cfdff990f0102c4e
+Envelopes for Synth parameters:
+- right click a Synth clip, "clip actions > add env for synth argument"
+- pick "freq" from the list and hit OK
+
+Editing Envelopes:
+- cmd-e to enter envelope breakpoint editor mode
+- move the breakpoints around to adjust, shift-click to add breakpoints, option-click to remove them
+- double-click to edit and adjust curves, if you want
+- hit cmd-e again to leave envelope breakpoint editor mode (**if you can't move any clips around, this is probably why** -- maybe a design flaw...)
+
+To make this envelope affect all your Synths:
+- drag the edges of the envelope clip to resize it
+- click and drag to select all the Synth clips, right click, "clip actions > bulk edit synth arguments"
+- assign the freq of all the clips to 
+`\freq0`
+(or whatever the name of the envelope clip is)
+- you should see all their freqs change to `a4` -- this is the audio rate bus that the Env clip has created for you (you can override this behavior)
+- you should hear it is now controlling all the synths' pitches
+
+Routines and environment variables:
+- make a new track, add a Routine clip (shift-R, or use right click menu), double click, and put
+```
+loop {
+  ~pan = rrand(-1.0, 1.0);
+  0.1.wait;
+};
+```
+- save the changes to the Routine by pressing "Save"
+- select all the Synth clips again, right click, "clip actions > bulk edit synth arguments" and set `pan` to `~pan`
+- now you will hear each synth has a random panning, but they are deterministic (same every time you play them)
+- if you want them to be truly random (different every time you play them), turn off `isSeeded`
+
+Timeline clips:
+- above the main timeline, click "Open as clip in new timeline"
+Now this little system, the synths, panning and editable frequency envelope, are all encapsulated in this timeline clip, which won't e.g. interfere with other environment variables called ~pan that you happen to use elsewhere. (in fact you can duplicate the timeline clip by option-dragging onto a new track, and the two will play simultanously each using its own environment and envelope bus.) **If you can't move a clip, hit cmd-e to leave breakpoint editor mode**
+- you can also move the mouse cursor over the clip and use the s key to split it into two separate timeline clips.
+
+More advanced sequencing options: using Pattern clips, or using Routine clips to sequence e.g. Synths:
+```
+var syn;
+10.do { |i|
+  s.bind { syn = Synth(\default, [freq: (40 + i).midicps]) };
+  0.2.wait;
+  s.bind { syn.free };
+  0.2.wait;
+};
+```
+It's important to use `s.bind` for server operations inside of routines, otherwise the timing is off.
+
+You can think of Routine clips as kind of your generic "execute this code here", and if you want say OSC out to a light board to line up with the sounding events, check the `addLatency` box.
+
+If you do try it out, I would love to know your thoughts, ideas, critiques, and if you find bugs etc please report them here or on the github with steps to reproduce.
