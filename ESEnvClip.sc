@@ -138,13 +138,16 @@ ESEnvClip : ESClip {
       */
       var n = (width / (height / 50).max(1)).asInteger;
       var nratio = width / n;
-      var prevY = top + ((1 - env[offset]) * height);
-      Pen.moveTo(left@prevY);
-      n.do { |i|
-        var thisY;
+      var firstI, lastI, prevY;
+      firstI = ((0 - left) / nratio).asInteger.clip(0, n);
+      lastI = ((Window.screenBounds.width - left) / nratio).asInteger.clip(0, n);
+      prevY = top + ((1 - env[offset + (firstI * pratio)]) * height);
+      (firstI..lastI).do { |i|
+        var thisY, thisX;
         i = i * nratio;
+        thisX = left + i;
         thisY = top + ((1 - env[offset + (i * pratio)]) * height);
-        Pen.addRect(Rect(left + i, min(prevY, thisY), nratio, max(1, abs(prevY - thisY))));
+        Pen.addRect(Rect(thisX, min(prevY, thisY), nratio, max(1, abs(prevY - thisY))));
         prevY = thisY;
       };
 
