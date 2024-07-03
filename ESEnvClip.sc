@@ -460,4 +460,6 @@ ESEnvClip : ESClip {
       ^value.curvelin(min, max, 0.0, 1.0, curve);
     };
   }
+
+  hasEditingMode { ^true }
 }

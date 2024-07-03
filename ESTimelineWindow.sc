@@ -77,6 +77,7 @@ ESTimelineWindow : Window {
         //ESTimelineWindow(bounds: this.bounds, timeline: ESTimeline([ESTrack([ESTimelineClip(0, if (timeline.duration == 0) { 10 } { timeline.duration }, timeline)])], timeline.tempo));
         //this.close;
         timeline.encapsulateSelf;
+        timelineView.editingMode = false;
       })
     };
 
