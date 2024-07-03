@@ -11,7 +11,7 @@ ESClip {
   }
 
   startTime_ { |val, adjustOffset = false|
-    val = max(val, 0);
+    //val = max(val, 0);
     if (adjustOffset) {
       var delta;
       val = min(val, this.endTime);
@@ -198,7 +198,7 @@ ESClip {
   }
 
   duplicate {
-    ^this.asCompileString.interpret;
+    ^this.asCompileString.interpret.track_(track);
   }
 
   index {
