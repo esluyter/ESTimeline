@@ -12,7 +12,7 @@ ESTimelineView : UserView {
   var <editingMode = false;
   var <drawClipGuides = false;
 
-  selectedClips { ^(clipSelection ++ stagedClipSelection) }
+  selectedClips { ^(clipSelection -- stagedClipSelection) }
   timeSelection_ { |val| timeSelection = val; this.changed(\timeSelection, val); }
   editingMode_ { |val| editingMode = val; this.changed(\editingMode, val); }
 
@@ -254,7 +254,7 @@ ESTimelineView : UserView {
       };
 
       if (hoverClip.isNil) {
-        clipSelection = clipSelection ++ stagedClipSelection;
+        clipSelection = this.selectedClips;
         stagedClipSelection = Set[];
         this.changed(\selectedClips);
       };
