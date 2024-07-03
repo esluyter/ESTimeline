@@ -80,9 +80,23 @@ ESTimeline {
     };
   }
 
-  now_ { |val|
-    playbar = max(val, 0);
-    this.changed(\playbar);
+  now_ { |val, force = true|
+    val = max(val, 0);
+    if (isPlaying and: force) {
+      this.play(val);
+    } {
+      playbar = val;
+      this.changed(\playbar);
+    };
+  }
+
+  goto { |clipName, point = \start|
+    var clip = this.at(clipName);
+    if (clip.notNil) {
+      switch (point)
+      {\start} { this.now_(clip.startTime); }
+      {\end} { this.now_(clip.endTime); }
+    };
   }
 
   stop { |hard = false|
@@ -95,20 +109,37 @@ ESTimeline {
     //if (clock.notNil) { clock.stop; clock = nil };
 
     //playbar = this.now;
-    {
-      if (hard.not) {
+    if (hard) {
+      this.prStop;
+    } {
+      {
         (Server.default.latency * playClock.tempo).wait;
-      };
-      isPlaying = false;
-      this.changed(\isPlaying, false);
-    }.fork(playClock);
+        this.prStop;
+      }.fork(playClock);
+    };
+  }
+
+  prStop {
+    isPlaying = false;
+    this.changed(\isPlaying, false);
   }
 
   prMakeClock { |altClock|
     // stop if playing
     if (isPlaying) { this.stop };
 
-    if (clock.notNil) { clock.stop; clock = nil };
+    /* will this cause tempoclock buildup?
+       // but otherwise this is attempted and failed workaround to endless notes from patterns being cut off by stopping clock
+    if (clock.notNil) {
+      {
+        while { clock.queue != [0] } {
+          1.wait;
+        };
+        clock.stop;
+      }.fork(clock);
+      clock = nil;
+    };
+    */
 
     if (parentClip.notNil and: { parentClip.useParentClock }) {
       playClock = parentClip.track.timeline.playClock;
@@ -120,6 +151,10 @@ ESTimeline {
   }
 
   play { |startTime, altClock, makeClock = true|
+    if (isPlaying) {
+      this.stop(true);
+    };
+
     if (makeClock) {
       this.prMakeClock(altClock);
     };

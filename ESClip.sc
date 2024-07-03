@@ -130,7 +130,7 @@ ESClip {
         title = ""
       };
 
-      if (name.notNil) { title = name.asCompileString ++ " (" ++ title ++ ")" };
+      if (name.notNil and: (this.class != ESClip)) { title = name.asCompileString ++ " (" ++ title ++ ")" };
 
       if (left < 0) {
         width = width + left;
@@ -161,6 +161,7 @@ ESClip {
   prFree { }
   prStart { }
   prStop { }
+  // default clip is a comment clip
   prDraw { |left, top, width, height|
     var lines = comment.split($\n);
     var font = Font.sansSerif(14);
@@ -169,6 +170,7 @@ ESClip {
       width = width + left;
       left = 0;
     };
+    lines = [if (name.isNil) { "" } { name.asString }] ++ lines;
     lines.do { |line, i|
       var thisFont = if (i > 0) { font } { font.copy.size_(17) };
       while { max(0, width - 5) < (QtGUI.stringBounds(line, thisFont).width) } {
