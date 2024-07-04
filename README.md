@@ -199,15 +199,18 @@ Pbind(
 - you will hear this uses the same reverb synth
 - if you want to try a new random seed, click "re-roll" button and save
   - you can always undo if you don't like it
+- you can drag the edges to adjust start and end point without changing the timing of the notes
+  - you can split it into two by pointing with the mouse where you want the split and pressing s
 - if you make a new track and a new envelope, name the envelope `pan0` and set its range from -1 to 1
-- edit the panning to your liking, and update the pattern with
+- edit the panning to your liking, and update the pattern(s) with
 ```
   \pan, ~thisTimeline[\pan0],
 ```
     
 ### Timeline clips:
 - above the main timeline, click "Open as clip in new timeline"
-Now this little system, the synths, buses and envelopes, are all encapsulated in this timeline clip, which won't interfere with e.g. another ~verbbus that you happen to use elsewhere. (in fact you can duplicate the timeline clip by option-dragging onto a new track, and the two will play simultanously each using its own environment and bus.)
+  - Now this little system, the synths, buses and envelopes, are all encapsulated in this timeline clip, which won't interfere with e.g. another ~verbbus that you happen to use elsewhere.
+  - (in fact you can duplicate the timeline clip by option-dragging onto a new track, and the two will play simultanously each using its own environment and bus.)
   - you can also resize the clips, move the mouse cursor over the clip and use the s key to split it into two separate timeline clips, etc.
 
 ### Using Routine clips:
