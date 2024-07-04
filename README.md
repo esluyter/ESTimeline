@@ -77,7 +77,7 @@ Note that this is a work in progress and all is subject to revision.
 </details>
 
 <details>
-  <summary>Getting started: installation and tutorial</summary>
+  <summary>Getting started: installing and tutorial</summary>
   
 ## Installing
 Download or clone this repository into your SuperCollider Extensions directory. To see where this is, go to `File > Open user support directory` and find the `Extensions` directory, or evaluate:
@@ -85,7 +85,7 @@ Download or clone this repository into your SuperCollider Extensions directory. 
 Platform.userExtensionDir
 ```
 
-## Basic workflow example
+## Tutorial: basic workflow examples
 ```
 (
 ~timeline = ESTimeline();
