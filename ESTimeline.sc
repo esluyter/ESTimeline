@@ -68,7 +68,7 @@ ESTimeline {
 
   soundingNow {
     if (isPlaying) {
-      ^max(playbar, this.now - (playClock.tempo * Server.default.latency));
+      ^max(playStartTime, this.now - (playClock.tempo * Server.default.latency));
     } {
       ^this.now;
     }
@@ -93,11 +93,15 @@ ESTimeline {
   }
 
   goto { |clipName, point = \start|
-    var clip = this.at(clipName);
-    if (clip.notNil) {
-      switch (point)
-      {\start} { this.now_(clip.startTime); }
-      {\end} { this.now_(clip.endTime); }
+    if (clipName.isNumber) {
+      this.now = clipName;
+    } {
+      var clip = this.at(clipName);
+      if (clip.notNil) {
+        switch (point)
+        {\start} { this.now_(clip.startTime); }
+        {\end} { this.now_(clip.endTime); }
+      };
     };
   }
 
@@ -124,6 +128,7 @@ ESTimeline {
   prStop {
     isPlaying = false;
     this.changed(\isPlaying, false);
+    this.changed(\playbar);
   }
 
   prMakeClock { |altClock|
@@ -161,21 +166,23 @@ ESTimeline {
       this.prMakeClock(altClock);
     };
 
+    /*
     if (startTime.notNil) {
       playbar = startTime;
     };
+    */
 
     // save the starting conditions
     //playClock = clock;
     playBeats = playClock.beats;
-    playStartTime = playbar;
+    playStartTime = startTime ?? playbar;
 
     if (useEnvir) {
       envir.use {
-        tracks.do(_.play(playbar, playClock));
+        tracks.do(_.play(playStartTime, playClock));
       };
     } {
-      tracks.do(_.play(playbar, playClock));
+      tracks.do(_.play(playStartTime, playClock));
     };
 
 
