@@ -510,6 +510,8 @@ ESTimelineView : UserView {
       };
     }).keyDownAction_({ |view, char, mods, unicode, keycode, key|
       var snappedHoverTime = if (timeline.snapToGrid) { hoverTime.round(1 / timeline.gridDivision) } { hoverTime };
+      var newClipStartTime = if (timeSelection.notNil) { timeSelection[0] } { snappedHoverTime };
+      var newClipDuration = if (timeSelection.notNil) { timeSelection[1] - timeSelection[0] } { nil }; // override with default later
       //key.postln;
       // space is play
       if (char == $ ) { timeline.togglePlay };
@@ -548,22 +550,23 @@ ESTimelineView : UserView {
         };
       };
       if (char == $S) {
-        timeline.tracks[hoverTrack].addClip(ESSynthClip(snappedHoverTime, 0.5, defName: \default));
+        timeline.tracks[hoverTrack].addClip(ESSynthClip(newClipStartTime, newClipDuration ?? 0.5, defName: \default));
       };
       if (char == $T) {
-        timeline.tracks[hoverTrack].addClip(ESTimelineClip(snappedHoverTime, 10, timeline: ESTimeline()));
+        timeline.tracks[hoverTrack].addClip(ESTimelineClip(newClipStartTime, newClipDuration ?? 10, timeline: ESTimeline()));
       };
       if (char == $C) {
-        timeline.tracks[hoverTrack].addClip(ESClip(snappedHoverTime, 5));
+        timeline.tracks[hoverTrack].addClip(ESClip(newClipStartTime, newClipDuration ?? 5));
       };
       if (char == $P) {
-        timeline.tracks[hoverTrack].addClip(ESPatternClip(snappedHoverTime, 5, pattern: {Pbind()}));
+        timeline.tracks[hoverTrack].addClip(ESPatternClip(newClipStartTime, newClipDuration ?? 5, pattern: {Pbind()}));
       };
       if (char == $R) {
-        timeline.tracks[hoverTrack].addClip(ESRoutineClip(snappedHoverTime, 5, func: {}));
+        timeline.tracks[hoverTrack].addClip(ESRoutineClip(newClipStartTime, newClipDuration ?? 5, func: {}));
       };
       if (char == $E) {
-        timeline.tracks[hoverTrack].addClip(ESEnvClip(snappedHoverTime, 5, env: Env([0, 1, 0], [2.5, 2.5], \sin), prep: true));
+        var thisDuration = newClipDuration ?? 5;
+        timeline.tracks[hoverTrack].addClip(ESEnvClip(newClipStartTime, thisDuration, env: Env([0, 1, 0], (thisDuration / 2).dup(2), \sin), prep: true));
       };
       if (char == $e) {
         if (hoverClip.class == ESTimelineClip) {
