@@ -14,7 +14,8 @@ Timelines inside of timelines with optionally separate play clocks:
 
 ## Features
 - Non-prescriptive: no server architecture is forced on you, possible to disable timeline-specific clock and environment so as to interact with the timeline as part of a larger project; the basic goal is only to "execute this code at this particular time"
-- Comment, Synth, Pattern, Routine, and Env clip types
+- Non-linear: "goto" command to jump to a clip or a point in time
+- Synth, Pattern, Routine, and Env clip types
   - Bulk editing selected clip parameters
   - Env clips can manage their own bus
   - Clips can reference other clips in the same timeline, to e.g. apply an Env to a Synth parameter
@@ -34,7 +35,6 @@ Timelines inside of timelines with optionally separate play clocks:
 
 ## Hypothetical features
 - Time features
-  - Non-linearity: loop points, wait points, etc.
   - Indeterminacy: probability for clips not to play?
   - Clock follow: e.g. sync up with an Ableton timeline or midi show control
 - Track/clips
