@@ -129,6 +129,7 @@ SynthDef(\sin, { |out, freq = 100, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
   - drag them around to move them
   - drag their edges to resize them (a red bar appears when you are within the resize zone)
   - option-drag to copy a clip
+  - check the `snapToGrid` box or press opt-s to align your edits with the tempo grid
   - double-click on a clip to edit it, e.g. change the frequency
     - double-click on the grayed out `freq` parameter to activate it, then you can set it to any valid SuperCollider expression
     - press save when you're done
