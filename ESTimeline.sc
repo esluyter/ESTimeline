@@ -1,5 +1,5 @@
 ESTimeline {
-  var <tracks, <tempo, <>prepFunc, <>cleanupFunc, <>bootOnPrep, <>useEnvir, <>optimizeView;
+  var <tracks, <tempo, <>prepFunc, <>cleanupFunc, <>bootOnPrep, <>useEnvir, <>optimizeView, <gridDivision, <snapToGrid;
   var <isPlaying = false;
   var <playbar = 0.0;
   var playBeats, playStartTime, <playClock;
@@ -13,14 +13,16 @@ ESTimeline {
   tempo_ { |val| tempo = val; if (clock.notNil) { clock.tempo_(val) }; this.changed(\tempo, val); }
   tempoBPM { ^tempo * 60 }
   tempoBPM_ { |val| this.tempo_(val / 60); }
+  gridDivision_ { |val| gridDivision = val; this.changed(\gridDivision); }
+  snapToGrid_ { |val| snapToGrid = val; this.changed(\snapToGrid); }
 
-  storeArgs { ^[tracks, this.tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView] }
+  storeArgs { ^[tracks, this.tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid] }
 
-  *new { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = false|
+  *new { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = false, gridDivision = 4, snapToGrid = false|
     //var clock = TempoClock(tempo).permanent_(true);
 
     tracks = tracks ?? [ESTrack()];
-    ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView).initEnvir.initDependantFunc.init(true);
+    ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid).initEnvir.initDependantFunc.init(true);
   }
 
   initEnvir {

@@ -175,6 +175,27 @@ ESTimelineView : UserView {
     );
 
     this.drawFunc_({
+      // draw grid
+      if (timeline.snapToGrid) {
+        var gridDivisionFilter = 1, beatFilter = 1;
+        gridDivisionFilter = (this.pixelsToRelativeTime(10) * timeline.gridDivision).asInteger.nextPowerOfTwo;
+        if (gridDivisionFilter > timeline.gridDivision) {
+          beatFilter = (gridDivisionFilter / timeline.gridDivision).asInteger.nextPowerOfTwo;
+        };
+        (this.startTime.asInteger.max(0)..(this.startTime + this.duration + 1).asInteger).do { |i|
+          if (i % beatFilter == 0) {
+            timeline.gridDivision.do { |j|
+              if (j % gridDivisionFilter == 0) {
+                var left = this.absoluteTimeToPixels(i + (j / timeline.gridDivision));
+                Pen.addRect(Rect(left, 0, 1, this.bounds.height));
+                Pen.color = if (j == 0) { Color.gray(0, 0.3) } { Color.gray(0, 0.1) };
+                Pen.fill;
+              };
+            };
+          };
+        };
+      };
+
       if (editingMode) {
         Pen.addRect(Rect(0, 0, this.bounds.width, this.bounds.height));
         Pen.color_(Color.hsv(0.58, 0.45, 0.65, 0.2));
@@ -371,6 +392,16 @@ ESTimelineView : UserView {
             } {
               hoverClip.startTime = hoverClipStartTime + this.pixelsToRelativeTime(xDelta);
             };
+            if (this.relativeTimeToPixels((hoverClip.startTime - timeline.now).abs) < 10) {
+              var adjust = timeline.now - hoverClip.startTime;
+              if (this.selectedClips.includes(hoverClip)) {
+                this.selectedClips.do { |clip, i|
+                  clip.startTime = clip.startTime + adjust;
+                };
+              } {
+                hoverClip.startTime = timeline.now;
+              };
+            };
             if (currentHoverTrack != hoverTrack) {
               var trackDelta = currentHoverTrack - hoverTrack;
               var clips;
@@ -441,6 +472,31 @@ ESTimelineView : UserView {
       //key.postln;
       // space is play
       if (char == $ ) { timeline.togglePlay };
+      // [ and ] move playhead to nearest clip edge on hovered track
+      if ((char == $[) or: (char == $])) {
+        var points = [];
+        var prevPrevPoint = 0, prevPoint = 0, skipRest = false;
+        var goForwards = (char == $]);
+        timeline.tracks[hoverTrack].clips.do { |clip|
+          points = points ++ [clip.startTime, clip.endTime];
+        };
+        points.sort.do { |point|
+          if (skipRest.not) {
+            if ((point > timeline.now) or: (point == points.last)) {
+              skipRest = true;
+              timeline.now = if (goForwards) { point } {
+                if (timeline.now == prevPoint) {
+                  prevPrevPoint
+                } {
+                  prevPoint
+                };
+              };
+            };
+          };
+          prevPrevPoint = prevPoint;
+          prevPoint = point;
+        }
+      };
       // s - split clip
       if (char == $s) { if (hoverClip.notNil) { timeline.tracks[hoverTrack].splitClip(hoverClip.index, hoverTime) } };
       if (char == $S) {
