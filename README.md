@@ -3,6 +3,8 @@
 The distant goal is that anything you can do in SuperCollider could be sequenced on a visual and editable timeline...
 
 Note that this is a work in progress and all is subject to revision.
+<br />
+<br />
 <details>
   <summary>Out of date screenshots</summary>
   <img src="img/ss2.png" />
@@ -13,12 +15,15 @@ Note that this is a work in progress and all is subject to revision.
 </details>
 
 <details>
-  <summary>Out of date video: Timelines inside of timelines with optionally separate play clocks</summary>
+  <summary>Out of date video demo: Timelines inside of timelines with optionally separate play clocks</summary>
   http://www.youtube.com/watch?v=8jcxcfvS_08
 </details>
 
+<br />
+<br />
+
 <details>
-  <summary>Features, hypothetical features, and issues</summary>
+  <summary><strong>Features, hypothetical features, and issues</strong></summary>
   
 ## Features
 - **Non-prescriptive:** no server architecture is forced on you, possible to disable timeline-specific clock and environment so as to interact with the timeline as part of a larger project; the basic goal is only to "execute this code at this particular time"
@@ -74,10 +79,11 @@ Note that this is a work in progress and all is subject to revision.
 3. There is a limit to the complexity of a timeline created using SCLang (i.e. by evaluating `ESTimeline([ESTrack([....`) -- it may only contain max 256 functions.
   - to avoid this I have created a light custom file format that compiles complex timeline structures from the inside out
 
+<br />
 </details>
 
 <details>
-  <summary>Getting started: installing and tutorial</summary>
+  <summary><strong>Getting started: installing and tutorial</strong></summary>
   
 ## Installing
 Download or clone this repository into your SuperCollider Extensions directory. To see where this is, go to `File > Open user support directory` and find the `Extensions` directory, or evaluate:
@@ -111,44 +117,66 @@ SynthDef(\sin, { |out, freq = 100, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
 ```
 - hit save when you're done to save the prepFunc and load it.
 
+### Making tracks:
+- press cmd-t to add a track after the one your mouse is currently over, or shift-cmd-T to add it before the current track
+- cmd-delete deletes a track
+- each track can contain any kind of clip in any combination
+- mute and solo tracks using the buttons on the left panel
+- click and drag in the left panel to rearrange tracks
+
 ### Synth Clips:
 - create a bunch of Synth clips (point the mouse where you want it and press shift-S, or use right click menu)
   - drag them around to move them
-  - drag their edges to resize them
+  - drag their edges to resize them (a red bar appears when you are within the resize zone)
   - option-drag to copy a clip
+  - double-click on a clip to edit it, e.g. change the frequency
+    - double-click on the grayed out `freq` parameter to activate it, then you can set it to any valid SuperCollider expression
+    - press save when you're done
   - if you play now by clicking to place the playhead and pressing space, you will hear they play the default synth
-- click in an empty area and drag to select all the Synth clips, right click, "clip actions > bulk edit synth defName", and set them to `'sin'`.
+    - press space again to stop playback
+- click in an empty area and drag to select all the Synth clips, right click, "clip actions > bulk edit synth defName"
+  - and set them to `'sin'`.
+  - play again and you hear they now all play your SynthDef
   - double-click in an empty area to remove selection
-  - play again and you hear this has happened
+
+### Scrolling and zooming:
+- use trackpad to scroll left and right or click and drag ruler at top
+- cmd-scroll to zoom in and out horizontally
+- opt-scroll to zoom in and out vertically (when there are more than one track)
 
 ### Envelopes for Synth parameters:
 - right click a Synth clip, "clip actions > add env for synth argument"
 - pick "freq" from the list and hit OK
+  - this will by default add a new track with an envelope clip on it that is the length of your Synth clip, with a unique name (starting from 'freq0'), and it will update the freq argument of the Synth clip to read from this envelope's bus
 
 ### Editing Envelopes:
-- cmd-scroll to zoom in and out
-  - scroll left and right or click and drag ruler at the top
 - cmd-e to enter envelope breakpoint editor mode
   - click and drag to move the breakpoints around or adjust curves,
   - shift-click to add breakpoints,
   - option-click to remove them
-- to rescale, right click, clip actions > "set env range keeping breakpoint values"
+- by default, these envelopes will map to the range of the parameter name .asSpec
+  - to rescale, right click, clip actions > "set env range keeping breakpoint values"
 - hit cmd-e again to leave envelope breakpoint editor mode
 
-### To make this envelope affect all your Synths:
-- drag the edges of the envelope clip to resize it
-- click and drag to select all the Synth clips, right click, "clip actions > bulk edit synth arguments"
-- assign the freq of all the clips to 
+### Bulk edit Synths -- To make this envelope affect all your Synths:
+- drag the edges of the envelope clip to resize it, so that it covers the entire range of your Synth clips
+- click and drag to select all the Synth clips
+- right click, "clip actions > bulk edit synth arguments"
+- assign the `freq` of all the clips to 
 `\freq0`
 (or whatever the name of the envelope clip is)
 - you should see all their freqs change to `a4` -- this is the audio rate bus that the Env clip has created for you (you can override this behavior)
+- cmd-e to edit the breakpoints again
 - you should hear it is now controlling all the synths' pitches
+- make sure you've left breakpoint edit mode when you want to move clips around
 
-### Random panning:
-- Select all your Synth clips, right click > clip actions > bulk edit synth arguments, and for `pan` put in `rrand(-1.0, 1.0)` and check the "hard coded" box
+### Bulk edit Synths -- Random panning:
+- Select all your Synth clips
+- right click > clip actions > bulk edit synth arguments
+- for `pan` put in `rrand(-1.0, 1.0)` and check the "hard coded" box
   - this will generate a random hard-coded pan per clip. (if you want it to be newly random every time you play it, uncheck the box)
 
-### Reverb and environment variables:
+### Environment variables -- adding reverb:
 - add to your timeline prep func:
 ```
 SynthDef(\verb, { |out, verbbus, gate = 1, amp = 1|
@@ -165,10 +193,10 @@ SynthDef(\verb, { |out, verbbus, gate = 1, amp = 1|
 ~verbbus.free;
 ```
 - save the changes to load the new SynthDef and bus
+  - this environment variable is local to this timeline (assuming `useEnvir` box is still checked)
 - cmd-t to make a new track
-  - click and drag in the panel to the left to rearrange tracks
 - click in an empty area and drag to select the time around all your Synth clips
-- put the mouse over your new track and shift-S to create a new Synth clip
+- put the mouse over your new track and shift-S to create a new Synth clip that fills the selected time
 - double click on it
   - set defName to `'verb'`
   - set addAction to `'addToTail'`
@@ -180,7 +208,8 @@ SynthDef(\verb, { |out, verbbus, gate = 1, amp = 1|
   - again, you should see that they all have verbbus set to the same bus number
 - bulk edit the same synth arguments and set `verbamt` to `1.0`
   - now when you play you will hear they all are affected by the reverb Synth.
-- you could now make an envelope to control the amplitude of this reverb, like an overall send level.
+- you could now make an envelope to control the amplitude of this reverb, analogous to overall return level.
+- you could also make an envelope to control the verbamt of all of the Synths, analogous to send level.
 
 ### Pattern Clips:
 - make a new track and shift-P to make a pattern clip
@@ -209,7 +238,7 @@ Pbind(
     
 ### Timeline clips:
 - above the main timeline, click "Open as clip in new timeline"
-  - Now this little system, the synths, buses and envelopes, are all encapsulated in this timeline clip, which won't interfere with e.g. another ~verbbus that you happen to use elsewhere.
+  - Now this little system, the synths, patterns, buses and envelopes, are all encapsulated in this timeline clip, which won't interfere with e.g. another ~verbbus that you happen to use elsewhere.
   - (in fact you can duplicate the timeline clip by option-dragging onto a new track, and the two will play simultanously each using its own environment and bus.)
   - you can also resize the clips, move the mouse cursor over the clip and use the s key to split it into two separate timeline clips, etc.
 
@@ -242,11 +271,11 @@ loop {
 ```
 - you can use a comment clip (shift-C) for this dummy "next" clip -- the first line of the comment is its name
 - you can also goto a number, which will be interpreted as beat number.
-
+<br />
 </details>
 
 <details>
-  <summary>Keyboard and mouse actions</summary>
+  <summary><strong>Keyboard and mouse actions</strong></summary>
   
 ## Mouse interaction
 - drag middle of clip to move
@@ -297,4 +326,6 @@ loop {
 - cmd-Z redo
 </details>
 
+<br />
+<br />
 If you do try it out, I would love to know your thoughts, ideas, critiques, and if you find bugs etc please report them on the github issue page with steps to reproduce.
