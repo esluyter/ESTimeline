@@ -474,7 +474,7 @@ ESTimelineView : UserView {
       } {  // if editingMode
         if (hoverClip.notNil) {
           //                        not the best
-          hoverClip.prMouseMove(x, y - (trackHeight * hoverClip.track.index), xDelta, yDelta, *this.clipBounds(hoverClip));
+          hoverClip.prMouseMove(x, y - (trackHeight * hoverClip.track.index), xDelta, yDelta, mods, *this.clipBounds(hoverClip));
         };
       };// end editingMode
 
@@ -568,7 +568,7 @@ ESTimelineView : UserView {
       };
       if (char == $E) {
         var thisDuration = newClipDuration ?? 5;
-        timeline.tracks[hoverTrack].addClip(ESEnvClip(newClipStartTime, thisDuration, env: Env([0, 1, 0], (thisDuration / 2).dup(2), \sin), prep: true));
+        timeline.tracks[hoverTrack].addClip(ESEnvClip(newClipStartTime, thisDuration, env: Env([0.5, 0.5], [thisDuration], 0), prep: true));
       };
       if (char == $e) {
         if (hoverClip.class == ESTimelineClip) {
