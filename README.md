@@ -135,7 +135,7 @@ SynthDef(\sin, { |out, freq = 100, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
     - press save when you're done
   - if you play now by clicking to place the playhead and pressing space, you will hear they play the default synth
     - press space again to stop playback
-- click in an empty area and drag to select all the Synth clips, right click, "clip actions > bulk edit synth defName"
+- click in an empty area and drag to select all the Synth clips (they will be highlighted in cyan when selected), right click, "clip actions > bulk edit synth defName"
   - and set them to `'sin'`.
   - play again and you hear they now all play your SynthDef
   - double-click in an empty area to remove selection
