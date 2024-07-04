@@ -292,7 +292,7 @@ ESTimelineView : UserView {
       // if the mouse didn't move during the click, move the playhead to the click point:
       if (clickPoint == (x@y)) {
         if (timeline.isPlaying.not) {
-          timeline.now = clickTime;
+          timeline.now = if (timeline.snapToGrid) { clickTime.round(1 / timeline.gridDivision) } { clickTime };
         };
       };
 
@@ -374,6 +374,7 @@ ESTimelineView : UserView {
           } {
             var currentHoverTrack = this.trackAtY(y);
 
+            // if clips have been duplicated, insert them into appropriate tracks and then select and move.
             if (duplicatedClips.notNil) {
               duplicatedClips.do { |duplicatedClip|
                 duplicatedClip.track.addClip(duplicatedClip);
@@ -385,6 +386,7 @@ ESTimelineView : UserView {
               duplicatedClips = nil;
             };
 
+            // move clips
             if (this.selectedClips.includes(hoverClip)) {
               this.selectedClips.do { |clip, i|
                 clip.startTime = hoverClipStartTime[i] + this.pixelsToRelativeTime(xDelta);
@@ -392,6 +394,7 @@ ESTimelineView : UserView {
             } {
               hoverClip.startTime = hoverClipStartTime + this.pixelsToRelativeTime(xDelta);
             };
+            // always snap to cursor
             if (this.relativeTimeToPixels((hoverClip.startTime - timeline.now).abs) < 10) {
               var adjust = timeline.now - hoverClip.startTime;
               if (this.selectedClips.includes(hoverClip)) {
@@ -402,6 +405,18 @@ ESTimelineView : UserView {
                 hoverClip.startTime = timeline.now;
               };
             };
+            // snap to grid, optionally
+            if (timeline.snapToGrid and: (this.relativeTimeToPixels((hoverClip.startTime.round(1 / timeline.gridDivision) - hoverClip.startTime).abs) < 10)) {
+              var adjust = hoverClip.startTime.round(1 / timeline.gridDivision) - hoverClip.startTime;
+              if (this.selectedClips.includes(hoverClip)) {
+                this.selectedClips.do { |clip, i|
+                  clip.startTime = clip.startTime + adjust;
+                };
+              } {
+                hoverClip.startTime = hoverClip.startTime + adjust;
+              };
+            };
+            // move clips between tracks
             if (currentHoverTrack != hoverTrack) {
               var trackDelta = currentHoverTrack - hoverTrack;
               var clips;
@@ -469,6 +484,7 @@ ESTimelineView : UserView {
         };
       };
     }).keyDownAction_({ |view, char, mods, unicode, keycode, key|
+      var snappedHoverTime = if (timeline.snapToGrid) { hoverTime.round(1 / timeline.gridDivision) } { hoverTime };
       //key.postln;
       // space is play
       if (char == $ ) { timeline.togglePlay };
@@ -498,24 +514,31 @@ ESTimelineView : UserView {
         }
       };
       // s - split clip
-      if (char == $s) { if (hoverClip.notNil) { timeline.tracks[hoverTrack].splitClip(hoverClip.index, hoverTime) } };
+      // opt-s = toggle snapping
+      if (char == $s) {
+        if (mods.isAlt) {
+          timeline.snapToGrid = timeline.snapToGrid.not;
+        } {
+          if (hoverClip.notNil) { timeline.tracks[hoverTrack].splitClip(hoverClip.index, snappedHoverTime) };
+        };
+      };
       if (char == $S) {
-        timeline.tracks[hoverTrack].addClip(ESSynthClip(hoverTime, 0.5, defName: \default));
+        timeline.tracks[hoverTrack].addClip(ESSynthClip(snappedHoverTime, 0.5, defName: \default));
       };
       if (char == $T) {
-        timeline.tracks[hoverTrack].addClip(ESTimelineClip(hoverTime, 10, timeline: ESTimeline()));
+        timeline.tracks[hoverTrack].addClip(ESTimelineClip(snappedHoverTime, 10, timeline: ESTimeline()));
       };
       if (char == $C) {
-        timeline.tracks[hoverTrack].addClip(ESClip(hoverTime, 5));
+        timeline.tracks[hoverTrack].addClip(ESClip(snappedHoverTime, 5));
       };
       if (char == $P) {
-        timeline.tracks[hoverTrack].addClip(ESPatternClip(hoverTime, 5, pattern: {Pbind()}));
+        timeline.tracks[hoverTrack].addClip(ESPatternClip(snappedHoverTime, 5, pattern: {Pbind()}));
       };
       if (char == $R) {
-        timeline.tracks[hoverTrack].addClip(ESRoutineClip(hoverTime, 5, func: {}));
+        timeline.tracks[hoverTrack].addClip(ESRoutineClip(snappedHoverTime, 5, func: {}));
       };
       if (char == $E) {
-        timeline.tracks[hoverTrack].addClip(ESEnvClip(hoverTime, 5, env: Env([0, 1, 0], [2.5, 2.5], \sin), prep: true));
+        timeline.tracks[hoverTrack].addClip(ESEnvClip(snappedHoverTime, 5, env: Env([0, 1, 0], [2.5, 2.5], \sin), prep: true));
       };
       if (char == $e) {
         if (hoverClip.class == ESTimelineClip) {
