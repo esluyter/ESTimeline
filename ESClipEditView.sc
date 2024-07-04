@@ -17,7 +17,7 @@ ESClipEditView {
     .background_(Color.gray(0.9))
     .front;
 
-    funcView = CodeView(editorWindow, Rect(0, 0, 800, 600)).font_(panelFont).string_(clip.comment);
+    funcView = CodeView(editorWindow, Rect(0, 0, 800, 600)).font_(panelFont).string_(if (clip.name.isNil) { "" } { clip.name.asString ++ "\n" } ++ clip.comment);
     if (timeline.useEnvir) {
       funcView.interpretEnvir_(timeline.envir);
     };
