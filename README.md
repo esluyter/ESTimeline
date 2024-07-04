@@ -125,7 +125,9 @@ Platform.userExtensionDir
 ~window = ESTimelineWindow(timeline: ~timeline);
 )
 ```
-- by default, this boots the default server. You can make it not do this.
+- by default, this boots the default server. You can make it not do this by going into "Prep / Cleanup funcs" and unchecking `bootOnPrep`.
+
+SynthDefs:
 - put your SynthDef in the timeline's prep function (click the "edit prep/cleanup funcs" button) e.g.
 ```
 SynthDef(\sin, { |out, freq = 100, gate = 1, amp = 0.1, preamp = 1.5, attack = 0.001, release = 0.01, pan, verbbus, verbamt, vibrato = 0.2|
@@ -141,21 +143,30 @@ SynthDef(\sin, { |out, freq = 100, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
 }).add;
 ```
 - hit save when you're done to save the prepFunc and load it.
+
+Clips:
 - create a bunch of Synth clips (point the mouse where you want it and press shift-S, or use right click menu)
-- if you play now by clicking to place the playhead and pressing space, you will hear they play the default synth
-- click in an empty area and drag to select all the Synth clips, right click, "clip actions > bulk edit synth defName", and set them to use your SynthDef.
-- double-click in an empty area to remove selection
-- play again and you hear this has happened
+  - drag them around to move them
+  - drag their edges to resize them
+  - option-drag to copy a clip
+  - if you play now by clicking to place the playhead and pressing space, you will hear they play the default synth
+- click in an empty area and drag to select all the Synth clips, right click, "clip actions > bulk edit synth defName", and set them to `'sin'`.
+  - double-click in an empty area to remove selection
+  - play again and you hear this has happened
 
 Envelopes for Synth parameters:
 - right click a Synth clip, "clip actions > add env for synth argument"
 - pick "freq" from the list and hit OK
 
 Editing Envelopes:
+- cmd-scroll to zoom in and out
+  - scroll left and right or click and drag ruler at the top
 - cmd-e to enter envelope breakpoint editor mode
-- move the breakpoints around to adjust, shift-click to add breakpoints, option-click to remove them
-- double-click to edit and adjust curves, if you want
-- hit cmd-e again to leave envelope breakpoint editor mode (**if you can't move any clips around, this is probably why** -- maybe a design flaw...)
+  - click and drag to move the breakpoints around or adjust curves,
+  - shift-click to add breakpoints,
+  - option-click to remove them
+- to rescale, right click, clip actions > "set env range keeping breakpoint values"
+- hit cmd-e again to leave envelope breakpoint editor mode
 
 To make this envelope affect all your Synths:
 - drag the edges of the envelope clip to resize it
@@ -166,25 +177,75 @@ To make this envelope affect all your Synths:
 - you should see all their freqs change to `a4` -- this is the audio rate bus that the Env clip has created for you (you can override this behavior)
 - you should hear it is now controlling all the synths' pitches
 
-Routines and environment variables:
-- make a new track, add a Routine clip (shift-R, or use right click menu), double click, and put
-```
-loop {
-  ~pan = rrand(-1.0, 1.0);
-  0.1.wait;
-};
-```
-- save the changes to the Routine by pressing "Save"
-- select all the Synth clips again, right click, "clip actions > bulk edit synth arguments" and set `pan` to `~pan`
-- now you will hear each synth has a random panning, but they are deterministic (same every time you play them)
-- if you want them to be truly random (different every time you play them), turn off `isSeeded`
+Random panning:
+- Select all your Synth clips, right click > clip actions > bulk edit synth arguments, and for `pan` put in `rrand(-1.0, 1.0)` and check the "hard coded" box
+  - this will generate a random hard-coded pan per clip. (if you want it to be newly random every time you play it, uncheck the box)
 
+Reverb and environment variables:
+- add to your timeline prep func:
+```
+SynthDef(\verb, { |out, verbbus, gate = 1, amp = 1|
+  var in = In.ar(verbbus, 2);
+  var env = Env.adsr(0.01, 0, 1, 1.0).ar(2, gate);
+  var verb = NHHall.ar(in) * env;
+  Out.ar(out, verb * amp);
+}).add;
+
+~verbbus = Bus.audio(s, 2);
+```
+- and to the cleanup func:
+```
+~verbbus.free;
+```
+- save the changes to load the new SynthDef and bus
+- cmd-t to make a new track
+  - click and drag in the panel to the left to rearrange tracks
+- click in an empty area and drag to select the time around all your Synth clips
+- put the mouse over your new track and shift-S to create a new Synth clip
+- double click on it
+  - set defName to `'verb'`
+  - set addAction to `'addToTail'`
+  - click refresh icon next to args to refresh argument names
+  - double click on grayed-out "verbbus" to activate it, put `~verbbus`
+  - save
+    - you should see that verbbus is now set to e.g. `a4`
+- click and drag to select all your Synths, bulk edit Synth arguments, and set `verbbus` to `~verbbus`
+  - again, you should see that they all have verbbus set to the same bus number
+- bulk edit the same synth arguments and set `verbamt` to `1.0`
+  - now when you play you will hear they all are affected by the reverb Synth.
+- you could now make an envelope to control the amplitude of this reverb, like an overall send level.
+
+Pattern Clips:
+- make a new track and shift-P to make a pattern clip
+- double click to edit, e.g.:
+```
+Pbind(
+  \instrument, \sin,
+  \verbbus, ~verbbus,
+  \verbamt, Pwhite(0.0, 1.0).linexp(0, 1, 0.1, 3.0),
+  \degree, Pbrown(0, 7 * 3 + 1, 3),
+  \octave, Pdup(Pwhite(1, 10), Pwhite(3, 5)),
+  \pan, Pwhite(-1.0, 1.0),
+  \dur, Pbrown().linexp(0, 1, 0.02, 1.0)
+)
+```
+- you will hear this uses the same reverb synth
+- if you want to try a new random seed, click "re-roll" button and save
+  - you can always undo if you don't like it
+- if you make a new track and a new envelope, name the envelope `pan0` and set its range from -1 to 1
+- edit the panning to your liking, and update the pattern with
+```
+  \pan, ~thisTimeline[\pan0],
+```
+    
 Timeline clips:
 - above the main timeline, click "Open as clip in new timeline"
-Now this little system, the synths, panning and editable frequency envelope, are all encapsulated in this timeline clip, which won't e.g. interfere with other environment variables called ~pan that you happen to use elsewhere. (in fact you can duplicate the timeline clip by option-dragging onto a new track, and the two will play simultanously each using its own environment and envelope bus.) **If you can't move a clip, hit cmd-e to leave breakpoint editor mode**
-- you can also move the mouse cursor over the clip and use the s key to split it into two separate timeline clips.
+Now this little system, the synths, buses and envelopes, are all encapsulated in this timeline clip, which won't interfere with e.g. another ~verbbus that you happen to use elsewhere. (in fact you can duplicate the timeline clip by option-dragging onto a new track, and the two will play simultanously each using its own environment and bus.)
+  - you can also resize the clips, move the mouse cursor over the clip and use the s key to split it into two separate timeline clips, etc.
 
-More advanced sequencing options: using Pattern clips, or using Routine clips to sequence e.g. Synths:
+Using Routine clips:
+- shift-R to make a Routine clip, double click to edit
+- it's important to use `s.bind` for server operations inside of routines, otherwise the timing is off.
 ```
 var syn;
 10.do { |i|
@@ -194,8 +255,22 @@ var syn;
   0.2.wait;
 };
 ```
-It's important to use `s.bind` for server operations inside of routines, otherwise the timing is off.
+- You can think of Routine clips as kind of your generic "execute this code here", and if you want say OSC out to a light board to line up with the sounding events, check the `addLatency` box.
+- You can interact with the timeline using `~thisTimeline` which always refers to the timeline you're currently working in, or `~timeline` which refers to either this or the nearest parent timeline whose `useEnvir` box is checked
+  - if no parent timeline is set to `useEnvir`, then `~thisTimeline` will overwrite anything you might have in your current environment.
+  - in that case, `~timeline` might be nil unless you've set it in your current environment.
+- to get the current value of an envelope named `env` from within a routine:
+```
+loop {
+  ~thisTimeline[\env].valueNow.postln;
+  1.wait;
+};
+```
+- to jump to a clip named `next`, use
+```
+~thisTimeline.goto(\next)
+```
+- you can use a comment clip (shift-C) for this dummy "next" clip -- the first line of the comment is its name
+- you can also goto a number, which will be interpreted as beat number.
 
-You can think of Routine clips as kind of your generic "execute this code here", and if you want say OSC out to a light board to line up with the sounding events, check the `addLatency` box.
-
-If you do try it out, I would love to know your thoughts, ideas, critiques, and if you find bugs etc please report them here or on the github with steps to reproduce.
+If you do try it out, I would love to know your thoughts, ideas, critiques, and if you find bugs etc please report them on the github issue page with steps to reproduce.
