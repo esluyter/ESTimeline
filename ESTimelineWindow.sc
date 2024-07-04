@@ -40,7 +40,7 @@ ESTimelineWindow : Window {
     funcEditButt = Button(this, Rect(160, 5, 150, 30)).states_([["Prep / Cleanup funcs"]]).action_({ ESFuncEditView(timeline); timelineView.focus });
 
 
-    newButt = Button(this, Rect(350, 5, 65, 30)).states_([["New"]]);
+    newButt = Button(this, Rect(350, 5, 65, 30)).states_([["New"]]).action_({ timeline.new });
 
     saveIDEButt = Button(this, Rect(420, 5, 100, 30)).states_([["Open in IDE"]]).action_({
       Document.new("Timeline Score", timeline.currentState.asCompileString).front;
@@ -176,6 +176,10 @@ ESTimelineWindow : Window {
             timelineView.makeTrackViews;
             ESClipEditView.closeWindow;
           }.fork(AppClock);
+        }
+        { \new } {
+          timelineView.duration = 15;
+          timelineView.startTime = -2;
         }
         { \encapsulateSelf } {
           {
