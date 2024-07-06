@@ -55,6 +55,13 @@ ESTimelineClip : ESClip {
     timeline.play(startOffset, makeClock: false);
   }
 
+  prTempoChanged { |tempo|
+    // this is called when parent timeline's tempo changes
+    if (useParentClock) {
+      timeline.currentClips.do(_.prTempoChanged(tempo));
+    };
+  }
+
   prDraw { |left, top, width, height, editingMode, clipLeft, clipWidth, selected|
     var tracks = timeline.tracks;
     var tratio = width / duration;

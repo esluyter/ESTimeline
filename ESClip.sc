@@ -161,8 +161,8 @@ ESClip {
   prFree { }
   prStart { }
   prStop { }
-  // default clip is a comment clip
   prDraw { |left, top, width, height|
+    // default clip is a comment clip
     var lines = comment.split($\n);
     var font = Font.sansSerif(14);
     var strTop;
@@ -190,6 +190,7 @@ ESClip {
     Pen.stroke;
     ^""
   }
+  prTempoChanged { |tempo| } // so far this is just so env clips follow tempo changes
   defaultColor { ^Color.gray(1); }
 
   // helper methods
