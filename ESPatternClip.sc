@@ -149,13 +149,7 @@ ESPatternClip : ESClip {
     var lines = string.split($\n);
     var font = Font.monospace(10);
     lines.do { |line, i|
-      while { max(0, width - 5) < (QtGUI.stringBounds(line, font).width) } {
-        if (line.size == 1) {
-          line = "";
-        } {
-          line = line[0..line.size-2];
-        };
-      };
+      line = ESStringShortener.trim(line, width - 5, font);
       Pen.stringAtPoint(line, (left+3.5)@(top+20+(i * 10)), font, Color.gray(1.0, 0.4));
     };
     */

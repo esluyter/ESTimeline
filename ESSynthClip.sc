@@ -28,7 +28,7 @@ ESSynthClip : ESClip {
 
   prStart { |startOffset = 0.0, clock|
     Server.default.bind {
-      synth = Synth(defName.value, this.prArgsValue(clock), target.value, addAction.value)
+      synth = Synth(defName.value, this.prArgsValue(clock).postcs, target.value, addAction.value)
     };
   }
 
@@ -72,14 +72,8 @@ ESSynthClip : ESClip {
 
     if ((height > 30) and: (width > 15)) {
       argsValue.pairsDo { |key, val, i|
-        var line = "" ++ key ++ ":  " ++ val.value;
-        while { max(0, width - 5) < (QtGUI.stringBounds(line, font).width) } {
-          if (line.size == 1) {
-            line = "";
-          } {
-            line = line[0..line.size-2];
-          };
-        };
+        var line = "" ++ key ++ ":  " ++ this.getArg(key).asESDisplayString ++ " -> " ++ val.value;
+        line = ESStringShortener.trim(line, width - 5, font);
         strTop = 22 + (i * 6);
         if (strTop < height) {
           Pen.stringAtPoint(line, (left+3.5)@(top + strTop), font, Color.gray(1.0, 0.55));
@@ -102,8 +96,8 @@ ESSynthClip : ESClip {
     args.pairsDo { |key, val|
       val = val.value;
       if (val.class == Symbol) { val = track.timeline[val]; };
-      if (val.class == ESEnvClip) { val = val.bus; };
-      if (val.class == Bus) { val = val.asMap; };
+      if (val.class == ESEnvClip) { val = val.bus.asMap; };
+      //if (val.class == Bus) { val = val.asMap; };
       ret = ret.add(key).add(val);
     };
     if (ret.indexOf(\sustain).isNil and: clock.notNil) {

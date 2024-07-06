@@ -91,13 +91,7 @@ ESRoutineClip : ESClip {
       var funcHeight = lines.size * 10;
       var strTop;
       lines.do { |line, i|
-        while { max(0, width - 5) < (QtGUI.stringBounds(line, font).width) } {
-          if (line.size == 1) {
-            line = "";
-          } {
-            line = line[0..line.size-2];
-          };
-        };
+        line = ESStringShortener.trim(line, width - 5, font);
         strTop = 20 + (i * 10);
         if (strTop < height) {
           Pen.stringAtPoint(line, (left+3.5)@(top+strTop), font, Color.gray(1.0, 0.6));
@@ -111,13 +105,7 @@ ESRoutineClip : ESClip {
       string = this.stopFunc.asESDisplayString;
       lines = string.split($\n);
       lines.do { |line, i|
-        while { max(0, width - 5) < (QtGUI.stringBounds(line, font).width) } {
-          if (line.size == 1) {
-            line = "";
-          } {
-            line = line[0..line.size-2];
-          };
-        };
+        line = ESStringShortener.trim(line, width - 5, font);
         strTop = 30 + funcHeight + (i * 10);
         if (strTop < height) {
           Pen.stringAtPoint(line, (left+3.5)@(top+strTop), font, Color.gray(1.0, 0.4));
