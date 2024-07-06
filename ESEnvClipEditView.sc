@@ -25,7 +25,7 @@ ESEnvClipEditView : ESClipEditView {
 
     StaticText(editorWindow, Rect(20, 175, 50, 20)).string_("env").font_(panelFont);
     StaticText(editorWindow, Rect(50, 177, 480, 20)).string_("... edit if you must (curves) but otherwise use cmd-e for breakpoint editor mode").font_(Font.sansSerif(13));
-    codeView = CodeView(editorWindow, Rect(10, 200, 590, 400)).font_(Font.monospace(16)).string_(clip.env.asCompileString).background_(Color.gray(0.8));
+    codeView = CodeView(editorWindow, Rect(10, 200, 590, 400)).font_(Font.monospace(16)).string_(clip.env.asESDisplayString).background_(Color.gray(0.8));
     if (timeline.useEnvir) {
       codeView.interpretEnvir_(timeline.envir);
     };
@@ -80,7 +80,7 @@ ESEnvClipEditView : ESClipEditView {
     Button(sidePanel, Rect(0, 485, 180, 30)).string_("Cancel").font_(panelFont.copy.size_(14)).action_({ editorWindow.close });
     Button(sidePanel, Rect(0, 520, 180, 30)).string_("Save").font_(panelFont.copy.size_(14)).action_({
       clip.name = nameField.string.asSymbol;
-      clip.env = codeView.string.interpret;
+      clip.env = ("{" ++ codeView.string ++ "}").interpret;
       clip.target = ("{" ++ targetView.string ++ "}").interpret;
       clip.addAction = ("{" ++ addActionView.string ++ "}").interpret;
       clip.color = colorView.background;
