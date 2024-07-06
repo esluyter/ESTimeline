@@ -20,32 +20,27 @@ ESEnvClip : ESClip {
   storeArgs { ^[startTime, duration, offset, color, name, env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate] }
 
   *initClass {
+    var sizes = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8190]; // 8191 crashes server
     ServerBoot.add {
-      SynthDef('ESEnvClip_internal_kr', { |out, gate = 1, tempo = 1, min = 0, max = 1, curve = 0|
-        var env = \env.kr(Env(0.dup(1000), 1.dup(999), 0.dup(999)));
-        var sig = EnvGen.kr(env, timeScale: tempo.reciprocal).lincurve(0, 1, min, max, curve);
-        FreeSelf.kr(gate <= 0);
-        Out.kr(out, sig);
-      }).add;
-      SynthDef('ESEnvClip_internal_ar', { |out, gate = 1, tempo = 1, min = 0, max = 1, curve = 0|
-        var env = \env.kr(Env(0.dup(1000), 1.dup(999), 0.dup(999)));
-        var sig = EnvGen.ar(env, timeScale: tempo.reciprocal).lincurve(0, 1, min, max, curve);
-        FreeSelf.kr(gate <= 0);
-        Out.ar(out, sig);
-      }).add;
-
-      SynthDef('ESEnvClip_internal_kr_exp', { |out, gate = 1, tempo = 1, min = 0, max = 1|
-        var env = \env.kr(Env(0.dup(1000), 1.dup(999), 0.dup(999)));
-        var sig = EnvGen.kr(env, timeScale: tempo.reciprocal).linexp(0, 1, min, max);
-        FreeSelf.kr(gate <= 0);
-        Out.kr(out, sig);
-      }).add;
-      SynthDef('ESEnvClip_internal_ar_exp', { |out, gate = 1, tempo = 1, min = 0, max = 1|
-        var env = \env.kr(Env(0.dup(1000), 1.dup(999), 0.dup(999)));
-        var sig = EnvGen.ar(env, timeScale: tempo.reciprocal).linexp(0, 1, min, max);
-        FreeSelf.kr(gate <= 0);
-        Out.ar(out, sig);
-      }).add;
+      sizes.do { |n|
+        [\kr, \ar].do { |rate|
+          [\curve, \exp].do { |type|
+            SynthDef(('ESEnvClip_' ++ rate ++ '_' ++ type ++ '_' ++ n).asSymbol, { |out, gate = 1, tempo = 1, min = 0, max = 1|
+              var env = \env.kr(Env(0.dup(n), 1.dup(n - 1), 0.dup(n - 1)));
+              var sig = EnvGen.perform(rate, env, timeScale: tempo.reciprocal);
+              switch (type)
+              {\curve} {
+                sig = sig.lincurve(0, 1, min, max, \curve.kr(0));
+              }
+              {\exp} {
+                sig = sig.linexp(0, 1, min, max);
+              };
+              FreeSelf.kr(gate <= 0);
+              Out.perform(rate, out, sig);
+            }).add;
+          };
+        };
+      };
     };
   }
 
@@ -87,12 +82,17 @@ ESEnvClip : ESClip {
   }
 
   prStart { |startOffset = 0.0, clock|
+    var thisEnv = this.envToPlay(startOffset);
+    var size = thisEnv.levels.size.nextPowerOfTwo;
+    if (size > 8190) {
+      "Envelope can have max 8190 points. Please adjust.".warn;
+      size = 8190;
+    };
     if (bus.value.notNil) {
-      var defName = if (this.rate == 'control') { 'ESEnvClip_internal_kr' } { 'ESEnvClip_internal_ar' };
-      if (this.isExponential) { defName = (defName ++ "_exp").asSymbol };
+      var defName = if (this.rate == 'control') { 'ESEnvClip_kr' } { 'ESEnvClip_ar' };
+      defName = (defName ++ if (this.isExponential) { "_exp_" } { "_curve_" } ++ size).asSymbol;
       Server.default.bind {
-        synth = Synth(defName, [env: this.envToPlay(startOffset), out: bus.value, tempo: clock.tempo, min: min, max: max, curve: curve], target.value, addAction.value);
-        //synth = Synth(defName.value, this.prArgsValue(clock), target.value, addAction.value)
+        synth = Synth(defName, [env: thisEnv, out: bus.value, tempo: clock.tempo, min: min, max: max, curve: curve], target.value, addAction.value);
       };
     };
   }
