@@ -22,6 +22,12 @@ ESTimeline {
   tempoBPM_ { |val| this.tempo_(val / 60); }
   gridDivision_ { |val| gridDivision = val; this.changed(\gridDivision); }
   snapToGrid_ { |val| snapToGrid = val; this.changed(\snapToGrid); }
+  tracks_ { |val|
+    this.prFree;
+    tracks = val;
+    this.init;
+    this.changed(\tracks);
+  }
 
   storeArgs { ^[tracks, this.tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid] }
   defaultUndoPoint { ^[[ESTrack([])], 1, nil, nil, true, true, false, 4, false].asESArray }
