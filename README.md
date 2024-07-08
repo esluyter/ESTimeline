@@ -65,6 +65,7 @@ Note that this is a work in progress and all is subject to revision.
   - Indeterminacy: probability for clips not to play?
   - Clock follow: e.g. sync up with an Ableton timeline or midi show control
 - Track/clips
+  - Streamlined Synth/SynthDef/Envelope editing flow
   - More clip types (e.g. OSCdef, loop, audio file, midi/piano/drum roll, VST)
   - Optional default MixerChannel per track? and modifiable per clip
   - Reference clips to create clones that all change together
