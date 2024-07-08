@@ -160,6 +160,8 @@ ESTimelineClip : ESClip {
 
   prTitle { ^"Timeline" }
 
+  prHasOffset { ^true } // whether to show offset parameter for editing
+
   defaultColor { ^if (timeline.useEnvir) { Color.gray(0.96, 0.5) } { Color.clear  } }
 
   guiClass { ^ESTimelineClipEditView }

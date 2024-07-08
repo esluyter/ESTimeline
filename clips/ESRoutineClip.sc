@@ -117,6 +117,8 @@ ESRoutineClip : ESClip {
 
   prTitle { ^"Routine" }
 
+  prHasOffset { ^true } // whether to show offset parameter for editing
+
   guiClass { ^ESRoutineClipEditView }
 
   defaultColor { ^Color.hsv(0.5, 0.4, 0.4) }
