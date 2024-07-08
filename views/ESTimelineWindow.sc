@@ -156,6 +156,24 @@ ESTimelineWindow : Window {
           tempoKnob.value_(timeline.tempoBPM);
         }
         { \track } {
+          if (args[2] == \clip) {
+            if (ESClipEditView.thisClip == args[4]) {
+              if (args[5] == \startTime) {
+                ESClipEditView.startTimeView.string_(args[6].asString);
+                ESClipEditView.durationView.string_(args[4].duration.asString);
+                if (ESClipEditView.offsetView.notNil) {
+                  ESClipEditView.offsetView.string_(args[4].offset.asString);
+                };
+              };
+              if (args[5] == \duration) {
+                ESClipEditView.durationView.string_(args[6].asString);
+              };
+              if (args[5] == \offset) {
+                ESClipEditView.offsetView.string_(args[6].asString);
+              };
+            };
+          };
+
           if ((args[2] == \mute) or: (args[2] == \solo)) {
             trackPanelView.refresh;
             timelineView.refresh;
