@@ -75,11 +75,13 @@ Note that this is a work in progress and all is subject to revision.
   - Timeline tempo envelopes (this is already possible but kind of annoying, using an Env clip and a Routine clip)
 - Playback and record audio files
   - easily access this Buffer for further manipulation
+- MIDI integration
+  - not sure how DAW-like I want to make this.....
 - Library integration
+  - ddwMixerChannel for simple, solid bus routing.
   - ddwPlug -- simplify bus routing for modulation
-  - jitlib -- ditto
-  - clothesline -- put whole .scd files on the timeline
   - VSTPlugin, somehow..... this could be a can of worms
+  - clothesline -- put whole .scd files on the timeline
 
 ## Issues
 1. Although I've tried to make it pleasant, the GUI based code editing environment does not syntax highlight, autocomplete, etc -- for this reason I've added "Open in IDE" / "Copy from IDE" buttons as necessary.
