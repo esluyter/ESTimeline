@@ -29,6 +29,8 @@ Note that this is a work in progress and all is subject to revision.
 - **Non-prescriptive:**
   - as little architecture as possible is forced on you,
     - possible to disable timeline-specific clock and environment so as to interact with the timeline as part of a larger project
+    - possible to play clips with any bus, target, addAction, etc. for full flexibility
+      - although I will probably build in optional use of ddwMixerChannel
   - the basic goal is only to "execute this code at this particular time"
     - although the competing goal is to make it easy to do the things you want to do, which is subjective
 - **DAW-like GUI** for editing and playback
@@ -61,8 +63,8 @@ Note that this is a work in progress and all is subject to revision.
   - Indeterminacy: probability for clips not to play?
   - Clock follow: e.g. sync up with an Ableton timeline or midi show control
 - Track/clips
-  - More clip types (e.g. OSCdef, loop, audio file)
-  - Set default params per track (e.g. pan: -1)
+  - More clip types (e.g. OSCdef, loop, audio file, piano/drum roll, VST)
+  - Optional default MixerChannel per track? and modifiable per clip
   - Reference clips to create clones that all change together
 - Envelopes
   - Ability to draw freehand with mouse 
