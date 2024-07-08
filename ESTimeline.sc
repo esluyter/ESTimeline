@@ -8,6 +8,7 @@ ESTimeline {
   var <envir;
   var <>parentClip;
   var clock; // this specifically refers to the internal clock to this specific timeline
+  var <buses;
 
   //tempo { ^clock.tempo; }
   tempo_ { |val|
@@ -43,6 +44,7 @@ ESTimeline {
     envir = Environment.make {
       ~timeline = this;
     };
+    buses = ();
   }
 
   initDependantFunc {

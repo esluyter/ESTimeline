@@ -3,7 +3,7 @@ ESEnvClip : ESClip {
   var <synth;
   var <hoverIndex, <editingFirst, <originalCurve, <curveIndex;
 
-  classvar <buses;  // event format name -> [bus, nClips] -- when nClips becomes 0 bus should be freed.
+  //classvar <buses;  // event format name -> [bus, nClips] -- when nClips becomes 0 bus should be freed.
 
   min_ { |val| min = val; this.changed(\min); }
   max_ { |val| max = val; this.changed(\max); }
@@ -47,7 +47,7 @@ ESEnvClip : ESClip {
   *initClass {
     var sizes;
 
-    buses = ();
+    //buses = ();
 
     sizes = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8190]; // 8191 crashes server
     ServerBoot.add {
@@ -81,7 +81,7 @@ ESEnvClip : ESClip {
 
   duplicate {
     //this.asCompileString.interpret.track_(track);
-    ^this.class.new(*(this.storeArgs ++ true)).track_(track); // prep is true
+    ^this.class.new(*(this.storeArgs)).track_(track).prep;
   }
 
   init { |argEnv, argBus, argTarget, argAddAction, argMin, argMax, argCurve, argExp, argMakeBus, argMakeBusRate, argPrep|
@@ -102,6 +102,7 @@ ESEnvClip : ESClip {
     if (makeBus) {
       //"allocating bus".postln;
       if (name.notNil) {
+        var buses = track.timeline.buses;
         // for named clip, allocate a global bus or increase its clip count
         if (buses[name].notNil) {
           buses[name][1] = buses[name][1] + 1;
@@ -121,6 +122,7 @@ ESEnvClip : ESClip {
       if (bus.notNil) { // if bus is nil, we've already cleaned up
         //"freeing bus".postln;
         if (name.notNil) {
+          var buses = track.timeline.buses;
           // for named clip, free or decrement the global bus
           if (buses[name].notNil) {
             buses[name][1] = buses[name][1] - 1;
