@@ -77,11 +77,11 @@ ESTimelineView : UserView {
                   target: thisHoverClip.target,
                   min: min,
                   max: max,
-                  isExponential: isExponential,
-                  prep: true
-                );
+                  isExponential: isExponential
+                ); // dont prep here anymore because it needs to know its track
                 envClip.env = Env(envClip.prValueUnscale(value).dup(2), [thisHoverClip.duration], [0]);
                 timeline.tracks[thisTrackIndex].addClip(envClip);
+                envClip.prep;
 
                 thisHoverClip.setArg(name, envName);
               }
