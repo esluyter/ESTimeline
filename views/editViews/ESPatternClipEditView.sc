@@ -9,9 +9,9 @@ ESPatternClipEditView : ESClipEditView {
       clip.randSeed = randSeedField.string.asInteger;
       clip.isSeeded = isSeededBox.value;
       clip.color = colorView.background;
-      clip.startTime = startTimeView.value;
-      clip.duration =  durationView.value;
-      clip.offset = offsetView.value;
+      clip.startTime = startTimeView.string.interpret;
+      clip.duration =  durationView.string.interpret;
+      clip.offset = offsetView.string.interpret;
 
       timeline.addUndoPoint;
     });

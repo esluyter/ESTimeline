@@ -10,9 +10,9 @@ ESEnvClipEditView : ESClipEditView {
       clip.target = ("{" ++ targetView.string ++ "}").interpret;
       clip.addAction = ("{" ++ addActionView.string ++ "}").interpret;
       clip.color = colorView.background;
-      clip.startTime = startTimeView.value;
-      clip.duration =  durationView.value;
-      clip.offset = offsetView.value;
+      clip.startTime = startTimeView.string.interpret;
+      clip.duration =  durationView.string.interpret;
+      clip.offset = offsetView.string.interpret;
       clip.min = minView.value;
       clip.max = maxView.value;
       clip.curve = curveView.value;
