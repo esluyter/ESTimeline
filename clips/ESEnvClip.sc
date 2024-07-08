@@ -568,11 +568,14 @@ ESEnvClip : ESClip {
     })
   }
   embedInStream { arg inval;
-    //loop {
-      { this.asMap }.value(inval).embedInStream(inval);
-    //};
+    //used to be this.asMap
+    { this.valueNow }.value(inval).embedInStream(inval);
     ^inval;
 	}
+
+  asPattern {
+    ^Pfunc { this.track.timeline[this.name].valueNow }
+  }
 
   /*
   asStream { /*^Routine { loop { this.asMap.yield } }*/
