@@ -3,12 +3,39 @@ ESEnvClip : ESClip {
   var <synth;
   var <hoverIndex, <editingFirst, <originalCurve, <curveIndex;
 
+  classvar <buses;  // event format name -> [bus, nClips] -- when nClips becomes 0 bus should be freed.
+
   min_ { |val| min = val; this.changed(\min); }
   max_ { |val| max = val; this.changed(\max); }
   env_ { |val| env = val; this.changed(\env); }
   bus_ { |val| bus = val; this.changed(\bus); }
   rate { ^this.bus.value.rate }
-  makeBus_ { |val| this.cleanup; makeBus = val; this.prep; this.changed(\makeBus); }
+  makeBus_ { |val|
+    if (val != makeBus) {
+      this.cleanup;
+      makeBus = val;
+      this.prep;
+      this.changed(\makeBus);
+    };
+  }
+
+
+  name_ { |val|
+    if (val != name) {
+      this.cleanup;
+
+      if (val.asString.size > 0) {
+        name = val;
+      } {
+        name = nil;
+      };
+
+      this.prep;
+      this.changed(\name, val);
+    };
+
+  }
+
 
   hoverIndex_ { |val|
     if (val != hoverIndex) {
@@ -20,7 +47,11 @@ ESEnvClip : ESClip {
   storeArgs { ^[startTime, duration, offset, color, name, env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate] }
 
   *initClass {
-    var sizes = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8190]; // 8191 crashes server
+    var sizes;
+
+    buses = ();
+
+    sizes = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8190]; // 8191 crashes server
     ServerBoot.add {
       sizes.do { |n|
         [\kr, \ar].do { |rate|
@@ -65,14 +96,31 @@ ESEnvClip : ESClip {
   prep {
     if (makeBus) {
       //"allocating bus".postln;
-      bus = Bus.perform(makeBusRate, Server.default, 1);
+      if (name.notNil) {
+        if (buses[name].notNil) {
+          buses[name][1] = buses[name][1] + 1;
+        } {
+          buses[name] = [Bus.perform(makeBusRate, Server.default, 1), 1];
+        };
+        bus = buses[name][0];
+      } {
+        bus = Bus.perform(makeBusRate, Server.default, 1);
+      }
     };
   }
 
   cleanup {
     if (makeBus) {
       //"freeing bus".postln;
-      if (bus.index.notNil) { bus.free; };
+      if (name.notNil) {
+        buses[name][1] = buses[name][1] - 1;
+        if (buses[name][1] < 1) {
+          bus.free;
+          buses[name] = nil;
+        };
+      } {
+        if (bus.index.notNil) { bus.free; };
+      };
     };
   }
 

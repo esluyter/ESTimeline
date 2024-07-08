@@ -132,7 +132,7 @@ ESTimelineWindow : Window {
         }
         { \isPlaying } {
           if (timeline.isPlaying) {
-            var waitTime = 30.reciprocal; // 30 fps
+            var waitTime = 20.reciprocal; // 30 fps
             playheadRout.stop; // just to make sure
             playheadRout = {
               inf.do { |i|
