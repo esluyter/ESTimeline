@@ -65,7 +65,7 @@ Note that this is a work in progress and all is subject to revision.
   - Indeterminacy: probability for clips not to play?
   - Clock follow: e.g. sync up with an Ableton timeline or midi show control
 - Track/clips
-  - More clip types (e.g. OSCdef, loop, audio file, piano/drum roll, VST)
+  - More clip types (e.g. OSCdef, loop, audio file, midi/piano/drum roll, VST)
   - Optional default MixerChannel per track? and modifiable per clip
   - Reference clips to create clones that all change together
 - Envelopes
@@ -75,10 +75,6 @@ Note that this is a work in progress and all is subject to revision.
   - Timeline tempo envelopes (this is already possible but kind of annoying, using an Env clip and a Routine clip)
 - Playback and record audio files
   - easily access this Buffer for further manipulation
-- More types of sequencing
-  - Piano roll with flexible scale and steps per octave
-    - ...which could be midi-capable....
-  - Drum machine type step sequencer with multiple lanes for different instruments
 - Library integration
   - ddwPlug -- simplify bus routing for modulation
   - jitlib -- ditto
