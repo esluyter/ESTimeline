@@ -44,8 +44,6 @@ ESEnvClip : ESClip {
     };
   }
 
-  storeArgs { ^[startTime, duration, offset, color, name, env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate] }
-
   *initClass {
     var sizes;
 
@@ -79,6 +77,13 @@ ESEnvClip : ESClip {
     ^super.new(startTime, duration, offset, color, name).init(env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate, prep);
   }
 
+  storeArgs { ^[startTime, duration, offset, color, name, env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate] }
+
+  duplicate {
+    //this.asCompileString.interpret.track_(track);
+    ^this.class.new(*(this.storeArgs ++ true)).track_(track); // prep is true
+  }
+
   init { |argEnv, argBus, argTarget, argAddAction, argMin, argMax, argCurve, argExp, argMakeBus, argMakeBusRate, argPrep|
     env = argEnv;
     bus = argBus;
@@ -97,6 +102,7 @@ ESEnvClip : ESClip {
     if (makeBus) {
       //"allocating bus".postln;
       if (name.notNil) {
+        // for named clip, allocate a global bus or increase its clip count
         if (buses[name].notNil) {
           buses[name][1] = buses[name][1] + 1;
         } {
@@ -104,6 +110,7 @@ ESEnvClip : ESClip {
         };
         bus = buses[name][0];
       } {
+        // for unnamed clip, always make new bus
         bus = Bus.perform(makeBusRate, Server.default, 1);
       }
     };
@@ -111,17 +118,24 @@ ESEnvClip : ESClip {
 
   cleanup {
     if (makeBus) {
-      //"freeing bus".postln;
-      if (name.notNil) {
-        buses[name][1] = buses[name][1] - 1;
-        if (buses[name][1] < 1) {
-          bus.free;
-          buses[name] = nil;
+      if (bus.notNil) { // if bus is nil, we've already cleaned up
+        //"freeing bus".postln;
+        if (name.notNil) {
+          // for named clip, free or decrement the global bus
+          if (buses[name].notNil) {
+            buses[name][1] = buses[name][1] - 1;
+            if (buses[name][1] < 1) {
+              bus.free;
+              buses[name] = nil;
+            };
+          };
+        } {
+          // for unnamed clip, always free the bus you made
+          if (bus.index.notNil) { bus.free; };
         };
-      } {
-        if (bus.index.notNil) { bus.free; };
       };
     };
+    bus = nil;
   }
 
   prStop {

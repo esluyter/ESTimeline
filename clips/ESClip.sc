@@ -205,7 +205,8 @@ ESClip {
   }
 
   duplicate {
-    ^this.asCompileString.interpret.track_(track);
+    //this.asCompileString.interpret.track_(track);
+    ^this.class.new(*this.storeArgs).track_(track);
   }
 
   index {
