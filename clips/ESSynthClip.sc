@@ -7,11 +7,11 @@ ESSynthClip : ESClip {
   defName_ { |val| defName = val; this.changed(\defName, val); }
   args_ { |val| args = val; this.changed(\args, val); }
 
-  storeArgs { ^[startTime, duration, offset, color, name, defName, args, target, addAction] }
+  storeArgs { ^[startTime, duration, offset, color, name, defName, args, target, addAction, mute] }
 
-  *new { |startTime, duration, offset = 0, color, name, defName, args, target, addAction = 'addToHead'|
+  *new { |startTime, duration, offset = 0, color, name, defName, args, target, addAction = 'addToHead', mute = false|
     args = args ?? [];
-    ^super.new(startTime, duration, offset, color, name).init(defName, args, target, addAction);
+    ^super.new(startTime, duration, offset, color, name, mute: mute).init(defName, args, target, addAction);
   }
 
   init { |argDefName, argArgs, argTarget, argAddAction|
@@ -80,7 +80,11 @@ ESSynthClip : ESClip {
         };
       };
     };
-    ^defName.value.asString ++ ": Synth";
+    ^this.prTitle;
+  }
+
+  prTitle {
+    ^defName.value.asString ++ ": Synth"
   }
 
   defaultColor { ^Color.hsv(0.85, 0.45, 0.5) }

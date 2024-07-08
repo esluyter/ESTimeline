@@ -551,6 +551,16 @@ ESTimelineView : UserView {
           if (hoverClip.notNil) { timeline.tracks[hoverTrack].splitClip(hoverClip.index, snappedHoverTime) };
         };
       };
+      // m - mute clip
+      if (char == $m) {
+        if (hoverClip.notNil and: this.selectedClips.includes(hoverClip).not) {
+          hoverClip.mute = hoverClip.mute.not
+        } {
+          this.selectedClips.do { |clip|
+            clip.mute = clip.mute.not
+          };
+        };
+      };
       if (char == $S) {
         timeline.tracks[hoverTrack].addClip(ESSynthClip(newClipStartTime, newClipDuration ?? 0.5, defName: \default));
       };

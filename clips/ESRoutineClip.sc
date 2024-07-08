@@ -4,10 +4,10 @@ ESRoutineClip : ESClip {
   <>prepFunc, <>cleanupFunc, <func, <>stopFunc;
   var player;
 
-  storeArgs { ^[startTime, duration, offset, color, name, func, stopFunc, prepFunc, cleanupFunc, randSeed, isSeeded, addLatency, fastForward] }
+  storeArgs { ^[startTime, duration, offset, color, name, func, stopFunc, prepFunc, cleanupFunc, randSeed, isSeeded, addLatency, fastForward, mute] }
 
-  *new { |startTime, duration, offset = 0, color, name, func, stopFunc, prepFunc, cleanupFunc, randSeed, isSeeded = true, addLatency = false, fastForward = 1|
-    ^super.new(startTime, duration, offset, color, name).init(func, stopFunc, prepFunc, cleanupFunc, randSeed, isSeeded, addLatency, fastForward);
+  *new { |startTime, duration, offset = 0, color, name, func, stopFunc, prepFunc, cleanupFunc, randSeed, isSeeded = true, addLatency = false, fastForward = 1, mute = false|
+    ^super.new(startTime, duration, offset, color, name, mute: mute).init(func, stopFunc, prepFunc, cleanupFunc, randSeed, isSeeded, addLatency, fastForward);
   }
 
   init { |argFunc, argStopFunc, argPrepFunc, argCleanupFunc, argRandSeed, argIsSeeded, argAddLatency, argFastForward|
@@ -112,8 +112,10 @@ ESRoutineClip : ESClip {
         };
       };
     };
-    ^"Routine"
+    ^this.prTitle;
   }
+
+  prTitle { ^"Routine" }
 
   guiClass { ^ESRoutineClipEditView }
 

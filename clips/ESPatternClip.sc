@@ -2,11 +2,12 @@ ESPatternClip : ESClip {
   var pattern, <randSeed, <>isSeeded;
   var player;
   var drawData;
+  var prTitle;
 
-  storeArgs { ^[startTime, duration, offset, color, name, pattern, randSeed, isSeeded]; }
+  storeArgs { ^[startTime, duration, offset, color, name, pattern, randSeed, isSeeded, mute]; }
 
-  *new { |startTime, duration, offset = 0, color, name, pattern, randSeed, isSeeded = true|
-    ^super.new(startTime, duration, offset, color, name).init(pattern, randSeed, isSeeded);
+  *new { |startTime, duration, offset = 0, color, name, pattern, randSeed, isSeeded = true, mute = false|
+    ^super.new(startTime, duration, offset, color, name, mute: mute).init(pattern, randSeed, isSeeded);
   }
 
   init { |argPattern, argRandSeed, argIsSeeded|
@@ -175,10 +176,15 @@ ESPatternClip : ESClip {
         t = t + event.dur;
       };
       // return the title of the clip
-      ^instrument.asArray.join(" / ") ++ ": " ++ this.pattern.class;
+      ^this.prTitle(instrument.asArray.join(" / ") ++ ": " ++ this.pattern.class);
     } {
-      ^this.pattern.class.asString;
+      ^this.prTitle;
     };
+  }
+
+  prTitle { |val|
+    if (val.notNil) { prTitle = val };
+    ^prTitle ?? { this.pattern.class.asString };
   }
 
   defaultColor { ^Color.hsv(0.4, 0.55, 0.5) }
