@@ -286,7 +286,7 @@ ESTimelineView : UserView {
 
       if (hoverClip.notNil and: editingMode) {
         // again, not the best:
-        hoverClip.prMouseDown(x, y - (trackHeight * hoverClip.track.index), mods, buttNum, clickCount, *this.clipBounds(hoverClip))
+        hoverClip.drawClip.prMouseDown(x, y - (trackHeight * hoverClip.track.index), mods, buttNum, clickCount, *this.clipBounds(hoverClip))
       };
     }).mouseUpAction_({ |view, x, y, mods|
       // if the mouse didn't move during the click, move the playhead to the click point:
@@ -474,7 +474,7 @@ ESTimelineView : UserView {
       } {  // if editingMode
         if (hoverClip.notNil) {
           //                        not the best
-          hoverClip.prMouseMove(x, y - (trackHeight * hoverClip.track.index), xDelta, yDelta, mods, *this.clipBounds(hoverClip));
+          hoverClip.drawClip.prMouseMove(x, y - (trackHeight * hoverClip.track.index), xDelta, yDelta, mods, *this.clipBounds(hoverClip));
         };
       };// end editingMode
 
@@ -501,11 +501,11 @@ ESTimelineView : UserView {
         };
       } {
         if (oldHoverClip.notNil and: (oldHoverClip != hoverClip)) {
-          oldHoverClip.prHoverLeave;
+          oldHoverClip.drawClip.prHoverLeave;
         };
         if (hoverClip.notNil) {
           //                  this is bad:
-          hoverClip.prHover(x, y - (trackHeight * hoverClip.track.index), hoverTime, *this.clipBounds(hoverClip));
+          hoverClip.drawClip.prHover(x, y - (trackHeight * hoverClip.track.index), hoverTime, *this.clipBounds(hoverClip));
         };
       };
     }).keyDownAction_({ |view, char, mods, unicode, keycode, key|

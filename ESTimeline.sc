@@ -314,7 +314,7 @@ ESTimeline {
   encapsulateSelf {
     var duration = this.duration;
     if (duration > 0) {
-      var newTimeline = ESTimeline().restoreUndoPoint(currentState);
+      var newTimeline = ESTimeline(bootOnPrep: bootOnPrep).restoreUndoPoint(currentState);
       this.prFree;
       tracks = [ESTrack([ESTimelineClip(0, duration, timeline: newTimeline)])];
       prepFunc = {};

@@ -19,7 +19,7 @@ ESTrackView : UserView {
           try {
             if ((clip.startTime < timelineView.endTime) and: (clip.endTime > timelineView.startTime)) {
               // only draw clips in the timeline view bounds
-              clip.draw(*timelineView.clipBounds(clip));
+              clip.drawClip.draw(*timelineView.clipBounds(clip));
             };
           };
         };
