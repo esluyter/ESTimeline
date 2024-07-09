@@ -12,6 +12,8 @@ ESTimelineView : UserView {
   var <editingMode = false;
   var <drawClipGuides = false;
 
+  var <timelineController;
+
   selectedClips { ^(clipSelection -- stagedClipSelection) }
   timeSelection_ { |val| timeSelection = val; this.changed(\timeSelection, val); }
   editingMode_ { |val| editingMode = val; this.changed(\editingMode, val); }
@@ -32,6 +34,7 @@ ESTimelineView : UserView {
     stagedClipSelection = Set[];
 
     timeline = argtimeline;
+    timelineController = ESTimelineController(timeline);
 
     this.makeTrackViews;
     this.makeContextMenu;
@@ -388,77 +391,35 @@ ESTimelineView : UserView {
       var newClipDuration = if (timeSelection.notNil) { timeSelection[1] - timeSelection[0] } { nil }; // override with default later
       //key.postln;
       // space is play
-      if (char == $ ) { timeline.togglePlay };
+      if (char == $ ) { timelineController.togglePlay };
       // enter goes to beginning
-      if (key == 16777220) { timeline.goto(0) };
+      if (key == 16777220) { timelineController.goto(0) };
       // [ and ] move playhead to nearest clip edge on hovered track
       if ((char == $[) or: (char == $])) {
-        var points = [];
-        var prevPrevPoint = 0, prevPoint = 0, skipRest = false;
-        var goForwards = (char == $]);
-        hoverTrack.clips.do { |clip|
-          points = points ++ [clip.startTime, clip.endTime];
-        };
-        points.sort.do { |point|
-          if (skipRest.not) {
-            if ((point > timeline.now) or: (point == points.last)) {
-              skipRest = true;
-              timeline.now = if (goForwards) { point } {
-                if (timeline.now == prevPoint) {
-                  prevPrevPoint
-                } {
-                  prevPoint
-                };
-              };
-            };
-          };
-          prevPrevPoint = prevPoint;
-          prevPoint = point;
-        }
+        timelineController.moveToClipEdge(char == $], hoverTrack);
       };
       // s - split clip
       // opt-s = toggle snapping
       if (char == $s) {
         if (mods.isAlt) {
-          timeline.snapToGrid = timeline.snapToGrid.not;
+          timelineController.toggleSnap;
         } {
-          if (hoverClip.notNil) { hoverTrack.splitClip(hoverClip.index, snappedHoverTime) };
+          timelineController.splitClip(hoverClip, snappedHoverTime);
         };
       };
       // m - mute clip
-      if (char == $m) {
-        if (hoverClip.notNil and: this.selectedClips.includes(hoverClip).not) {
-          hoverClip.mute = hoverClip.mute.not
-        } {
-          this.selectedClips.do { |clip|
-            clip.mute = clip.mute.not
-          };
-        };
-      };
-      if (char == $S) {
-        hoverTrack.addClip(ESSynthClip(newClipStartTime, newClipDuration ?? 0.5, defName: \default));
-      };
-      if (char == $T) {
-        hoverTrack.addClip(ESTimelineClip(newClipStartTime, newClipDuration ?? 10, timeline: ESTimeline()));
-      };
-      if (char == $C) {
-        hoverTrack.addClip(ESClip(newClipStartTime, newClipDuration ?? 5));
-      };
-      if (char == $P) {
-        hoverTrack.addClip(ESPatternClip(newClipStartTime, newClipDuration ?? 5, pattern: {Pbind()}));
-      };
-      if (char == $R) {
-        hoverTrack.addClip(ESRoutineClip(newClipStartTime, newClipDuration ?? 5, func: {}));
-      };
-      if (char == $E) {
-        var thisDuration = newClipDuration ?? 5;
-        hoverTrack.addClip(ESEnvClip(newClipStartTime, thisDuration, env: Env([0.5, 0.5], [thisDuration], 0), prep: true));
-      };
+      if (char == $m) { timelineController.toggleMuteClips(hoverClip, this.selectedClips); };
+      if (char == $S) { timelineController.newSynthClip(hoverTrack, newClipStartTime, newClipDuration); };
+      if (char == $T) { timelineController.newTimelineClip(hoverTrack, newClipStartTime, newClipDuration); };
+      if (char == $C) { timelineController.newCommentClip(hoverTrack, newClipStartTime, newClipDuration); };
+      if (char == $P) { timelineController.newPatternClip(hoverTrack, newClipStartTime, newClipDuration); };
+      if (char == $R) { timelineController.newRoutineClip(hoverTrack, newClipStartTime, newClipDuration); };
+      if (char == $E) { timelineController.newEnvClip(hoverTrack, newClipStartTime, newClipDuration); };
       if (char == $e) {
         if (hoverClip.class == ESTimelineClip) {
           ESFuncEditView(hoverClip.timeline);
         } {
-          hoverClip.guiClass.new(hoverClip, timeline);
+          timelineController.editClip(hoverClip);
         };
       };
       // cmd-e toggles editing mode
@@ -522,130 +483,21 @@ ESTimelineView : UserView {
   makeContextMenu {
     this.setContextMenuActions(
       Menu(
-        MenuAction("Add Comment (C)", { hoverTrack.addClip(ESClip(hoverTime, 5)) }),
-        MenuAction("Add Synth Clip (S)", { hoverTrack.addClip(ESSynthClip(hoverTime, 0.5, defName: \default)) }),
-        MenuAction("Add Pattern Clip (P)", { hoverTrack.addClip(ESPatternClip(hoverTime, 5, pattern: {Pbind()})) }),
-        MenuAction("Add Routine Clip (R)", { hoverTrack.addClip(ESRoutineClip(hoverTime, 5, func: {})) }),
-        MenuAction("Add Env Clip (E)", { hoverTrack.addClip(ESEnvClip(hoverTime, 5, env: Env([0, 1, 0], [2.5, 2.5], \sin), prep: true)); }),
-        MenuAction("Add Timeline Clip (T)", { hoverTrack.addClip(ESTimelineClip(hoverTime, 10, timeline: ESTimeline())); })
-      ).title_("Add Clip"),
+        MenuAction("New Comment (C)", { timelineController.newCommentClip(hoverTrack, hoverTime) }),
+        MenuAction("New Synth Clip (S)", { timelineController.newSynthClip(hoverTrack, hoverTime) }),
+        MenuAction("New Pattern Clip (P)", { timelineController.newPatternClip(hoverTrack, hoverTime) }),
+        MenuAction("New Routine Clip (R)", { timelineController.newRoutineClip(hoverTrack, hoverTime) }),
+        MenuAction("New Env Clip (E)", { timelineController.newEnvClip(hoverTrack, hoverTime) }),
+        MenuAction("New Timeline Clip (T)", { timelineController.newTimelineClip(hoverTrack, hoverTime) })
+      ).title_("New Clip"),
       Menu(
-        MenuAction("Add Env for Synth argument", {
-          if (hoverClip.class == ESSynthClip) {
-            var names = hoverClip.argControls.collect(_.name);
-            var thisHoverClip = hoverClip;
-            var thisTrackIndex = thisHoverClip.track.index + 1;
-            ESBulkEditWindow.menu("Add Env for Synth argument",
-              "arg", names, names.indexOf(\amp),
-              "add track", true,
-              callback: { |argument, addTrack|
-                var envClip;
-                var name = argument.asSymbol;
-                var value = thisHoverClip.getArg(name).value;
-                var i = 0, envName, min = 0, max = 1, isExponential = false;
-                if (value.isNumber.not) { value = 0 };
-                min = min(min, value);
-                max = max(max, value);
-                if (name.asSpec.notNil) {
-                  var spec = name.asSpec;
-                  min = spec.minval;
-                  max = spec.maxval;
-                  isExponential = (spec.warp.class == ExponentialWarp);
-                };
-                while { timeline[envName = (name ++ i).asSymbol].notNil } { i = i + 1 };
-                if (addTrack) {
-                  timeline.addTrack(thisTrackIndex);
-                };
-                envClip = ESEnvClip(
-                  thisHoverClip.startTime, thisHoverClip.duration,
-                  name: envName,
-                  target: thisHoverClip.target,
-                  min: min,
-                  max: max,
-                  isExponential: isExponential
-                ); // dont prep here anymore because it needs to know its track
-                envClip.env = Env(envClip.prValueUnscale(value).dup(2), [thisHoverClip.duration], [0]);
-                timeline.tracks[thisTrackIndex].addClip(envClip);
-                envClip.prep;
-
-                thisHoverClip.setArg(name, envName);
-              }
-            );
-          };
-        }),
-        MenuAction("Set Env range keeping breakpoint values", {
-          var minDefault = 0, maxDefault = 1, curveDefault = 0, isExponentialDefault = false;
-          var arr = if (this.selectedClips.includes(hoverClip)) { this.selectedClips } { [hoverClip] };
-          if (hoverClip.class == ESEnvClip) {
-            minDefault = hoverClip.min;
-            maxDefault = hoverClip.max;
-            curveDefault = hoverClip.curve;
-            isExponentialDefault = hoverClip.isExponential;
-          };
-          ESBulkEditWindow.keyValue("Set Env range keeping breakpoint values",
-            "min", minDefault, "max", maxDefault, "isExponential", isExponentialDefault, true, "curve", curveDefault,
-            callback: { |min, max, isExponential, curve|
-              min = min.interpret;
-              max = max.interpret;
-              curve = curve.interpret;
-              if ((isExponential and: ((min.sign != max.sign))).not) {
-                arr.do { |clip|
-                  if (clip.class == ESEnvClip) {
-                    var oldLevels = clip.env.levels;
-                    var values = oldLevels.collect(clip.prValueScale(_));
-                    var newLevels;
-                    clip.min = min;
-                    clip.max = max;
-                    clip.curve = curve;
-                    clip.isExponential = isExponential;
-                    newLevels = values.collect(clip.prValueUnscale(_));
-                    clip.env = Env(newLevels, clip.env.times, clip.env.curves);
-                  };
-                };
-              };
-            }
-          );
-        }),
-        MenuAction("Bulk edit Synth arguments", {
-          var arr = this.selectedClips;
-          if (arr.size == 0) { arr = [hoverClip] };
-          ESBulkEditWindow.keyValue(callback: { |key, val, hardCode|
-            var func;
-            key = key.asSymbol;
-            val = ("{" ++ val ++ "}").interpret;
-            func = { |clips|
-              clips.do { |clip|
-                if (clip.class == ESSynthClip) {
-                  clip.setArg(key, if (hardCode) { val.value } { val });
-                };
-                if (clip.class == ESTimelineClip) {
-                  func.(clip.timeline.clips);
-                };
-              };
-            };
-            func.(arr);
-          });
-        }),
-        MenuAction("Bulk edit Synth defName", {
-          var arr = this.selectedClips;
-          if (arr.size == 0) { arr = [hoverClip] };
-          ESBulkEditWindow.value(callback: { |val|
-            var func = { |clips|
-              clips.do { |clip|
-                if (clip.class == ESSynthClip) {
-                  clip.defName = val;
-                };
-                if (clip.class == ESTimelineClip) {
-                  func.(clip.timeline.clips);
-                };
-              };
-            };
-            func.(arr);
-          });
-        }),
+        MenuAction("Add Env for Synth argument", { timelineController.addEnvForSynth(hoverClip) }),
+        MenuAction("Set Env range keeping breakpoint values", { timelineController.setEnvRange(hoverClip, this.selectedClips) }),
+        MenuAction("Bulk edit Synth arguments", { timelineController.bulkEditSynthArgs(hoverClip, this.selectedClips) }),
+        MenuAction("Bulk edit Synth defName", { timelineController.bulkEditSynthDefName(hoverClip, this.selectedClips) }),
         MenuAction.separator(""),
-        MenuAction("Edit Clip (e)", { hoverClip.guiClass.new(hoverClip, timeline) }),
-        MenuAction("Split Clip (s)", { if (hoverClip.notNil) { hoverTrack.splitClip(hoverClip.index, hoverTime) } }),
+        MenuAction("Edit Clip (e)", { timelineController.editClip(hoverClip) }),
+        MenuAction("Split Clip (s)", { if (hoverClip.notNil) { timelineController.splitClip(hoverClip, hoverTime) } }),
         MenuAction("Delete Clip (⌫)", { if (hoverClip.notNil) { hoverTrack.removeClip(hoverClip.index) } }),
       ).title_("Clip actions"),
       MenuAction.separator(""),
