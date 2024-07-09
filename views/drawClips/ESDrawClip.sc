@@ -23,7 +23,7 @@ ESDrawClip {
       var title = ESStringShortener.trim(clip.prTitle, width - 3.5, font);
       Pen.stringAtPoint(title, (left + 3.5)@(top + 2), font, clip.color.alpha_(0.3));
     } {
-      if (editingMode and: clip.hasEditingMode) {
+      if (editingMode and: this.hasEditingMode) {
         Pen.addRect(Rect(left, top, width, height));
         Pen.strokeColor = Color.white;
         Pen.width = 3;
@@ -68,6 +68,7 @@ ESDrawClip {
   }
 
   // override in subclass
+  hasEditingMode { ^false }
   prHover { |x, y, hoverTime, left, top, width, height| }
   prHoverLeave {}
   prMouseMove { |x, y, xDelta, yDelta, mods, left, top, width, height| }
