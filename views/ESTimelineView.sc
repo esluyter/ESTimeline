@@ -432,18 +432,12 @@ ESTimelineView : UserView {
         this.changed(\selectedClips);
       };
       // cmd-i insert time
-      if ((key == 73) and: mods.isCmd) {
-        if (timeSelection.notNil) {
-          timeline.insertTime(*timeSelection);
-        };
-      };
+      if ((key == 73) and: mods.isCmd) { timelineController.insertTime(timeSelection) };
       // delete - remove clip, cmd - remove track
       if (key == 16777219) {
         if (mods.isCmd) {
           if (mods.isShift) {
-            if (timeSelection.notNil) {
-              timeline.deleteTime(*timeSelection);
-            };
+            timelineController.deleteTime(timeSelection);
           } {
             timeline.removeTrack(hoverTrack.index);
           };
@@ -503,8 +497,8 @@ ESTimelineView : UserView {
       ).title_("Clip actions"),
       MenuAction.separator(""),
       Menu(
-        MenuAction("Insert Time (Cmd+i)", { if (timeSelection.notNil) { timeline.insertTime(*timeSelection); }; }),
-        MenuAction("Delete Time (Shift+Cmd+⌫)", { if (timeSelection.notNil) { timeline.deleteTime(*timeSelection); }; }),
+        MenuAction("Insert Time (Cmd+i)", { timelineController.insertTime(timeSelection) }),
+        MenuAction("Delete Time (Shift+Cmd+⌫)", { timelineController.deleteTime(timeSelection) }),
       ).title_("Time actions"),
       MenuAction.separator(""),
       MenuAction("Add Track Before (Cmd+T)", { timeline.addTrack(hoverTrack.index) }),
