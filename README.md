@@ -62,7 +62,6 @@ Note that this is a work in progress and all is subject to revision.
 
 ## Hypothetical features
 - Time features
-  - Indeterminacy: probability for clips not to play?
   - Clock follow: e.g. sync up with an Ableton timeline or midi show control
 - Track/clips
   - Streamlined Synth/SynthDef/Envelope editing flow
