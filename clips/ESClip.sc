@@ -59,6 +59,25 @@ ESClip {
     this.changed(\comment, val);
   }
 
+  color { |selected = false, editingMode = false|
+    var ret = color ?? { this.defaultColor };
+    if (selected) {
+      ret = Color.white.lighten(ret, 0.5);
+    };
+    if (editingMode) {
+      if (this.drawClip.hasEditingMode) {
+        ret = Color.black.darken(ret, 0.5);
+      } {
+        ret = ret.alpha_(ret.alpha * 0.5);
+      }
+    };
+    ^ret;
+  }
+
+  rawColor {
+    ^color
+  }
+
   stop { |hard = false|
     // stop the clip
     this.prStop(hard);
@@ -107,7 +126,7 @@ ESClip {
   prFree { }
   prStart { }
   prStop { }
-  prTitle { ^"" }
+  prTitle { ^"" } // title to display (not including name)
   prHasOffset { ^false } // whether to show offset parameter for editing
   prTempoChanged { |tempo| } // so far this is just so env clips follow tempo changes
   defaultColor { ^Color.gray(1); }
@@ -116,26 +135,6 @@ ESClip {
 
   // helper methods
   endTime { ^startTime + duration }
-
-  // getters
-  color { |selected = false, editingMode = false|
-    var ret = color ?? { this.defaultColor };
-    if (selected) {
-      ret = Color.white.lighten(ret, 0.5);
-    };
-    if (editingMode) {
-      if (this.drawClip.hasEditingMode) {
-        ret = Color.black.darken(ret, 0.5);
-      } {
-        ret = ret.alpha_(ret.alpha * 0.5);
-      }
-    };
-    ^ret;
-  }
-
-  rawColor {
-    ^color
-  }
 
   duplicate {
     //this.asCompileString.interpret.track_(track);
