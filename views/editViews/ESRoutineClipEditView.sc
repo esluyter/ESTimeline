@@ -4,19 +4,25 @@ ESRoutineClipEditView : ESClipEditView {
     var funcButton, stopFuncButton, funcView, stopFuncView, randSeedField, isSeededBox, addLatencyBox, fastForwardMenu;
 
     this.prNew(clip, timeline, {
-      clip.name = nameField.string.asSymbol;
-      clip.func = ("{" ++ funcView.string ++ "}").interpret;
-      clip.stopFunc = ("{" ++ stopFuncView.string ++ "}").interpret;
-      clip.randSeed = randSeedField.string.asInteger;
-      clip.isSeeded = isSeededBox.value;
-      clip.addLatency = addLatencyBox.value;
-      clip.color = colorView.background;
-      clip.startTime = startTimeView.string.interpret;
-      clip.duration =  durationView.string.interpret;
-      clip.offset = offsetView.string.interpret;
-      clip.fastForward = fastForwardMenu.value;
+      var func = ("{" ++ funcView.string ++ "}").interpret;
+      var stopFunc = ("{" ++ stopFuncView.string ++ "}").interpret;
+      if ((func.isNil) or: (stopFunc.isNil)) {
+        ESBulkEditWindow.ok;
+      } {
+        clip.name = nameField.string.asSymbol;
+        clip.func = func;
+        clip.stopFunc = stopFunc;
+        clip.randSeed = randSeedField.string.asInteger;
+        clip.isSeeded = isSeededBox.value;
+        clip.addLatency = addLatencyBox.value;
+        clip.color = colorView.background;
+        clip.startTime = startTimeView.string.interpret;
+        clip.duration =  durationView.string.interpret;
+        clip.offset = offsetView.string.interpret;
+        clip.fastForward = fastForwardMenu.value;
 
-      timeline.addUndoPoint;
+        timeline.addUndoPoint;
+      };
     });
 
 

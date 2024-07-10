@@ -1,6 +1,23 @@
 ESBulkEditWindow {
   classvar editorWindow;
 
+  *ok { |title = "Something didn't work; check your code for errors", okFunc, cancFunc|
+    var width = 600, height = 300;
+    var left = ((Window.availableBounds.width - width) / 2);
+    var top = Window.availableBounds.height - height - 200;
+    editorWindow !? { editorWindow.close };
+    editorWindow = Window(title, Rect(left, top, width, height)).front;
+    StaticText(editorWindow, Rect(100, 30, 500, 20)).string_(title).font_(Font.sansSerif(20));
+    Button(editorWindow, Rect(100, 220, 197.5, 40)).string_("OK").font_(Font.sansSerif(14)).action_({
+      okFunc.value;
+      editorWindow.close;
+    });
+    Button(editorWindow, Rect(302.5, 220, 197.5, 40)).string_("Cancel").font_(Font.sansSerif(14)).action_({
+      cancFunc.value;
+      editorWindow.close;
+    });
+  }
+
   *keyValue { |title = "Set all selected Synth Clip parameter", keyLabel = "key", keyDefault = \freq, valLabel = "val", valDefault = 440, checkLabel = "hard coded", checkDefault = false, showExtraField = false, extraFieldLabel = "", extraFieldDefault = "", callback|
     var width = 600, height = 300;
     var left = ((Window.availableBounds.width - width) / 2);

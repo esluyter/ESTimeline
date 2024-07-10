@@ -5,27 +5,31 @@ ESEnvClipEditView : ESClipEditView {
     var busView, makeBusBox, makeBusRateMenu, targetView, addActionView, codeView, minView, maxView, curveView, isExponentialBox;
 
     this.prNew(clip, timeline, {
+      var env = ("{" ++ codeView.string ++ "}").interpret;
+      if (env.isNil) {
+        ESBulkEditWindow.ok
+      } {
+        clip.env = env;
+        clip.target = ("{" ++ targetView.string ++ "}").interpret;
+        clip.addAction = ("{" ++ addActionView.string ++ "}").interpret;
+        clip.color = colorView.background;
+        clip.startTime = startTimeView.string.interpret;
+        clip.duration =  durationView.string.interpret;
+        clip.offset = offsetView.string.interpret;
+        clip.min = minView.value;
+        clip.max = maxView.value;
+        clip.curve = curveView.value;
+        clip.isExponential = isExponentialBox.value;
 
-      clip.env = ("{" ++ codeView.string ++ "}").interpret;
-      clip.target = ("{" ++ targetView.string ++ "}").interpret;
-      clip.addAction = ("{" ++ addActionView.string ++ "}").interpret;
-      clip.color = colorView.background;
-      clip.startTime = startTimeView.string.interpret;
-      clip.duration =  durationView.string.interpret;
-      clip.offset = offsetView.string.interpret;
-      clip.min = minView.value;
-      clip.max = maxView.value;
-      clip.curve = curveView.value;
-      clip.isExponential = isExponentialBox.value;
+        clip.makeBusRate = makeBusRateMenu.item.asSymbol;
+        clip.makeBus = makeBusBox.value;
+        if (clip.makeBus.not) {
+          clip.bus = ("{" ++ busView.string ++ "}").interpret;
+        };
+        clip.name = nameField.string.asSymbol;
 
-      clip.makeBusRate = makeBusRateMenu.item.asSymbol;
-      clip.makeBus = makeBusBox.value;
-      if (clip.makeBus.not) {
-        clip.bus = ("{" ++ busView.string ++ "}").interpret;
+        timeline.addUndoPoint;
       };
-      clip.name = nameField.string.asSymbol;
-
-      timeline.addUndoPoint;
     });
 
     StaticText(editorWindow, Rect(20, 30, 180, 20)).string_("bus").font_(panelFont);
