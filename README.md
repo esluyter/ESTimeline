@@ -230,7 +230,7 @@ SynthDef(\verb, { |out, verbbus, gate = 1, amp = 1|
     - you should see that verbbus is now set to e.g. `Bus(audio, 4, 2, localhost)`
 - click and drag to select all your Synths, bulk edit Synth arguments, and set `verbbus` to `~verbbus`
   - again, you should see that they all have verbbus set to the same bus number
-- bulk edit the same synth arguments and set `verbamt` to `1.0`
+- bulk edit the same synth arguments and set `verbamt` to `1.0`, or to `rrand(0.0, 1.0)`
   - now when you play you will hear they all are affected by the reverb Synth.
 - you could now make an envelope to control the amplitude of this reverb, analogous to overall return level.
 - you could also make an envelope to control the verbamt of all of the Synths, analogous to send level.
