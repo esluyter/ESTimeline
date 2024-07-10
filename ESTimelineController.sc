@@ -237,4 +237,9 @@ ESTimelineController {
       lastPath = path;
     }, path: lastPath);
   }
+
+  new {
+    lastPath = nil;
+    timeline.new;
+  }
 }
