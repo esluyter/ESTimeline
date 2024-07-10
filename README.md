@@ -184,7 +184,7 @@ SynthDef(\sin, { |out, freq = 200, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
 
 ### Bulk edit Synths -- To make this envelope affect all your Synths:
 - drag the edges of the envelope clip to resize it, so that it covers the entire range of your Synth clips
-- click and drag to select all the Synth clips
+- click and drag to select all the Synth clips (your envelope clip can also be selected, it doesn't matter)
 - right click, "clip actions > synth actions > bulk edit synth arguments"
 - assign the `freq` of all the clips to 
 `\freq0`
