@@ -3,6 +3,8 @@
 The distant goal is that anything you can do in SuperCollider could be sequenced on a visual and editable timeline...
 
 Note that this is a work in progress and all is subject to revision.
+
+Also note that because timelines are built to execute user-supplied code they are inherently insecure. Before opening timeline files from another source, open them in a text editor to make sure they don't have malicious code. (i.e. treat them just like any other random SC code you are executing for the first time)
 <br />
 <br />
 <details>
@@ -45,11 +47,15 @@ Note that this is a work in progress and all is subject to revision.
   - tracks can be muted/soloed and rearranged
   - individual clips can be muted
 - **Synth, Pattern, Routine, and Env** clip types
-  - Bulk editing selected clip parameters
+  - Synth clips can either instantiate a SynthDef or run their own single-use function a la `{ }.play`
+    - You can select multiple Synth clips and bulk edit their arguments
   - Env clips play on a bus and come with a shortcut to map to Synths and Patterns, and 
-    - can optionally manage their own bus
-      - all Env clips with the same name on a timeline share the same bus
-  - Clips can reference other clips in the same timeline, to e.g. apply an Env to a Synth parameter
+    - can optionally manage their own bus, and
+      - if so, all Env clips with the same name on a timeline share the same bus
+  - Clips can reference other clips in the same timeline by name
+    - from a routine, `goto` any clip by name
+    - apply an Env to a Synth parameter or use it in a Pattern or Routine
+    - if more than one clip share the same name, the referenced clip is the closest to the playhead
   - Pattern, Routine, Env, and Timeline clips can "fast forward" to start playing in the middle
     - (there is no way to fast forward a Synth, that I know of....)
   - Pattern and Routine clips can be seeded so random number generation is deterministic
