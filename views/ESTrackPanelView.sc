@@ -16,6 +16,8 @@ ESTrackPanelView : UserView {
     timeline.tracks.do { |track, i|
       trackButts[i][\mute].value = track.mute.asInteger;
       trackButts[i][\solo].value = track.solo.asInteger;
+      trackButts[i][\nameText].string = track.name ?? "";
+      trackButts[i][\mix].value_(track.useMixerChannel).visible_(track.timeline.useMixerChannel);
     };
     ^super.refresh;
   }
@@ -44,6 +46,11 @@ ESTrackPanelView : UserView {
         Pen.addRect(Rect(width - 1, 0, 1, trackHeight));
         Pen.color = Color.gray(0.65);
         Pen.fill;
+        if (track.name.notNil) {
+          Pen.color = Color.gray(1, 0.3);
+          Pen.addRect(Rect(0, 33, width, trackHeight - 36));
+          Pen.fill;
+        };
       })
       .mouseMoveAction_({
         view.beginDrag;
@@ -57,16 +64,30 @@ ESTrackPanelView : UserView {
         timeline.removeTrack(thisTrack.index, false);
         timeline.addTrack(i, thisTrack);
       });
-      StaticText(view, Rect(2, 2, 18, 20)).string_(i.asString).stringColor_(Color.gray(0.4)).font_(Font.monospace(14));
+      StaticText(view, Rect(2, 4, 18, 25)).string_(i.asString).stringColor_(Color.gray(0.4)).font_(Font.monospace(14));
+
       trackButts = trackButts.add((
-        mute: Button(view, Rect(21, 5, 25, 25)).states_([
+        nameText: StaticText(view, Rect(2, 35, width - 4, trackHeight - 35)).align_(\topLeft).string_(track.name ?? "").stringColor_(Color.gray(0.4)).font_(Font.monospace(12)).canReceiveDragHandler_(true)
+      .receiveDragHandler_({
+        var thisTrack = View.currentDrag;
+        timeline.removeTrack(thisTrack.index, false);
+        timeline.addTrack(i, thisTrack);
+      }),
+        mix: Button(view, Rect(21, 4, 25, 25)).states_([
+          ["mix", Color.gray(0.5), Color.gray(0.8)],
+          ["mix", Color.gray(0.85), Color.gray(0.45)]])
+        .focusColor_(Color.clear).font_(Font.sansSerif(12, true)).action_({ |view|
+          track.useMixerChannel = view.value.asBoolean;
+          timelineView.focus;
+        }).value_(track.useMixerChannel).visible_(track.timeline.useMixerChannel),
+        mute: Button(view, Rect(48, 4, 25, 25)).states_([
           ["M", Color.gray(0.5), Color.gray(0.8)],
           ["M", Color.gray(0.7), Color.gray(0.3)]])
         .focusColor_(Color.clear).font_(Font.sansSerif(16, true)).action_({ |view|
           track.mute = view.value.asBoolean;
           timelineView.focus;
         }).value_(track.mute),
-        solo: Button(view, Rect(48, 5, 25, 25)).states_([
+        solo: Button(view, Rect(75, 4, 25, 25)).states_([
           ["S", Color.gray(0.5), Color.gray(0.8)],
           ["S", Color.yellow, Color.black]])
         .focusColor_(Color.clear).font_(Font.sansSerif(16, true)).action_({ |view|
