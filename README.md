@@ -192,7 +192,7 @@ SynthDef(\sin, { |out, freq = 200, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
 - you should see all their freqs change to `a4` -- this is the audio rate bus that the Env clip has created for you (you can override this behavior)
 - cmd-e to edit the breakpoints again
 - you should hear it is now controlling all the synths' pitches
-- make sure you've left breakpoint edit mode when you want to move clips around
+- make sure you've left breakpoint edit mode when you want to move clips around, and double-click in an empty area to remove the selection.
 
 ### Bulk edit Synths -- Random panning:
 - Select all your Synth clips
