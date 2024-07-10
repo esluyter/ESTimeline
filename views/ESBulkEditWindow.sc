@@ -8,13 +8,13 @@ ESBulkEditWindow {
     var funcView;
     editorWindow !? { editorWindow.close };
     editorWindow = Window(title, Rect(left, top, width, height)).front;
-    StaticText(editorWindow, Rect(100, 30, 500, 20)).string_(title).font_(Font.sansSerif(20));
-    funcView = CodeView(editorWindow, Rect(20, 50, width - 40, 150)).string_(string);
-    Button(editorWindow, Rect(100, 220, 197.5, 40)).string_("OK").font_(Font.sansSerif(14)).action_({
+    StaticText(editorWindow, Rect(100, 22, 500, 20)).string_(title).font_(Font.sansSerif(20));
+    funcView = CodeView(editorWindow, Rect(20, 50, width - 40, 180)).string_(string);
+    Button(editorWindow, Rect(100, 240, 197.5, 40)).string_("OK").font_(Font.sansSerif(14)).action_({
       callback.value(funcView.string);
       editorWindow.close;
     });
-    Button(editorWindow, Rect(302.5, 220, 197.5, 40)).string_("Cancel").font_(Font.sansSerif(14)).action_({
+    Button(editorWindow, Rect(302.5, 240, 197.5, 40)).string_("Cancel").font_(Font.sansSerif(14)).action_({
       editorWindow.close;
     });
   }
