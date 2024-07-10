@@ -42,20 +42,12 @@ ESTimelineWindow : Window {
 
     newButt = Button(this, Rect(350, 5, 65, 30)).states_([["New"]]).action_({ timeline.new });
 
-    saveIDEButt = Button(this, Rect(420, 5, 100, 30)).states_([["Open in IDE"]]).action_({
-      Document.new("Timeline Score", timeline.currentState.asCompileString).front;
+    saveIDEButt = Button(this, Rect(420, 5, 100, 30)).states_([["Save As"]]).action_({
+      timelineView.timelineController.saveAsDialog;
       timelineView.focus;
     });
-    loadIDEButt = Button(this, Rect(525, 5, 100, 30)).states_([["Load from IDE"]]).action_({
-      var func = { |obj, what|
-        if (what == \restoreUndoPoint) {
-          timelineView.startTime = -2;
-          timelineView.duration = timeline.duration.postln + 5;
-          timeline.removeDependant(func);
-        };
-      };
-      timeline.restoreUndoPoint(Document.current.string.interpret);
-      timeline.addDependant(func);
+    loadIDEButt = Button(this, Rect(525, 5, 100, 30)).states_([["Open"]]).action_({
+      timelineView.timelineController.openDialog;
       timelineView.focus;
     });
 

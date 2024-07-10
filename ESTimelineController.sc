@@ -1,8 +1,9 @@
 ESTimelineController {
-  var <timeline;
+  var <timeline, <timelineView;
+  var <lastPath;
 
-  *new { |timeline|
-    ^super.newCopyArgs(timeline);
+  *new { |timeline, timelineView|
+    ^super.newCopyArgs(timeline, timelineView);
   }
 
   togglePlay { timeline.togglePlay }
@@ -200,5 +201,31 @@ ESTimelineController {
 
   deleteTime { |timeSelection|
     if (timeSelection.notNil) { timeline.deleteTime(*timeSelection); };
+  }
+
+  saveAsDialog {
+    Dialog.savePanel({ |path|
+      path.postln;
+      File.use(path, "w", { |f| f.write(timeline.currentState.asCompileString) });
+      //Document.new("Timeline Score", timeline.currentState.asCompileString).front;
+      lastPath = path;
+    }, path: lastPath);
+  }
+
+  openDialog {
+    Dialog.openPanel({ |path|
+      var func = { |obj, what|
+        if (what == \restoreUndoPoint) {
+          timelineView.startTime = -2;
+          timelineView.duration = timeline.duration.postln + 5;
+          timeline.removeDependant(func);
+        };
+      };
+
+      timeline.restoreUndoPoint(File.readAllString(path).interpret);
+      //timeline.restoreUndoPoint(Document.current.string.interpret);
+      timeline.addDependant(func);
+      lastPath = path;
+    }, path: lastPath);
   }
 }
