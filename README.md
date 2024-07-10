@@ -227,7 +227,7 @@ SynthDef(\verb, { |out, verbbus, gate = 1, amp = 1|
   - click refresh icon next to args to refresh argument names
   - double click on grayed-out "verbbus" to activate it, put `~verbbus`
   - save
-    - you should see that verbbus is now set to e.g. `a4`
+    - you should see that verbbus is now set to e.g. `Bus(audio, 4, 2, localhost)`
 - click and drag to select all your Synths, bulk edit Synth arguments, and set `verbbus` to `~verbbus`
   - again, you should see that they all have verbbus set to the same bus number
 - bulk edit the same synth arguments and set `verbamt` to `1.0`
