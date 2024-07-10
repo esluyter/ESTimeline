@@ -54,45 +54,48 @@ ESTimelineController {
     clip.guiClass.new(clip, timeline);
   }
 
-  addEnvForSynth { |clip|
+  addEnvForSynth { |clip, selectedClips|
     if (clip.class == ESSynthClip) {
       var names = clip.argControls.collect(_.name);
-      var thisHoverClip = clip;
-      var thisTrackIndex = thisHoverClip.track.index + 1;
+      var thisTrackIndex = clip.track.index + 1;
+      var arr = if (selectedClips.includes(clip)) { selectedClips.asArray } { [clip] };
       ESBulkEditWindow.menu("Add Env for Synth argument",
         "arg", names, names.indexOf(\amp),
         "add track", true,
         callback: { |argument, addTrack|
           var envClip;
           var name = argument.asSymbol;
-          var value = thisHoverClip.getArg(name).value;
           var i = 0, envName, min = 0, max = 1, isExponential = false;
-          if (value.isNumber.not) { value = 0 };
-          min = min(min, value);
-          max = max(max, value);
           if (name.asSpec.notNil) {
             var spec = name.asSpec;
             min = spec.minval;
             max = spec.maxval;
             isExponential = (spec.warp.class == ExponentialWarp);
           };
-          while { timeline[envName = (name ++ i).asSymbol].notNil } { i = i + 1 };
           if (addTrack) {
-            timeline.addTrack(thisTrackIndex);
+            timeline.addTrack(thisTrackIndex, ESTrack([], false, \env, false));
           };
-          envClip = ESEnvClip(
-            thisHoverClip.startTime, thisHoverClip.duration,
-            name: envName,
-            target: thisHoverClip.target,
-            min: min,
-            max: max,
-            isExponential: isExponential
-          ); // dont prep here anymore because it needs to know its track
-          envClip.env = Env(envClip.prValueUnscale(value).dup(2), [thisHoverClip.duration], [0]);
-          timeline.tracks[thisTrackIndex].addClip(envClip);
-          envClip.prep;
 
-          thisHoverClip.setArg(name, envName);
+          arr.sort({ |a, b| a.startTime < b.startTime }).do { |thisClip|
+            var value = thisClip.getArg(name).value;
+            if (value.isNumber.not) { value = 0 };
+
+            while { timeline[envName = (name ++ i).asSymbol].notNil } { i = i + 1 };
+
+            envClip = ESEnvClip(
+              thisClip.startTime, thisClip.duration,
+              name: envName,
+              target: thisClip.target,
+              min: min(min, value),
+              max: max(max, value),
+              isExponential: isExponential
+            ); // dont prep here anymore because it needs to know its track
+            envClip.env = Env(envClip.prValueUnscale(value).dup(2), [thisClip.duration], [0]);
+            timeline.tracks[thisTrackIndex].addClip(envClip);
+            envClip.prep;
+
+            thisClip.setArg(name, envName);
+          };
         }
       );
     };
