@@ -203,11 +203,20 @@ ESTimelineController {
     if (timeSelection.notNil) { timeline.deleteTime(*timeSelection); };
   }
 
+  write { |path|
+    File.use(path, "w", { |f| f.write(timeline.currentState.asCompileString) });
+    //Document.new("Timeline Score", timeline.currentState.asCompileString).front;
+  }
+
+  saveBackup {
+    if (lastPath.notNil) {
+      this.write(lastPath ++ "-backup.txt");
+    }
+  }
+
   saveAsDialog {
     Dialog.savePanel({ |path|
-      path.postln;
-      File.use(path, "w", { |f| f.write(timeline.currentState.asCompileString) });
-      //Document.new("Timeline Score", timeline.currentState.asCompileString).front;
+      this.write(path);
       lastPath = path;
     }, path: lastPath);
   }

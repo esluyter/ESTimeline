@@ -181,7 +181,11 @@ ESTimelineWindow : Window {
             timelineView.makeTrackViews;
           //}.fork(AppClock);
         }
+        { \addUndoPoint } {
+          timelineView.timelineController.saveBackup;
+        }
         { \restoreUndoPoint } {
+          //timelineView.timelineController.saveBackup;
           {
             timelineView.makeTrackViews;
             ESClipEditView.closeWindow;
