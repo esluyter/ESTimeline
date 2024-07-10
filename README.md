@@ -158,7 +158,7 @@ SynthDef(\sin, { |out, freq = 200, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
 
 ### Bulk edit synth clips:
 - click in an empty area and drag to select all the Synth clips (they will be highlighted in cyan when selected)
-- right click, "clip actions > bulk edit synth defName"
+- right click, "clip actions > synth actions > bulk edit synth defName"
   - and set them to `'sin'`.
   - play again and you hear they now all play your SynthDef
   - double-click in an empty area to remove selection
@@ -169,7 +169,7 @@ SynthDef(\sin, { |out, freq = 200, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
 - opt-scroll to zoom in and out vertically (when there are more than one track)
 
 ### Envelopes for Synth parameters:
-- right click a Synth clip, "clip actions > add env for synth argument"
+- right click a Synth clip, "clip actions > synth actions > add env for synth argument"
 - pick "freq" from the list and hit OK
   - this will by default add a new track with an envelope clip on it that is the length of your Synth clip, with a unique name (starting from 'freq0'), and it will update the freq argument of the Synth clip to read from this envelope's bus
 
