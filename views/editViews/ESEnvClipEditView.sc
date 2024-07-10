@@ -3,6 +3,9 @@ ESEnvClipEditView : ESClipEditView {
   *new { |clip, timeline|
     var panelFont = Font("Helvetica", 16);
     var busView, makeBusBox, makeBusRateMenu, targetView, addActionView, codeView, minView, maxView, curveView, isExponentialBox;
+    var adjustBg = {
+      busView.background_(if (makeBusBox.value) { Color.gray(0.8) } { Color.white });
+    };
 
     this.prNew(clip, timeline, {
       var env = ("{" ++ codeView.string ++ "}").interpret;
@@ -36,7 +39,7 @@ ESEnvClipEditView : ESClipEditView {
     busView = TextField(editorWindow, Rect(10, 50, 350, 40)).string_(if (clip.makeBus.not) { clip.bus.asESDisplayString } { "" }).font_(Font.monospace(16));
 
     StaticText(editorWindow, Rect(365, 30, 100, 30)).string_(". . . or:");
-    makeBusBox = CheckBox(editorWindow, Rect(415, 30, 20, 20)).value_(clip.makeBus);
+    makeBusBox = CheckBox(editorWindow, Rect(415, 30, 20, 20)).value_(clip.makeBus).action_(adjustBg);
     StaticText(editorWindow, Rect(440, 30, 200, 20)).string_("makeBus with rate:").font_(panelFont);
     makeBusRateMenu = PopUpMenu(editorWindow, Rect(415, 50, 180, 30)).items_(["audio", "control"]).value_([\audio, \control].indexOf(clip.makeBusRate));
 
@@ -61,5 +64,7 @@ ESEnvClipEditView : ESClipEditView {
     curveView = NumberBox(sidePanel, Rect(0, 420, 180, 20)).font_(Font.monospace(16)).value_(clip.curve);
     isExponentialBox = CheckBox(sidePanel, Rect(0, 450, 20, 20)).value_(clip.isExponential);
     StaticText(sidePanel, Rect(20, 450, 150, 20)).string_("isExponential").font_(panelFont);
+
+    adjustBg.()
   }
 }
