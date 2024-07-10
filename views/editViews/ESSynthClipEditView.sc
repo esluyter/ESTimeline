@@ -4,7 +4,7 @@ ESSynthClipEditView : ESClipEditView {
     var panelFont = Font.sansSerif(16);
     var defNameView, targetView, addActionView, argsView, funcView, doPlayFuncBox;
     var adjustBg = {
-      funcView.background_(if (doPlayFuncBox.value) { Color.white } { Color.gray(0.8) });
+      funcView.visible_(doPlayFuncBox.value);
       defNameView.background_(if (doPlayFuncBox.value) { Color.gray(0.8) } { Color.white });
     };
 
