@@ -4,7 +4,7 @@ ESFuncEditView : ESClipEditView {
     var funcButton, cleanupFuncButton, funcView, cleanupFuncView, sidePanel, bootBox, envirBox, optimizeBox;
 
     if (editorWindow.notNil) { editorWindow.close };
-    editorWindow = Window("Timeline Function Editor", Rect(0, 0, 1000, 600))
+    editorWindow = Window("Timeline Function Editor", Rect(Window.availableBounds.width - 1100, 0, 1000, 600))
     .background_(Color.gray(0.9))
     .front;
 
