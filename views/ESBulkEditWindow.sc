@@ -1,6 +1,24 @@
 ESBulkEditWindow {
   classvar editorWindow;
 
+  *code { |title = "Code here:", string = "", callback|
+    var width = 600, height = 300;
+    var left = ((Window.availableBounds.width - width) / 2);
+    var top = Window.availableBounds.height - height - 200;
+    var funcView;
+    editorWindow !? { editorWindow.close };
+    editorWindow = Window(title, Rect(left, top, width, height)).front;
+    StaticText(editorWindow, Rect(100, 30, 500, 20)).string_(title).font_(Font.sansSerif(20));
+    funcView = CodeView(editorWindow, Rect(20, 50, width - 40, 150)).string_(string);
+    Button(editorWindow, Rect(100, 220, 197.5, 40)).string_("OK").font_(Font.sansSerif(14)).action_({
+      callback.value(funcView.string);
+      editorWindow.close;
+    });
+    Button(editorWindow, Rect(302.5, 220, 197.5, 40)).string_("Cancel").font_(Font.sansSerif(14)).action_({
+      editorWindow.close;
+    });
+  }
+
   *ok { |title = "Something didn't work; check your code for errors", okFunc, cancFunc|
     var width = 600, height = 300;
     var left = ((Window.availableBounds.width - width) / 2);
