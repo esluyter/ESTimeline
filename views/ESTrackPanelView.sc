@@ -34,6 +34,7 @@ ESTrackPanelView : UserView {
     trackViews.do(_.remove);
 
     trackViews = timeline.tracks.collect { |track, i|
+      var ev;
       var top = i * trackHeight;
       var view = UserView(this, Rect(0, top, width, trackHeight))
       .drawFunc_({
@@ -66,13 +67,23 @@ ESTrackPanelView : UserView {
       });
       StaticText(view, Rect(2, 4, 18, 25)).string_(i.asString).stringColor_(Color.gray(0.4)).font_(Font.monospace(14));
 
-      trackButts = trackButts.add((
+      ev = (
         nameText: StaticText(view, Rect(2, 35, width - 4, trackHeight - 35)).align_(\topLeft).string_(track.name ?? "").stringColor_(Color.gray(0.4)).font_(Font.monospace(12)).canReceiveDragHandler_(true)
-      .receiveDragHandler_({
-        var thisTrack = View.currentDrag;
-        timeline.removeTrack(thisTrack.index, false);
-        timeline.addTrack(i, thisTrack);
-      }),
+        .receiveDragHandler_({
+          var thisTrack = View.currentDrag;
+          timeline.removeTrack(thisTrack.index, false);
+          timeline.addTrack(i, thisTrack);
+        }).mouseDownAction_({ |view, x, y, mods, buttNum, clickCount|
+          if (clickCount > 1) {
+            var nextName = track.name ?? "";
+            ev[\nameField].string_(nextName).select(nextName.asString.size, 0).visible_(true).focus;
+          };
+        }),
+        nameField: TextView(view, Rect(2, 35, width - 4, trackHeight - 40)).keyDownAction_({ |...args| this.handleKey(track, *args) }).focusLostAction_({ |view|
+          // if you click somewhere else, accept changes
+          track.name = if (view.string == "") { nil } { view.string.asSymbol };
+          view.visible = false;
+        }).visible_(false).font_(Font.monospace(12)),
         mix: Button(view, Rect(21, 4, 25, 25)).states_([
           ["mix", Color.gray(0.5), Color.gray(0.8)],
           ["mix", Color.gray(0.85), Color.gray(0.45)]])
@@ -94,8 +105,42 @@ ESTrackPanelView : UserView {
           track.solo = view.value.asBoolean;
           timelineView.focus;
         }).value_(track.solo),
-      ));
+      );
+      trackButts = trackButts.add(ev);
       view;
+    };
+  }
+
+  handleKey { |track, view, char, mods, unicode, keycode, key|
+    var nextName;
+    //key.postln;
+    // enter to accept
+    if (key == 16777220) {
+      track.name = if (view.string == "") { nil } { view.string.asSymbol };
+      view.visible = false;
+      ^true;
+    };
+    // tab to accept and move to next
+    if (key == 16777217) {
+      track.name = if (view.string == "") { nil } { view.string.asSymbol };
+      view.visible = false;
+      nextName = track.timeline.tracks[track.index + 1].name ?? "";
+      trackButts[track.index + 1].nameField.string_(nextName).visible_(true).select(nextName.asString.size, 0).focus;
+      ^true;
+    };
+    // shift tab move to previous
+    if (key == 16777218) {
+      track.name = if (view.string == "") { nil } { view.string.asSymbol };
+      view.visible = false;
+      nextName = track.timeline.tracks[track.index - 1].name ?? "";
+      trackButts[track.index - 1].nameField.string_(nextName).select(nextName.asString.size, 0).visible_(true).focus;
+      ^true;
+    };
+    // esc to cancel
+    if (key == 16777216) {
+      view.visible = false;
+      view.string = (track.name ?? "");
+      ^true;
     };
   }
 }
