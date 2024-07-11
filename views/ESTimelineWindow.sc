@@ -185,6 +185,9 @@ ESTimelineWindow : Window {
         { \useMixerChannel } {
           trackPanelView.refresh;
         }
+        { \initMixerChannels } {
+          MixingBoard("Mixer", nil, timeline.orderedMixerChannels)
+        }
         { \tracks } {
           //{
             //0.01.wait; // this solves a weird bug?

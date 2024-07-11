@@ -32,6 +32,7 @@ ESTimeline {
   }
   useMixerChannel_ { |val|
     useMixerChannel = val;
+    this.initMixerChannels;
     this.changed(\useMixerChannel);
   }
 
@@ -51,6 +52,32 @@ ESTimeline {
     };
     buses = ();
     mixerChannels = ();
+  }
+
+  initMixerChannels {
+    mixerChannels.do(_.free);
+    mixerChannels = ();
+    if (useMixerChannel) {
+      tracks.do { |track|
+        if (track.useMixerChannel and: mixerChannels[track.mixerChannelName].isNil) {
+          mixerChannels[track.mixerChannelName] = MixerChannel(track.mixerChannelName, Server.default, 2, 2);
+        };
+      };
+    };
+    this.changed(\initMixerChannels);
+  }
+
+  orderedMixerChannels {
+    var ret = [];
+    tracks.do { |track|
+      if (track.useMixerChannel) {
+        var mc = mixerChannels[track.mixerChannelName];
+        if (ret.includes(mc).not) {
+          ret = ret.add(mc);
+        };
+      };
+    };
+    ^ret;
   }
 
   initDependantFunc {
@@ -222,6 +249,7 @@ ESTimeline {
     track.addDependant(dependantFunc);
     track.timeline = this;
     tracks = tracks.insert(index, track);
+    this.initMixerChannels;
     this.changed(\tracks);
   }
 
@@ -231,6 +259,7 @@ ESTimeline {
     if (doFree) {
       track.free;
     };
+    this.initMixerChannels;
     this.changed(\tracks);
   }
 
@@ -289,6 +318,8 @@ ESTimeline {
   }
 
   prep {
+    this.initMixerChannels;
+
     if (useEnvir) {
       envir.use { this.prepFunc.(); };
     } {
