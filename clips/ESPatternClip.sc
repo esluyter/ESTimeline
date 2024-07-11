@@ -96,7 +96,11 @@ ESPatternClip : ESClip {
     var wait = stream.fastForward(startOffset);
     player = {
       wait.wait;
-      player = EventStreamPlayer(stream).play(clock);
+      if (track.timeline.useMixerChannel and: track.useMixerChannel) {
+        player = track.timeline.mixerChannels[track.mixerChannelName].play(EventStreamPlayer(stream), (clock: clock));
+      } {
+        player = EventStreamPlayer(stream).play(clock);
+      };
     }.fork(clock);
   }
 

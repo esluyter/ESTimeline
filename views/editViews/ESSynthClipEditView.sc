@@ -6,6 +6,8 @@ ESSynthClipEditView : ESClipEditView {
     var adjustBg = {
       funcView.visible_(doPlayFuncBox.value);
       defNameView.background_(if (doPlayFuncBox.value) { Color.gray(0.8) } { Color.white });
+      targetView.background_(if (timeline.useMixerChannel and: clip.track.useMixerChannel) { Color.gray(0.8) } { Color.white });
+      addActionView.background_(if (timeline.useMixerChannel and: clip.track.useMixerChannel) { Color.gray(0.8) } { Color.white });
     };
 
     this.prNew(clip, timeline, {

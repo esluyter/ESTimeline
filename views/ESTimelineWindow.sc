@@ -186,7 +186,8 @@ ESTimelineWindow : Window {
           trackPanelView.refresh;
         }
         { \initMixerChannels } {
-          MixingBoard("Mixer", nil, timeline.orderedMixerChannels)
+          //if (mixer.notNil) { mixer.close };
+          //mixer = MixingBoard("Mixer", nil, timeline.orderedMixerChannels);
         }
         { \tracks } {
           //{
