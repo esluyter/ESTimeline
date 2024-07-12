@@ -121,6 +121,17 @@ ESTrack {
     ^timeline.mixerChannels[this.mixerChannelName];
   }
 
+  /*
+  inChannels { ^if (this.mixerChannel.notNil) { this.mixerChannel.inChannels } { nil } }
+  outChannels { ^if (this.mixerChannel.notNil) { this.mixerChannel.outChannels } { nil } }
+  level { ^if (this.mixerChannel.notNil) { this.mixerChannel.level } { nil } }
+  pan { ^if (this.mixerChannel.notNil) { this.mixerChannel.pan } { nil } }
+
+  level_ { |val|
+
+  }
+  */
+
   name_ { |val|
     name = val;
     timeline.initMixerChannels;
