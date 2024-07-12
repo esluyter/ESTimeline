@@ -108,6 +108,13 @@ ESTimeline {
 
       mixerChannelTemplates = newTemplates;
     };
+    /*
+    this.clips.do { |clip|
+      if (clip.class == ESTimelineClip) {
+        clip.initMixerChannels;
+      };
+    };
+    */
     this.changed(\initMixerChannels);
     //}.fork(SystemClock);
   }
@@ -370,16 +377,20 @@ ESTimeline {
     };
     currentState = undoPoint;
     //{
-      this.prFree;
-      //Server.default.sync;
-      #tracks, thisTempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, dummyGD, dummySTG, dummyUMC, mixerChannelTemplates, globalMixerChannelNames = Object.fromESArray(currentState);
-      this.tempo = thisTempo;
-      if (clearUndoStack) {
-        undoStack = [];
-        redoStack = [];
-      };
-      this.init;
-      this.changed(\restoreUndoPoint);
+    this.prFree;
+    //Server.default.sync;
+    #tracks, thisTempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, dummyGD, dummySTG, dummyUMC, mixerChannelTemplates, globalMixerChannelNames = Object.fromESArray(currentState);
+
+    mixerChannelTemplates = mixerChannelTemplates ?? ();
+    globalMixerChannelNames = globalMixerChannelNames ?? [\master];
+
+    this.tempo = thisTempo;
+    if (clearUndoStack) {
+      undoStack = [];
+      redoStack = [];
+    };
+    this.init;
+    this.changed(\restoreUndoPoint);
     //}.fork(AppClock)
   }
 
