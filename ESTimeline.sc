@@ -66,31 +66,50 @@ ESTimeline {
   }
 
   initMixerChannels {
-    {
-      // make a newTemplates struct and as you make mixerChannels below, make sure newTemplates accurately reflects structure, replace mixerChannelTemplates
-      //var newTemplates = ();
-      // TODO: make sure MixerChannelReconstructor:*doQueue is finished
+    //{
+    //Server.default.sync;
+    mixerChannels.do({ |mc| mc.release.free });
+    mixerChannels = ();
+
+    if (useMixerChannel) {
+      var defaultOutbus;
+      var newTemplates = ();
+
       //Server.default.sync;
-      mixerChannels.do({ |mc| mc.release.free });
-      mixerChannels = ();
-      if (useMixerChannel) {
-        var defaultOutbus;
-        //Server.default.sync;
-        defaultOutbus = if (parentClip.notNil and: { parentClip.track.useMixerChannel } and: { parentClip.track.timeline.useMixerChannel } and: { parentClip.track.mixerChannel.notNil } and: { parentClip.track.mixerChannel.active }) { parentClip.track.mixerChannel } { 0 };
-        globalMixerChannelNames.reverse.do { |name|
-          if (mixerChannels[name].isNil) {
-            var outbus = if (name == \master) { defaultOutbus } { mixerChannels[\master] ?? defaultOutbus };
-            mixerChannels[name] = MixerChannel(name, Server.default, 2, 2, 1, outbus: outbus);
-          };
-        };
-        tracks.do { |track|
-          if (track.useMixerChannel and: mixerChannels[track.mixerChannelName].isNil) {
-            mixerChannels[track.mixerChannelName] = MixerChannel(track.mixerChannelName, Server.default, 2, 2, 1, outbus: mixerChannels[\master] ?? defaultOutbus);
-          };
+      defaultOutbus = if (
+        parentClip.notNil and:
+        { parentClip.track.useMixerChannel } and:
+        { parentClip.track.timeline.useMixerChannel } and:
+        { parentClip.track.mixerChannel.notNil } and:
+        { parentClip.track.mixerChannel.active }
+      ) {
+        parentClip.track.mixerChannel
+      } {
+        0
+      };
+
+      globalMixerChannelNames.reverse.do { |name|
+        var template = mixerChannelTemplates[name] ?? (inChannels: 2, outChannels: 2, level: 1, pan: 0);
+        newTemplates[name] = template;
+        if (mixerChannels[name].isNil) {
+          var outbus = if (name == \master) { defaultOutbus } { mixerChannels[\master] ?? defaultOutbus };
+          mixerChannels[name] = MixerChannel(name.asSymbol, Server.default, template.inChannels, template.outChannels, template.level, template.pan, outbus: outbus);
+
         };
       };
-      this.changed(\initMixerChannels);
-    }.fork(SystemClock);
+      tracks.do { |track|
+        var name = track.mixerChannelName;
+        var template = mixerChannelTemplates[name] ?? (inChannels: 2, outChannels: 2, level: 1, pan: 0);
+        newTemplates[name] = template;
+        if (track.useMixerChannel and: mixerChannels[track.mixerChannelName].isNil) {
+          mixerChannels[name] = MixerChannel(name.asSymbol, Server.default, template.inChannels, template.outChannels, template.level, template.pan, outbus: mixerChannels[\master] ?? defaultOutbus);
+        };
+      };
+
+      mixerChannelTemplates = newTemplates;
+    };
+    this.changed(\initMixerChannels);
+    //}.fork(SystemClock);
   }
 
   orderedMixerChannels {
