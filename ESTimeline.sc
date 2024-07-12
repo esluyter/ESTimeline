@@ -1,5 +1,5 @@
 ESTimeline {
-  var <tracks, <tempo, <>prepFunc, <>cleanupFunc, <>bootOnPrep, <>useEnvir, <>optimizeView, <gridDivision, <snapToGrid, <useMixerChannel;
+  var <tracks, <tempo, <>prepFunc, <>cleanupFunc, <>bootOnPrep, <>useEnvir, <>optimizeView, <gridDivision, <snapToGrid, <useMixerChannel, <mixerChannelTemplates, <globalMixerChannelNames;
   var <isPlaying = false;
   var <playbar = 0.0;
   var playBeats, playStartTime, <playClock;
@@ -36,14 +36,25 @@ ESTimeline {
     this.changed(\useMixerChannel);
   }
 
-  storeArgs { ^[tracks, this.tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel] }
-  defaultUndoPoint { ^[[ESTrack([])], 1, nil, nil, bootOnPrep, useEnvir, optimizeView, 4, false, useMixerChannel].asESArray }
+  storeArgs { ^[tracks, this.tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames] }
+  defaultUndoPoint { ^[[ESTrack([])], 1, nil, nil, bootOnPrep, useEnvir, optimizeView, 4, false, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames].asESArray }
 
-  *new { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = false, gridDivision = 4, snapToGrid = false, useMixerChannel = true|
+  *new { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = false, gridDivision = 4, snapToGrid = false, useMixerChannel = true, mixerChannelTemplates, globalMixerChannelNames|
     //var clock = TempoClock(tempo).permanent_(true);
 
     tracks = tracks ?? [ESTrack()];
-    ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel).initEnvir.initDependantFunc.init(true);
+    mixerChannelTemplates = mixerChannelTemplates ?? ();
+    globalMixerChannelNames = globalMixerChannelNames ?? [\master];
+
+    ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames).initEnvir.initDependantFunc.init(true);
+  }
+
+  *newNoInitMixerChannels { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = false, gridDivision = 4, snapToGrid = false, useMixerChannel = true, mixerChannelTemplates, globalMixerChannelNames|
+    tracks = tracks ?? [ESTrack()];
+    mixerChannelTemplates = mixerChannelTemplates ?? ();
+    globalMixerChannelNames = globalMixerChannelNames ?? [\master];
+
+    ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames).initEnvir.initDependantFunc.init(true, initMixerChannels: false);
   }
 
   initEnvir {
@@ -56,14 +67,25 @@ ESTimeline {
 
   initMixerChannels {
     {
-      Server.default.sync;
-      mixerChannels.do(_.free);
+      // make a newTemplates struct and as you make mixerChannels below, make sure newTemplates accurately reflects structure, replace mixerChannelTemplates
+      //var newTemplates = ();
+      // TODO: make sure MixerChannelReconstructor:*doQueue is finished
+      //Server.default.sync;
+      mixerChannels.do({ |mc| mc.release.free });
       mixerChannels = ();
       if (useMixerChannel) {
-        Server.default.sync;
+        var defaultOutbus;
+        //Server.default.sync;
+        defaultOutbus = if (parentClip.notNil and: { parentClip.track.useMixerChannel } and: { parentClip.track.timeline.useMixerChannel } and: { parentClip.track.mixerChannel.notNil } and: { parentClip.track.mixerChannel.active }) { parentClip.track.mixerChannel } { 0 };
+        globalMixerChannelNames.reverse.do { |name|
+          if (mixerChannels[name].isNil) {
+            var outbus = if (name == \master) { defaultOutbus } { mixerChannels[\master] ?? defaultOutbus };
+            mixerChannels[name] = MixerChannel(name, Server.default, 2, 2, 1, outbus: outbus);
+          };
+        };
         tracks.do { |track|
           if (track.useMixerChannel and: mixerChannels[track.mixerChannelName].isNil) {
-            mixerChannels[track.mixerChannelName] = MixerChannel(track.mixerChannelName, Server.default, 2, 2);
+            mixerChannels[track.mixerChannelName] = MixerChannel(track.mixerChannelName, Server.default, 2, 2, 1, outbus: mixerChannels[\master] ?? defaultOutbus);
           };
         };
       };
@@ -72,17 +94,26 @@ ESTimeline {
   }
 
   orderedMixerChannels {
+    var globalRet = [];
     var ret = [];
+    globalMixerChannelNames.do { |name|
+      var mc = mixerChannels[name];
+      if (globalRet.includes(mc).not) {
+        globalRet = globalRet.add(mc);
+      };
+    };
     tracks.do { |track|
       if (track.useMixerChannel) {
         var mc = mixerChannels[track.mixerChannelName];
-        if (ret.includes(mc).not) {
+        if (ret.includes(mc).not and: globalRet.includes(mc).not) {
           ret = ret.add(mc);
         };
       };
     };
-    ^ret;
+    ^ret ++ globalRet;
   }
+
+  //setMixerChannel
 
   initDependantFunc {
     dependantFunc = { |theTrack, what, value|
@@ -90,7 +121,7 @@ ESTimeline {
     };
   }
 
-  init { |resetUndo = false, cleanupFirst = false|
+  init { |resetUndo = false, cleanupFirst = false, initMixerChannels = true|
     if (cleanupFirst) {
       this.cleanup;
     };
@@ -109,12 +140,12 @@ ESTimeline {
 
     if (bootOnPrep) {
       Server.default.waitForBoot {
-        this.prep;
+        this.prep(initMixerChannels);
         Server.default.sync;
         this.changed(\init);
       };
     } {
-      this.prep;
+      this.prep(initMixerChannels);
       this.changed(\init);
     };
   }
@@ -284,6 +315,8 @@ ESTimeline {
 
   restoreUndoPoint { |undoPoint, clearUndoStack = false, legacy = false|
     var thisTempo;
+    // leave gridDivision, snapToGrid, and useMixerChannel as they were
+    var dummyGD, dummySTG, dummyUMC;
     if (legacy) {
       currentState = undoPoint.interpret.asESArray;
     };
@@ -291,7 +324,7 @@ ESTimeline {
     //{
       this.prFree;
       //Server.default.sync;
-      #tracks, thisTempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView = Object.fromESArray(currentState);
+      #tracks, thisTempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, dummyGD, dummySTG, dummyUMC, mixerChannelTemplates, globalMixerChannelNames = Object.fromESArray(currentState);
       this.tempo = thisTempo;
       if (clearUndoStack) {
         undoStack = [];
@@ -321,8 +354,10 @@ ESTimeline {
     };
   }
 
-  prep {
-    this.initMixerChannels;
+  prep { |initMixerChannels = true|
+    if (initMixerChannels) {
+      this.initMixerChannels;
+    };
 
     if (useEnvir) {
       envir.use { this.prepFunc.(); };
@@ -346,6 +381,7 @@ ESTimeline {
   }
 
   prFree {
+    mixerChannels.do({ |mc| mc.release.free });
     this.cleanup;
     tracks.do(_.free);
   }
@@ -359,12 +395,13 @@ ESTimeline {
   encapsulateSelf {
     var duration = this.duration;
     if (duration > 0) {
-      var newTimeline = ESTimeline(bootOnPrep: bootOnPrep).restoreUndoPoint(currentState);
+      var newTimeline = ESTimeline.newNoInitMixerChannels(bootOnPrep: bootOnPrep, gridDivision: gridDivision, snapToGrid: snapToGrid, useMixerChannel: useMixerChannel);
       this.prFree;
       tracks = [ESTrack([ESTimelineClip(0, duration, timeline: newTimeline)])];
       prepFunc = {};
       cleanupFunc = {};
       this.init;
+      newTimeline.restoreUndoPoint(currentState);
       this.changed(\encapsulateSelf);
     }
   }

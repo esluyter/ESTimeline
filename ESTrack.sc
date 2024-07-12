@@ -117,6 +117,10 @@ ESTrack {
     ^if (name.isNil) { this.index.asSymbol } { name.asSymbol };
   }
 
+  mixerChannel {
+    ^timeline.mixerChannels[this.mixerChannelName];
+  }
+
   name_ { |val|
     name = val;
     timeline.initMixerChannels;
