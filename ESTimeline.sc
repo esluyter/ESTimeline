@@ -271,6 +271,8 @@ ESTimeline {
       this.play(val);
     } {
       playbar = val;
+      // this is ugly and duplicates code in ESTimelineClip
+      this.clips.select({ |clip| clip.class == ESTimelineClip }).do(_.refreshTimelineNow);
       this.changed(\playbar);
     };
   }

@@ -28,6 +28,11 @@ ESTimelineClip : ESClip {
     };
   }
 
+  refreshTimelineNow {
+    timeline.now = track.timeline.now - startTime - offset;
+    timeline.clips.select({ |clip| clip.class == ESTimelineClip }).do(_.refreshTimelineNow);
+  }
+
   update { |argTimeline, what, val|
     this.changed(\timeline, [what, val]);
   }
