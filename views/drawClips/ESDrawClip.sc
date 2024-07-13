@@ -10,7 +10,7 @@ ESDrawClip {
     var font = Font("Helvetica", 14, true);
 
     if (clip.track.shouldPlay) {
-      Pen.color = clip.color(selected, editingMode).alpha_(if (clip.mute) { if (selected) { 0 } { 0.1 } } { 1.0 });
+      Pen.color = clip.color(selected, editingMode).alpha_(if (clip.mute) { if (selected) { 0 } { if (clip.class == ESTimelineClip) { 1 } { 0.1 } } } { 1.0 });
     } {
       Pen.color = Color.white.lighten(clip.color(selected, editingMode), 0.5).alpha_(if (clip.mute) { if (selected) { 0 } { 0.2 } } { 1.0 });
     };
@@ -20,9 +20,11 @@ ESDrawClip {
     if (selected and: drawBorder) { Pen.fillStroke } { Pen.fill };
 
     if (clip.mute) {
-      var title = ESStringShortener.trim(clip.prTitle, width - 3.5, font);
+      var title = clip.prTitle;
       //TODO: remove code duplication
-      if (clip.name.notNil and: (clip.class != ESClip)) { title = clip.name.asCompileString ++ " (" ++ title ++ ")" };
+      if (clip.name.notNil) { title = clip.name.asCompileString ++ if (title.size > 0) { " (" ++ title ++ ")" } { "" } };
+      title = title ++ " - mute";
+      title = ESStringShortener.trim(title, width - 3.5, font);
 
       if (left < 0) {
         width = width + left;
@@ -32,7 +34,7 @@ ESDrawClip {
         width = width - (clipLeft - left);
         left = clipLeft;
       };
-      Pen.stringAtPoint(title, (left + 3.5)@(top + 2), font, clip.color.alpha_(0.3));
+      Pen.stringAtPoint(title.postcs, (left + 3.5)@(top + 2), font, if ((clip.class == ESTimelineClip) or: (clip.class == ESClip)) { Color.gray(0.5, 0.5) } { clip.color.alpha_(0.3) } );
     } {
       if (editingMode and: this.hasEditingMode) {
         Pen.addRect(Rect(left, top, width, height));
