@@ -30,8 +30,23 @@ ESRulerView : UserView {
         Pen.fill;
       };
 
+
       Pen.use {
+        var startIndex = (this.startTime / division).asInteger;
+
         Pen.color = Color.black;
+
+        (this.duration / division + 1).asInteger.do { |j|
+          var i = ((j + startIndex) * division).asInteger;
+          var left = this.absoluteTimeToPixels(i);
+          if (i >= 0) {
+            Pen.addRect(Rect(left, 0, 1, 20));
+            Pen.fill;
+            Pen.stringAtPoint(i.asString, (left + 3)@0, Font("Courier New", 16));
+          };
+        };
+
+        /*
         (this.startTime.asInteger.max(0)..(this.startTime + this.duration + 1).asInteger).do { |i|
           if (i % division == 0) {
             var left = this.absoluteTimeToPixels(i);
@@ -40,6 +55,7 @@ ESRulerView : UserView {
             Pen.stringAtPoint(i.asString, (left + 3)@0, Font("Courier New", 16));
           }
         };
+        */
       };
 
       if (timeline.parentClip.notNil) {
@@ -63,6 +79,7 @@ ESRulerView : UserView {
         Pen.color = Color.gray(0.6);
         Pen.fill;
       };
+
     }).mouseWheelAction_({ |view, x, y, mods, xDelta, yDelta|
       var xTime = timelineView.pixelsToAbsoluteTime(x);
       timelineView.duration = timelineView.duration * (-1 * yDelta).linexp(-100, 100, 0.5, 2, nil);
