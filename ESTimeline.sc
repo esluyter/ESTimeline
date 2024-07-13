@@ -11,6 +11,11 @@ ESTimeline {
   var <buses;
   var <mixerChannels;
 
+  classvar <nextId = 0, <timelines;
+  var <id; // for referencing e.g. with faders on global mixer
+
+  *at { |val| ^timelines[val] }
+
   //tempo { ^clock.tempo; }
   tempo_ { |val|
     tempo = val;
@@ -46,7 +51,7 @@ ESTimeline {
     mixerChannelTemplates = mixerChannelTemplates ?? ();
     globalMixerChannelNames = globalMixerChannelNames ?? [\master];
 
-    ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames).initEnvir.initDependantFunc.init(true);
+    ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames).initId.initEnvir.initDependantFunc.init(true);
   }
 
   *newNoInitMixerChannels { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = false, gridDivision = 4, snapToGrid = false, useMixerChannel = true, mixerChannelTemplates, globalMixerChannelNames|
@@ -54,7 +59,14 @@ ESTimeline {
     mixerChannelTemplates = mixerChannelTemplates ?? ();
     globalMixerChannelNames = globalMixerChannelNames ?? [\master];
 
-    ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames).initEnvir.initDependantFunc.init(true, initMixerChannels: false);
+    ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames).initId.initEnvir.initDependantFunc.init(true, initMixerChannels: false);
+  }
+
+  initId {
+    id = nextId;
+    if (timelines.isNil) { timelines = () };
+    timelines[id] = this;
+    nextId = nextId + 1;
   }
 
   initEnvir {
@@ -88,6 +100,7 @@ ESTimeline {
         0
       };
 
+      // put \master at the end of the global mixer channels for best results
       globalMixerChannelNames.reverse.do { |name|
         var template = mixerChannelTemplates[name] ?? (inChannels: 2, outChannels: 2, level: 1, pan: 0);
         newTemplates[name] = template;
@@ -97,6 +110,7 @@ ESTimeline {
 
         };
       };
+
       tracks.do { |track|
         var name = track.mixerChannelName;
         var template = mixerChannelTemplates[name] ?? (inChannels: 2, outChannels: 2, level: 1, pan: 0);
@@ -155,22 +169,37 @@ ESTimeline {
   }
 
   orderedMixerChannelNames {
-    var globalRet = [];
-    var ret = [];
+    var globalRet = []; // return an array with id and names [2, \bass, \kik, \sn, \master] for three tracks plus master in timeline 2
+    var ret = []; // if timeline 2 is embedded in timeline 1, [1, \melody, \harmony, [2, \bass, \kik, \sn, \master], \drums, \fx]
+
+    if (useMixerChannel.not) { ^[] };
+
     globalMixerChannelNames.do { |name|
       if (globalRet.includes(name).not) {
         globalRet = globalRet.add(name);
       };
     };
-    tracks.do { |track|
+
+    // reverse as stated above
+    tracks.reverse.do { |track|
+      var timelineClips;
+
       if (track.useMixerChannel) {
         var name = track.mixerChannelName;
         if (ret.includes(name).not and: globalRet.includes(name).not) {
           ret = ret.add(name);
         };
       };
+
+      // add channels for sub-timelines
+      timelineClips = track.nowClips.select({ |clip| clip.class == ESTimelineClip });
+      if (timelineClips.notNil) {
+        timelineClips.do { |timelineClip|
+          ret = ret.add(timelineClip.timeline.orderedMixerChannelNames);
+        };
+      };
     };
-    ^ret ++ globalRet;
+    ^[id] ++ ret.reverse ++ globalRet;
   }
 
   setMixerChannel { |name, what, val|
@@ -464,6 +493,7 @@ ESTimeline {
     this.prFree;
     this.changed(\free);
     this.release;
+    timelines[id] = nil;
   }
 
   encapsulateSelf {
