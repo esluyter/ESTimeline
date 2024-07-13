@@ -21,6 +21,17 @@ ESDrawClip {
 
     if (clip.mute) {
       var title = ESStringShortener.trim(clip.prTitle, width - 3.5, font);
+      //TODO: remove code duplication
+      if (clip.name.notNil and: (clip.class != ESClip)) { title = clip.name.asCompileString ++ " (" ++ title ++ ")" };
+
+      if (left < 0) {
+        width = width + left;
+        left = 0;
+      };
+      if (clipLeft.notNil and: { left < clipLeft }) {
+        width = width - (clipLeft - left);
+        left = clipLeft;
+      };
       Pen.stringAtPoint(title, (left + 3.5)@(top + 2), font, clip.color.alpha_(0.3));
     } {
       if (editingMode and: this.hasEditingMode) {
