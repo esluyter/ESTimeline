@@ -78,12 +78,12 @@ ESEnvClip : ESClip {
   }
 
   storeArgs { ^[startTime, duration, offset, color, name, env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate, mute] }
-
+/*
   duplicate {
     //this.asCompileString.interpret.track_(track);
     ^this.class.new(*(this.storeArgs)).track_(track).prep;
   }
-
+*/
   init { |argEnv, argBus, argTarget, argAddAction, argMin, argMax, argCurve, argExp, argMakeBus, argMakeBusRate, argPrep|
     env = argEnv;
     bus = argBus;
