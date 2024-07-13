@@ -40,27 +40,36 @@ ESEnvClip : ESClip {
 
     //buses = ();
 
-    sizes = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8190]; // 8191 crashes server
+    // cap at 512 so booting server doesn't take forever
+    // TODO: figure out how to split up long envelopes
+    sizes = [2, 4, 8, 16, 32, 64, 128, 256, 512]; //, 1024, 2048     //, 4096, 8190]; // 8191 crashes server
     ServerBoot.add {
-      sizes.do { |n|
-        [\kr, \ar].do { |rate|
-          [\curve, \exp].do { |type|
-            SynthDef(('ESEnvClip_' ++ rate ++ '_' ++ type ++ '_' ++ n).asSymbol, { |out, gate = 1, tempo = 1, min = 0, max = 1|
-              var env = \env.kr(Env(0.dup(n), 1.dup(n - 1), 0.dup(n - 1)));
-              var sig = EnvGen.perform(rate, env, timeScale: tempo.reciprocal);
-              switch (type)
-              {\curve} {
-                sig = sig.lincurve(0, 1, min, max, \curve.kr(0));
-              }
-              {\exp} {
-                sig = sig.linexp(0, 1, min, max);
-              };
-              FreeSelf.kr(gate <= 0);
-              Out.perform(rate, out, sig);
-            }).add;
+      {
+        sizes.do { |n|
+          [\kr, \ar].do { |rate|
+            [\curve, \exp].do { |type|
+              SynthDef(('ESEnvClip_' ++ rate ++ '_' ++ type ++ '_' ++ n).asSymbol, { |out, gate = 1, tempo = 1, min = 0, max = 1|
+                var env = \env.kr(Env(0.dup(n), 1.dup(n - 1), 0.dup(n - 1)));
+                var index = Sweep.perform(rate, 0, tempo);
+                var sig = IEnvGen.perform(rate, Env.fromArray(env), index);
+                //var sig = EnvGen.perform(rate, env, timeScale: tempo.reciprocal);
+
+                switch (type)
+                {\curve} {
+                  sig = sig.lincurve(0, 1, min, max, \curve.kr(0));
+                }
+                {\exp} {
+                  sig = sig.linexp(0, 1, min, max);
+                };
+                FreeSelf.kr(gate <= 0);
+
+                Out.perform(rate, out, sig);
+              }).add;
+              0.1.wait;
+            };
           };
         };
-      };
+      }.fork(SystemClock);
     };
   }
 
@@ -137,11 +146,15 @@ ESEnvClip : ESClip {
   }
 
   prStart { |startOffset = 0.0, clock|
-    var thisEnv = this.envToPlay(startOffset);
+    var thisEnv = this.envToPlay(startOffset, true);
     var size = thisEnv.levels.size.nextPowerOfTwo;
-    if (size > 8190) {
+    /*if (size > 8190) {
       "Envelope can have max 8190 points. Please adjust.".warn;
       size = 8190;
+    };*/
+    if (size > 512) {
+      "WARNING: Envelope can have max 512 points. Please adjust.".postln;
+      size = 512;
     };
     if (bus.value.notNil) {
       var defName = if (this.rate == 'control') { 'ESEnvClip_kr' } { 'ESEnvClip_ar' };
@@ -167,10 +180,11 @@ ESEnvClip : ESClip {
   guiClass { ^ESEnvClipEditView }
   drawClass { ^ESDrawEnvClip }
 
-  envToPlay { |startOffset = 0|
+  envToPlay { |startOffset = 0, addFinalBreakpoint = false|
     var thisEnv = env.value;
     var playOffset = offset + startOffset;
     var initlevel = thisEnv[playOffset];
+    var endLevel;
 
     var levels = thisEnv.levels;
     var times = thisEnv.times;
@@ -204,8 +218,9 @@ ESEnvClip : ESClip {
       };
     };
 
+    endLevel = Env(levels, times, curves)[thisDuration];
+
     if (times.sum > thisDuration) {
-      var endLevel = Env(levels, times, curves)[thisDuration];
       var prevTime = 0;
       var runningtime = 0.0;
       var i = 0;
@@ -223,6 +238,14 @@ ESEnvClip : ESClip {
 
       times[i] = thisDuration - prevTime;
       levels[i+1] = endLevel;
+    };
+
+    if (addFinalBreakpoint) {
+      if (times.sum < thisDuration) {
+        levels = levels.add(endLevel);
+        times = times.add(thisDuration - times.sum);
+        if (curves.isArray) { curves = curves.add(curves.last) };
+      };
     };
 
     ^Env(levels, times, curves);
