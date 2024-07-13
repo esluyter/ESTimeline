@@ -379,7 +379,7 @@ ESTimeline {
       };
       currentState = undoPoint;
       redoStack = [];
-      this.changed(\addUndoPoint, currentState)
+      this.changed(\addUndoPoint)
     };
   }
 
