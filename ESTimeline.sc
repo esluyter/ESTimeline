@@ -78,12 +78,8 @@ ESTimeline {
   }
 
   initMixerChannels {
-    //{
-    //Server.default.sync;
-    mixerChannels.do({ |mc| mc.release.free });
-    mixerChannels = ();
-
-    if (useMixerChannel) {
+    // already checks if we're usingMixerChannel
+    this.prFreeMixerChannels({
       var defaultOutbus;
       var newTemplates = ();
 
@@ -121,7 +117,15 @@ ESTimeline {
       };
 
       mixerChannelTemplates = newTemplates;
-    };
+      this.changed(\initMixerChannels);
+    });
+
+    // this will be replaced by callback function above:
+    mixerChannels = ();
+
+    //if (useMixerChannel) {
+
+    //};
     /*
     this.clips.do { |clip|
       if (clip.class == ESTimelineClip) {
@@ -129,7 +133,6 @@ ESTimeline {
       };
     };
     */
-    this.changed(\initMixerChannels);
     //}.fork(SystemClock);
   }
 
@@ -485,8 +488,22 @@ ESTimeline {
     };
   }
 
+  prFreeMixerChannels { |callback|
+    if (useMixerChannel) {
+      MixerChannelReconstructor.queueDelay = 0.0001;
+
+      MixerChannelReconstructor.queueBundle(Server.default, nil, (func: {
+        mixerChannels.do { |mc|
+          mc.release;
+          mc.free;
+        };
+        callback.value;
+      }));
+    }
+  }
+
   prFree {
-    mixerChannels.do({ |mc| mc.release.free });
+    this.prFreeMixerChannels;
     this.cleanup;
     tracks.do(_.free);
   }
