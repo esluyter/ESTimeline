@@ -97,6 +97,8 @@ ESTimeline {
       var defaultOutbus;
       var newTemplates = ();
 
+      mixerChannels = ();
+
       //Server.default.sync;
       defaultOutbus = if (
         parentClip.notNil and:
@@ -142,7 +144,7 @@ ESTimeline {
     });
 
     // this will be replaced by callback function above:
-    mixerChannels = ();
+    //mixerChannels = ();
 
     //if (useMixerChannel) {
 
