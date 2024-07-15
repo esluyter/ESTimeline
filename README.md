@@ -357,7 +357,8 @@ loop {
 <br />
 <br />
 
-Current ad-hoc mixer interface:
+## Current ad-hoc mixer interface
+Everything works, and everything saves with timeline except mixer channel output bus (will reset to default)
 ```
 (
 OSCdef(\test, { |msg|
