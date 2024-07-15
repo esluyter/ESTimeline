@@ -35,17 +35,20 @@ Also note that because timelines are built to execute user-supplied code they ar
     - although the competing goal is to make it easy to do the things you want to do, which is subjective
   - as little architecture as possible is forced on you,
     - possible to disable timeline-specific clock and environment so as to interact with the timeline as part of a larger project
-    - possible to play clips with any bus, target, addAction, etc. for full flexibility
-      - although I will probably build in optional use of ddwMixerChannel
+    - I am building in optional use of ddwMixerChannel, but
+      - ddwMixerChannel is not required
+      - possible to play clips with any bus, target, addAction, etc. for full flexibility
 - **DAW-like GUI** for editing and playback
   - Keyboard and mouse interface to full extent of Timeline capabilities, with built-in code editing
   - Snap to grid optional
   - Gray playhead is "scheduling playhead" and black playhead is "sounding playhead" -- to take into account server latency.
     - Routines can be played with additional latency so non-sounding events line up with the sounding playhead. The goal is an accurate visual representation of what you are hearing / when the code is executed.
+  - If using ddwMixerChannel, there is a GUI mixer window with track insert FX, pre fade sends and post fade sends.
 - **Non-linear:** "goto" command to jump to a clip or a point in time enabling complex real-time behaviors (variable-length looping, conditional branching...)
 - **Tracks** can contain all clip types
   - tracks can be muted/soloed and rearranged
   - individual clips can be muted
+  - if using ddwMixerChannel, tracks will play on a mixer channel specified by the track's name
 - **Synth, Pattern, Routine, and Env** clip types
   - Synth clips can either instantiate a SynthDef or run their own single-use function a la `{ }.play`
     - You can select multiple Synth clips and bulk edit their arguments
