@@ -414,24 +414,48 @@ ESTimeline {
     if (this.isPlaying) { this.stop(true) } { this.play }
   }
 
-  addTrack { |index, track|
+  addTrack { |index, track, mcTemplate|
     index = index ?? tracks.size;
     track = track ?? { ESTrack([]) };
     track.addDependant(dependantFunc);
     track.timeline = this;
     tracks = tracks.insert(index, track);
+    // update mixer templates so all track settings stay as they were
+    tracks[index + 1..].reverse.do { |thisTrack|
+      if (thisTrack.useMixerChannel and: thisTrack.mixerChannelName.isInteger) {
+        mixerChannelTemplates[thisTrack.mixerChannelName] = mixerChannelTemplates[thisTrack.mixerChannelName - 1];
+        mixerChannelTemplates[thisTrack.mixerChannelName - 1] = nil;
+      };
+    };
+    mixerChannelTemplates[track.mixerChannelName] = mcTemplate;
     this.initMixerChannels;
     this.changed(\tracks);
   }
 
-  removeTrack { |index, doFree = true|
+  removeTrack { |index, doFree = true, doMcInit = true|
     var track = tracks.removeAt(index);
     track.removeDependant(dependantFunc);
     if (doFree) {
       track.free;
     };
-    this.initMixerChannels;
+    // update mixer templates so all track settings stay as they were
+    tracks[index..].do { |thisTrack|
+      if (thisTrack.useMixerChannel and: thisTrack.mixerChannelName.isInteger) {
+        mixerChannelTemplates[thisTrack.mixerChannelName] = mixerChannelTemplates[thisTrack.mixerChannelName + 1];
+        mixerChannelTemplates[thisTrack.mixerChannelName + 1] = nil;
+      };
+    };
+    if (doMcInit) {
+      this.initMixerChannels;
+    };
     this.changed(\tracks);
+  }
+
+  moveTrack { |fromIndex, toIndex|
+    var track = tracks[fromIndex];
+    var mcTemplate = mixerChannelTemplates[track.mixerChannelName];
+    this.removeTrack(fromIndex, false, false);
+    this.addTrack(toIndex, track, mcTemplate);
   }
 
   asUndoPoint { ^this.storeArgs.asESArray }

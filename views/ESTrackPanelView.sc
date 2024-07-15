@@ -71,8 +71,7 @@ ESTrackPanelView : UserView {
         nameText: StaticText(view, Rect(2, 35, width - 4, trackHeight - 35)).align_(\topLeft).string_(track.name ?? "").stringColor_(Color.gray(0.5)).font_(Font.sansSerif(14, true)).canReceiveDragHandler_(true)
         .receiveDragHandler_({
           var thisTrack = View.currentDrag;
-          timeline.removeTrack(thisTrack.index, false);
-          timeline.addTrack(i, thisTrack);
+          timeline.moveTrack(thisTrack.index, i);
         }).mouseDownAction_({ |view, x, y, mods, buttNum, clickCount|
           if (clickCount > 1) {
             var nextName = track.name ?? "";
