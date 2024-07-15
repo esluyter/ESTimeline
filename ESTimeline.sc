@@ -11,8 +11,12 @@ ESTimeline {
   var <buses;
   var <mixerChannels;
 
+  classvar <freeQueue;
+
   classvar <nextId = 0, <timelines;
   var <id; // for referencing e.g. with faders on global mixer
+
+  *initClass { freeQueue = []; timelines = (); }
 
   *at { |val| ^timelines[val] }
 
@@ -64,7 +68,6 @@ ESTimeline {
 
   initId {
     id = nextId;
-    if (timelines.isNil) { timelines = () };
     timelines[id] = this;
     nextId = nextId + 1;
   }
@@ -79,15 +82,25 @@ ESTimeline {
 
   prFreeMixerChannels { |callback|
     if (useMixerChannel) {
-      MixerChannelReconstructor.queueDelay = 0.0001;
-
-      MixerChannelReconstructor.queueBundle(Server.default, nil, (func: {
+      var func = {
         mixerChannels.do { |mc|
           mc.release;
           mc.free;
         };
         callback.value;
-      }));
+        freeQueue.remove(func);
+      };
+
+      freeQueue = freeQueue.add(func);
+
+      MixerChannelReconstructor.queueDelay = 0.0001;
+      {
+        if (freeQueue.size == 1) {
+          MixerChannelReconstructor.queueBundle(Server.default, nil, (func: func));
+        } {
+          freeQueue.remove(func);
+        };
+      }.fork(SystemClock);
     }
   }
 
