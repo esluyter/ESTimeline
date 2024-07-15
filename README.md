@@ -356,4 +356,444 @@ loop {
 
 <br />
 <br />
+
+Current ad-hoc mixer interface:
+```
+(
+OSCdef(\test, { |msg|
+  var oscMsg, synthId, busIndex, peaks, powers;
+  var index;
+  //msg.postln;
+  # oscMsg, synthId, busIndex = msg;
+  # peaks, powers = msg[3..].clump(2).flop;
+  index = ~channelIndexMap[busIndex];
+  //[index, peaks, powers].postln;
+  defer {
+    //[busIndex, index].postln;
+    if (index.notNil) {
+      peaks.size.do { |i|
+        ~peaks[index][i].value = powers[i].ampdb.linlin(-60, 0, 0, 1);
+        ~peaks[index][i].peakLevel = peaks[i].ampdb.linlin(-60, 0, 0, 1);
+      };
+    };
+  };
+}, '/mixerChannel');
+
+{
+  var width = 1500, height = 600;
+  var left = Window.availableBounds.width - width;
+  if (~mixerWindow.notNil) { ~mixerWindow.close };
+  ~mixerWindow = Window("Mixer", Rect(left, 0, width, height)).background_(Color.gray(0.8)).front;
+}.value;
+
+~winFunc = {
+  var width = 1500, height = 600;
+  var left = Window.availableBounds.width - width;
+  var top;
+  var levelAdjust = 10;
+  var meterHeight = 250;
+  var dbHeight = 20;
+  var panHeight = 30;
+  var outHeight = 20;
+  var nameHeight = 40;
+  var muteHeight = 22;
+  var insertHeight = 15;
+  var trackWidth = 80;
+  var faderSpec = ControlSpec(0.0, 4.0, 4);//ControlSpec(0.0, 2, \amp);
+  var panSpec = \pan.asSpec;
+
+  var mixerChannels = ~timeline./*tracks[0].clips[0].timeline.*/orderedMixerChannels; //.postcs;
+  var mixerChannelNames = ~timeline.orderedMixerChannelNames;
+  // [1, \melody, \harmony, [2, \bass, \kik, \sn, \master], \drums, \fx]
+  // mixerChannelNames[i]
+  var mcnFunc = { |arr|
+    var index = arr[0];
+    var ret = [];
+    arr[1..].do { |item|
+      if (item.isArray.not) {
+        ret = ret.add([item, index])
+      } {
+        ret = ret ++ mcnFunc.(item);
+      };
+    };
+    ret;
+  };
+  var mixerChannelNamesFlat = mcnFunc.(mixerChannelNames);
+
+  var mcfFunc = { |arr, level = 0|
+    var ret = [];
+    arr.do { |item|
+      if (item.isArray.not) {
+        ret = ret.add([item, level])
+      } {
+        ret = ret ++ mcfFunc.(item, level + 1);
+      };
+    };
+    ret;
+  };
+  var mixerChannelsFlat = mcfFunc.(mixerChannels);
+
+  // in case of problem just don't throw infinite error messages..
+  try {
+
+    ~channelIndexMap = ();
+    mixerChannelsFlat.do { |arr, i| var mc = arr[0]; if (mc.notNil) { ~channelIndexMap[mc.inbus.index] = i } }; //ugh why
+
+    ~scrollView.remove;
+    ~scrollView = ScrollView(~mixerWindow, Rect(0, 0, width, height)).hasBorder_(false).background_(Color.gray(0.8));
+
+    top = height;
+
+    mixerChannelsFlat.do { |arr, i| var mc = arr[0]; var level = arr[1];
+      var bounds = Rect(i * trackWidth + 14, 0, trackWidth - 3, height - 3 - (level * levelAdjust));
+      UserView(~scrollView, bounds).background_(Color.gray(0.85));
+    };
+
+    //make sure right side margin is drawn
+    View(~scrollView, Rect(mixerChannels.size * trackWidth + 14, 0, 11, height));
+
+    // names
+    top = top - nameHeight - 5;
+    mixerChannelsFlat.do { |arr, i| var mc = arr[0]; var level = arr[1];
+      var bounds = Rect(i * trackWidth + 15, top - (level * levelAdjust), trackWidth - 5, 40);
+      StaticText(~scrollView, bounds).align_(\center).string_(mc.name).font_(Font.sansSerif(12, true)).stringColor_(Color.gray(0.5)).background_(Color.gray(0.9));
+      // draw folder indicators
+      if ((i > 0) and: { mixerChannelsFlat[i - 1][1] > level }) {
+        UserView(~scrollView, Rect(i * trackWidth + 7 - levelAdjust, top + nameHeight - (mixerChannelsFlat[i - 1][1] * levelAdjust), levelAdjust + 3, levelAdjust)).drawFunc_({ |view|
+          Pen.moveTo(0@0);
+          Pen.lineTo(levelAdjust@levelAdjust);
+          Pen.lineTo(view.bounds.width@levelAdjust);
+          Pen.lineTo(view.bounds.width@0);
+          Pen.lineTo(0@0);
+          Pen.color = Color.gray(0.9);
+          Pen.fill;
+        })//.background_(Color.red);
+      };
+    };
+
+    // out bus
+    top = top - outHeight - 2.5;
+    ~outViews = mixerChannelsFlat.collect { |arr, i| var mc = arr[0]; var level = arr[1];
+      var bounds = Rect(i * trackWidth + 15, top - (level * levelAdjust), trackWidth - 5, outHeight);
+      PopUpMenu(~scrollView, bounds).items_(BusDict.menuItems(Server.default)).font_(Font.sansSerif(10, true)).background_(Color.gray(0.65)).stringColor_(Color.gray(0.95)).action_({ |view|
+        mc.outbus = view.value;
+      }).value_(mc.outbus.index);
+    };
+
+    // mute/record
+    top = top - muteHeight -3;
+    mixerChannelsFlat.do { |arr, i| var mc = arr[0]; var level = arr[1];
+      [
+        Button(~scrollView, Rect(i * trackWidth + 25, top - (level * levelAdjust), muteHeight, muteHeight)).states_([
+          ["⚫︎" /*◉︎*/, Color.gray(0.6), Color.gray(0.8)],
+          ["⚫︎", Color.red, Color.black]])
+        .focusColor_(Color.clear).font_(Font.sansSerif(16, true)).action_({ |view|
+          if (view.value.asBoolean) {
+            mc.startRecord;
+            if (~timeline.isPlaying.not) {
+              ~timeline.play;
+            };
+          } {
+            mc.stopRecord;
+          };
+        }).value_(mc.isRecording),
+        Button(~scrollView, Rect(i * trackWidth + 58, top - (level * levelAdjust), muteHeight, muteHeight)).states_([
+          ["M", Color.gray(0.55), Color.gray(0.8)],
+          ["M", Color.gray(0.7), Color.gray(0.3)]])
+        .focusColor_(Color.clear).font_(Font.sansSerif(16, true)).action_({ |view|
+          mc.mute(view.value.asBoolean);
+        }).value_(mc.muted),
+      ]
+    };
+
+    // fader
+    top = top - meterHeight - 5;
+    ~peaks = mixerChannelsFlat.collect { |arr, i| var mc = arr[0]; var level = arr[1];
+      var levelWidth = 35 / mc.inChannels;
+      mc.inChannels.collect { |j|
+        LevelIndicator(~scrollView, Rect((i * trackWidth) + (j * levelWidth) + 20, top, levelWidth - 3, meterHeight - (level * levelAdjust)) ).warning_(0.9).critical_(0.99)
+        .drawsPeak_(true)
+        .numTicks_(0)
+        .numMajorTicks_(0)
+        .meterColor_(Color.hsv(0.3, 0.7, 0.99))
+        .warningColor_(Color.hsv(0.15, 0.6, 1))
+        .background_(Color.gray(0.6));
+      };
+    };
+
+    ~sliders = mixerChannelsFlat.collect { |arr, i| var mc = arr[0]; var level = arr[1];
+      var thisMeterHeight = meterHeight - (level * levelAdjust);
+      var bounds = Rect((i * trackWidth) + 55, top - 1, 30, thisMeterHeight + 2);
+      var slider = Slider(~scrollView, bounds).background_(Color.gray(0.8)).value_(faderSpec.unmap(mc.level)).action_({ |view|
+        //mc.level = faderSpec.map(view.value);
+        ESTimeline.at(mixerChannelNamesFlat[i][1]).setMixerChannel(mixerChannelNamesFlat[i][0], \level, faderSpec.map(view.value));
+      }).mouseDownAction_({ |view, x, y, mods, buttNum, clickCount|
+        if (clickCount > 1) {
+          ESTimeline.at(mixerChannelNamesFlat[i][1]).setMixerChannel(mixerChannelNamesFlat[i][0], \level, 1);
+          true;
+        } { false }
+      });
+
+      UserView(~scrollView, bounds).drawFunc_({
+        var color = Color.gray(0.5);
+        Pen.stringAtPoint("+12", 5@5, Font.sansSerif(10), color);
+        Pen.stringAtPoint("+6", 5@((1 - faderSpec.unmap(2)) * thisMeterHeight + 4), Font.sansSerif(10), color);
+        Pen.stringAtPoint("0", 5@((1 - faderSpec.unmap(1)) * thisMeterHeight), Font.sansSerif(10), color);
+        Pen.stringAtPoint("-6", 5@((1 - faderSpec.unmap(0.5)) * thisMeterHeight - 4), Font.sansSerif(10), color);
+        Pen.stringAtPoint("-12", 5@((1 - faderSpec.unmap(0.25)) * thisMeterHeight - 6), Font.sansSerif(10), color);
+        Pen.stringAtPoint("-20", 5@((1 - faderSpec.unmap(0.1)) * thisMeterHeight - 8), Font.sansSerif(10), color);
+        Pen.stringAtPoint("-inf", 5@(thisMeterHeight - 12), Font.sansSerif(10), color);
+      }).acceptsMouse_(false);
+      slider;
+    };
+
+    top = top - dbHeight - 2;
+    ~dbViews = mixerChannelsFlat.collect { |arr, i| var mc = arr[0];
+      var bounds = Rect(i * trackWidth + 20, top, trackWidth - 15, dbHeight);
+      NumberBox(~scrollView, bounds).background_(Color.gray(0.85)).normalColor_(Color.gray(0.4)).font_(Font.sansSerif(11)).value_(mc.level.ampdb).align_(\center).action_({ |view|
+        //mc.level = view.value.dbamp
+        ESTimeline.at(mixerChannelNamesFlat[i][1]).setMixerChannel(mixerChannelNamesFlat[i][0], \level, view.value.dbamp);
+      }).scroll_step_(0.05).shift_scale_(5).ctrl_scale_(2.5);
+    };
+
+    top = top - panHeight - 5;
+    ~panViews = mixerChannelsFlat.collect { |arr, i| var mc = arr[0];
+      var bounds = Rect(i * trackWidth + 55, top, panHeight, panHeight);
+      var panString = (mc.pan.abs * 100).asInteger.asString ++ " " ++ if (mc.pan.isPositive) { "R" } { "L" };
+      if (mc.pan == 0) { panString = "C" };
+      [
+        Knob(~scrollView, bounds).value_(panSpec.unmap(mc.pan)).centered_(true).mode_(\vert).step_(0.0025).action_({ |view|
+          //mc.pan = panSpec.map(view.value);
+          ESTimeline.at(mixerChannelNamesFlat[i][1]).setMixerChannel(mixerChannelNamesFlat[i][0], \pan, panSpec.map(view.value));
+        }).mouseDownAction_({ |view, x, y, mods, buttNum, clickCount|
+          if (clickCount > 1) { ESTimeline.at(mixerChannelNamesFlat[i][1]).setMixerChannel(mixerChannelNamesFlat[i][0], \pan, 0); true } { nil };
+        }),
+        StaticText(~scrollView, bounds.copy.left_(i * trackWidth + 20, top, 30, panHeight)).align_(\right).string_(panString).font_(Font.sansSerif(10, true)).stringColor_(Color.gray(0.5));
+      ];
+    };
+
+
+
+    // inserts
+    ~insertScrollViews = [];
+    ~insertUserViews = [];
+    mixerChannelNamesFlat.do { |arr, i| var name = arr[0]; var id = arr[1];
+      var insertView = ScrollView(~scrollView, Rect(i * trackWidth + 20, 5, trackWidth - 15, top - 15)).hasBorder_(false);
+      var timeline = ESTimeline.at(id);
+      var template = timeline.mixerChannelTemplates[name];
+      var funcViewFactory = { |bounds, index|
+        StaticText(insertView, bounds)
+        .string_(" { }")
+        .background_(Color.gray(0.6))
+        .font_(Font.monospace(9))
+        .stringColor_(Color.gray(0.8))
+        .mouseDownAction_({ |view, x, y, mods, buttNum, clickCount|
+          if (clickCount > 1) {
+            ESBulkEditWindow.code("Insert FX:", template.fx[index].asCompileString, { |string|
+              var func = string.interpret;
+              if (func.isNil) {
+                ESBulkEditWindow.ok;
+              } {
+                template.fx[index] = func;
+              };
+            });
+          };
+        }).setContextMenuActions(
+          MenuAction("Delete", {
+            template.fx.removeAt(index);
+            ~winFunc.value;
+          })
+        );
+      };
+      var sendViewFactory = { |bounds, index, method, stringColor, dbColor, barColor|
+        var send = template.perform(method)[index];
+        var clickPoint, clickVal;
+        UserView(insertView, bounds).background_(Color.gray(0.75)).drawFunc_({ |view|
+          var levelPx = faderSpec.unmap(send[1]) * view.bounds.width;
+          var dbString = send[1].ampdb.round(0.1).asString;
+          var dbStringWidth = QtGUI.stringBounds(dbString, Font.sansSerif(8)).width + 2;
+          Pen.addRect(Rect(0, 0, levelPx, view.bounds.height));
+          Pen.color = barColor;
+          Pen.fill;
+          Pen.stringAtPoint(send[0].asCompileString, 2@2, Font.monospace(9), stringColor);
+          Pen.stringAtPoint(dbString, (view.bounds.width - dbStringWidth)@4, Font.sansSerif(8), dbColor);
+        }).mouseDownAction_({ |view, x, y, mods, buttNum, clickCount|
+          if (clickCount > 1) {
+            var wasPre = method == 'preSends';
+            ESBulkEditWindow.keyValue("Edit Send:", "name", send[0].asCompileString, "db", send[1].ampdb.asCompileString, "pre fade", wasPre, callback: { |name, level, pre|
+              var arr = [name.interpret, level.interpret.dbamp];
+              if (pre) {
+                if (wasPre) {
+                  template.preSends[index] = arr;
+                } {
+                  template.postSends.removeAt(index);
+                  template.preSends = template.preSends.add(arr);
+                };
+              } {
+                if (wasPre) {
+                  template.preSends.removeAt(index);
+                  template.postSends = template.postSends.add(arr);
+                } {
+                  template.postSends[index] = arr;
+                }
+              };
+              timeline.initMixerChannels;
+            });
+          } {
+            clickPoint = x@y;
+            clickVal = template.perform(method)[index][1];
+          };
+        }).mouseMoveAction_({ |view, x, y, mods|
+          var yDelta = clickPoint.y - y;
+          var step = 0.005;
+          var val;
+          if (mods.isAlt) {
+            step = step * 0.2;
+          };
+          if (mods.isCmd) {
+            step = step * 2;
+          };
+          val = faderSpec.map(faderSpec.unmap(clickVal) + (yDelta * step));
+          template.perform(method)[index][1] = val;
+          timeline.mixerChannels[name].perform(method)[index].level = val;
+          view.refresh;
+        }).setContextMenuActions(
+          MenuAction("Delete", {
+            template.perform(method).removeAt(index);
+            ~winFunc.value;
+          })
+        );
+      };
+      var userViews = [];
+
+      max(((top - 20) / (insertHeight + 5)).asInteger, template.fx.size + template.preSends.size + template.postSends.size).do { |j|
+        var bounds = Rect(0, j * (insertHeight + 5) + 10, trackWidth - 15, insertHeight);
+        if (j < template.fx.size) {
+          userViews = userViews.add(funcViewFactory.(bounds, j));
+        } {
+          if (j < (template.fx.size + template.preSends.size)) {
+            var index = j - template.fx.size;
+            userViews = userViews.add(sendViewFactory.(bounds, index, 'preSends', Color.gray(0.9), Color.white, Color.gray(0.5)));
+          } {
+            if (j < (template.fx.size + template.preSends.size + template.postSends.size)) {
+              var index = j - template.fx.size - template.preSends.size;
+              userViews = userViews.add(sendViewFactory.(bounds, index, 'postSends', Color.gray(0.3), Color.gray(0.5), Color.white));
+            } {
+              UserView(insertView, bounds)
+              .background_(Color.gray(0.82)).setContextMenuActions(
+                MenuAction("New Insert Func", {
+                  ESBulkEditWindow.code("New Insert FX:", "{ |out|\n  var sig = In.ar(out, " ++ template.inChannels ++ ");\n  sig;\n}", { |string|
+                    var func = string.interpret;
+                    if (func.isNil) {
+                      ESBulkEditWindow.ok;
+                    } {
+                      template.fx = template.fx.add(func);
+                      ~winFunc.value;
+                    };
+                  });
+                }),
+                MenuAction("New Send", {
+                  ESBulkEditWindow.keyValue("New Send:", "name", "'verb'", "db", 0.0, "pre fade", callback: { |name, level, pre|
+                    if (pre) {
+                      template.preSends = template.preSends.add([name.interpret, level.interpret.dbamp]);
+                    } {
+                      template.postSends = template.postSends.add([name.interpret, level.interpret.dbamp]);
+                    };
+                    timeline.initMixerChannels;
+                  });
+                }),
+              );
+            };
+          };
+        };
+      };
+
+      ~insertScrollViews = ~insertScrollViews.add(insertView);
+      ~insertUserViews = ~insertUserViews.add(userViews);
+    };
+
+
+
+    // this is leaky when MC's are freed
+    // FIXED I think
+    // always call .release.free on a mixerChannel
+    // e.g. mixerChannels.do(_.release.free)
+
+    // and settings reset...
+    // make wrapper class for this
+    mixerChannelsFlat.do { |arr| var mc = arr[0];
+      mc.removeDependant(~dependantFunc);
+    };
+    ~dependantFunc = { |mc, what, args|
+      var i = ~channelIndexMap[mc.inbus.index];
+      if (i.notNil) {
+        //[i, what, args].postln;
+        if (what[\what] == \control) {
+          if (what[\name] == \level) {
+            ~sliders[i].value = faderSpec.unmap(mc.level);
+            ~dbViews[i].value = mc.level.ampdb;
+          };
+          if (what[\name] == \pan) {
+            var panString = (mc.pan.abs * 100).asInteger.asString ++ " " ++ if (mc.pan.isPositive) { "R" } { "L" };
+            if (mc.pan == 0) { panString = "C" };
+            ~panViews[i][0].value = panSpec.unmap(mc.pan);
+            ~panViews[i][1].string_(panString);
+          }
+        };
+      };
+    };
+    mixerChannelsFlat.do { |arr| var mc = arr[0];
+      mc.addDependant(~dependantFunc);
+    };
+  }; // end try
+};
+
+~timeline.removeDependant(~timelineDependantFunc);
+~timelineDependantFunc = { |self, what, args|
+  //[what, args].postln;
+  //timelineView.refresh;
+  defer {
+    switch (what)
+    { \initMixerChannels } {
+      ~winFunc.value;
+    }
+    { \playbar } {
+      ~winFunc.value;
+    }
+    { \track } {
+      if (args.indexOf(\initMixerChannels).notNil) {
+        ~winFunc.value;
+      }
+    }
+    { \isPlaying } {
+      var names;
+
+      if (~timeline.isPlaying) {
+        var waitTime = 5.reciprocal; // 5 fps refresh mixer
+        names = ~timeline.orderedMixerChannelNames;
+        ~mixerRout.stop; // just to make sure
+        ~mixerRout = {
+          inf.do { |i|
+            var nowNames = ~timeline.orderedMixerChannelNames;
+            if (nowNames != names) {
+              names = nowNames;
+              ~winFunc.value;
+            };
+            waitTime.wait;
+          };
+        }.fork(AppClock) // lower priority clock for GUI updates
+      } {
+        ~mixerRout.stop;
+        ~winFunc.value;
+      };
+    }
+  }
+};
+~timeline.addDependant(~timelineDependantFunc);
+
+
+~winFunc.value;
+)
+```
+
 If you do try it out, I would love to know your thoughts, ideas, critiques, and if you find bugs etc please report them on the github issue page with steps to reproduce.
