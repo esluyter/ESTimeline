@@ -443,7 +443,10 @@ ESTimelineView : UserView {
           if (mods.isShift) {
             timelineController.deleteTime(timeSelection);
           } {
-            timeline.removeTrack(hoverTrack.index);
+            if (hoverTrack.notNil) {
+              timeline.removeTrack(hoverTrack.index);
+              hoverTrack = nil;
+            };
           };
         } {
           if (hoverClip.notNil and: this.selectedClips.includes(hoverClip).not) {
@@ -458,10 +461,12 @@ ESTimelineView : UserView {
       };
       // cmd-t new track (shift before, default after)
       if (mods.isCmd and: (key == 84)) {
-        if (mods.isShift) {
-          timeline.addTrack(hoverTrack.index);
-        } {
-          timeline.addTrack(hoverTrack.index + 1);
+        if (hoverTrack.notNil) {
+          if (mods.isShift) {
+            timeline.addTrack(hoverTrack.index);
+          } {
+            timeline.addTrack(hoverTrack.index + 1);
+          };
         };
       };
 
