@@ -75,7 +75,6 @@ Also note that because timelines are built to execute user-supplied code they ar
 - Time features
   - Clock follow: e.g. sync up with an Ableton timeline or midi show control
 - Track/clips
-  - Streamlined Synth/SynthDef/Envelope editing flow
   - More clip types (e.g. OSCdef, loop, audio file, midi/piano/drum roll, VST)
   - Reference clips to create clones that all change together
 - Envelopes
