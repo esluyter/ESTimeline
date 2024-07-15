@@ -26,7 +26,7 @@ ESTrack {
   sortClips {
     // good to call this before assuming they are ordered
     clips.sort { |a, b|
-      a.startTime < b.startTime;
+      a.endTime < b.endTime;
     };
   }
 
@@ -56,10 +56,8 @@ ESTrack {
       // as we are scheduling these events
       // it begins at our startTime
       var t = startTime;
-      // make sure clips are in order
-      this.sortClips;
       // iterate over all the clips
-      clips.do { |clip|
+      clips.copy.sort({ |a, b| a.startTime < b.startTime }).do { |clip|
         if (clip.endTime < t) {
           // skip all clips previous to t, i.e. startTime
         } {

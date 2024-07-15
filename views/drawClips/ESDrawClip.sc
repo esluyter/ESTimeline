@@ -17,7 +17,13 @@ ESDrawClip {
     Pen.strokeColor = Color.cyan;
     Pen.width = 2;
     Pen.addRect(Rect(left, top, width, height));
-    if (selected and: drawBorder) { Pen.fillStroke } { Pen.fill };
+    if (selected and: drawBorder) {
+      Pen.fillStroke
+    } {
+      Pen.strokeColor = Color.gray(0.5, 0.5);
+      Pen.width = 0.5;
+      Pen.fillStroke
+    };
 
     if (clip.mute) {
       var title = clip.prTitle;
@@ -44,6 +50,7 @@ ESDrawClip {
       };
 
       Pen.color = Color.gray(0.8, 0.5);
+      Pen.addRect(Rect(left - 1, top, 1, height));
       Pen.addRect(Rect(left + width - 1, top, 1, height));
       Pen.fill;
 
