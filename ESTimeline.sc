@@ -293,14 +293,17 @@ ESTimeline {
     };
   }
 
-  now_ { |val, force = true|
+  now_ { |val, force = true, propagate = true|
     val = max(val, 0);
     if (isPlaying and: force) {
       this.play(val);
     } {
       playbar = val;
-      // this is ugly and duplicates code in ESTimelineClip
-      this.clips.select({ |clip| clip.class == ESTimelineClip }).do(_.refreshTimelineNow);
+      if (propagate) {
+        // this is ugly and duplicates code in ESTimelineClip
+        this.clips.select({ |clip| clip.class == ESTimelineClip }).do(_.refreshChildNow);
+        if (parentClip.notNil) { parentClip.refreshParentNow };
+      };
       this.changed(\playbar);
     };
   }
@@ -362,7 +365,11 @@ ESTimeline {
     */
 
     if (parentClip.notNil and: { parentClip.useParentClock }) {
-      playClock = parentClip.track.timeline.playClock;
+      var parentTimeline = parentClip.track.timeline;
+      if (parentTimeline.playClock.isNil or: { parentTimeline.playClock.isRunning.not }) {
+        parentTimeline.prMakeClock;
+      };
+      playClock = parentTimeline.playClock;
     } {
       playClock = altClock ?? { clock = TempoClock(tempo); };
     };
