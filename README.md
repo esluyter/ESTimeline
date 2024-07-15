@@ -357,6 +357,9 @@ loop {
 <br />
 <br />
 
+<details>
+  <summary><strong>Current ad-hoc mixer interface</strong></summary>
+
 ## Current ad-hoc mixer interface
 Everything works, and everything saves with timeline except mixer channel output bus (will reset to default)
 ```
@@ -796,6 +799,8 @@ OSCdef(\test, { |msg|
 ~winFunc.value;
 )
 ```
+</details>
+
 <br />
 <br />
 If you do try it out, I would love to know your thoughts, ideas, critiques, and if you find bugs etc please report them on the github issue page with steps to reproduce.
