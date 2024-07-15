@@ -449,8 +449,9 @@ ESTimelineView : UserView {
             timelineController.deleteTime(timeSelection);
           } {
             if (hoverTrack.notNil) {
-              timeline.removeTrack(hoverTrack.index);
-              hoverTrack = nil;
+              var index = hoverTrack.index;
+              timeline.removeTrack(index);
+              hoverTrack = timeline.tracks[min(index, timeline.tracks.size - 1)];
             };
           };
         } {

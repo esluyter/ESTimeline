@@ -494,9 +494,9 @@ ESTimeline {
       currentState = undoPoint.interpret.asESArray;
     };
     currentState = undoPoint;
-    //{
-    this.prFree;
-    //Server.default.sync;
+
+    this.prFree(false); // don't free mixer channels yet, this will happen in this.init -> this.initMixerChannels
+
     #tracks, thisTempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, dummyGD, dummySTG, dummyUMC, mixerChannelTemplates, globalMixerChannelNames = Object.fromESArray(currentState);
 
     mixerChannelTemplates = mixerChannelTemplates ?? ();
@@ -507,9 +507,9 @@ ESTimeline {
       undoStack = [];
       redoStack = [];
     };
+
     this.init;
     this.changed(\restoreUndoPoint);
-    //}.fork(AppClock)
   }
 
   new { |clearUndoStack = false|
@@ -557,8 +557,10 @@ ESTimeline {
     };
   }
 
-  prFree {
-    this.prFreeMixerChannels;
+  prFree { |freeMixerChannels = true|
+    if (freeMixerChannels) {
+      this.prFreeMixerChannels;
+    };
     this.cleanup;
     tracks.do(_.free);
   }

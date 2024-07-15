@@ -121,6 +121,7 @@ ESTrackPanelView : UserView {
     if (key == 16777220) {
       track.name = if (view.string == "") { nil } { view.string.asSymbol };
       view.visible = false;
+      timeline.addUndoPoint;
       ^true;
     };
     // tab to accept and move to next
@@ -129,6 +130,7 @@ ESTrackPanelView : UserView {
       view.visible = false;
       nextName = track.timeline.tracks[track.index + 1].name ?? "";
       trackButts[track.index + 1].nameField.string_(nextName).visible_(true).select(nextName.asString.size, 0).focus;
+      timeline.addUndoPoint;
       ^true;
     };
     // shift tab move to previous
@@ -137,6 +139,7 @@ ESTrackPanelView : UserView {
       view.visible = false;
       nextName = track.timeline.tracks[track.index - 1].name ?? "";
       trackButts[track.index - 1].nameField.string_(nextName).select(nextName.asString.size, 0).visible_(true).focus;
+      timeline.addUndoPoint;
       ^true;
     };
     // esc to cancel
