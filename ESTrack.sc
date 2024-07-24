@@ -5,11 +5,32 @@ ESTrack {
   var playRout;
   var dependantFunc;
 
+  envs {
+    if (useMixerChannel and: timeline.useMixerChannel) {
+      var envs = this.mixerChannelTemplate.envs;
+      var ret = [];
+      [\level, \pan].do { |thing| var env = envs.perform(thing); if (env.notNil) { ret = ret.add(thing->env) } };
+      envs.preSends.do { |env, i|
+        ret = ret.add(("pre" ++ i).asSymbol->env);
+      };
+      envs.postSends.do { |env, i|
+        ret = ret.add(("post" ++ i).asSymbol->env);
+      };
+      envs.fx.do { |fxEv, i|
+        fxEv.keysValuesDo { |key, env|
+          ret = ret.add(("fx" ++ i ++ key).asSymbol->env);
+        };
+      };
+      ^ret;
+    } {
+      ^[];
+    };
+  }
+
   totalHeightMultiplier {
-    var template = this.mixerChannelTemplate;
     // note: this isn't right, but just doing this to have something to test with
     //var envHeight = (template.fx.size + template.preSends.size + template.postSends.size) * timeline.envHeightMultiplier;
-    var envs = template.envs.collect { |item| if (item.isArray and: item.size == 0) { nil } { item }};
+    var envs = this.envs;
     var envHeight = envs.size * timeline.envHeightMultiplier;
     ^heightMultiplier + envHeight;
   }
