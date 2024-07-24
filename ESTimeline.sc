@@ -1,5 +1,5 @@
 ESTimeline {
-  var <tracks, <tempo, <>prepFunc, <>cleanupFunc, <>bootOnPrep, <>useEnvir, <>optimizeView, <gridDivision, <snapToGrid, <useMixerChannel, <mixerChannelTemplates, <globalMixerChannelNames;
+  var <tracks, tempo, <>prepFunc, <>cleanupFunc, <>bootOnPrep, <>useEnvir, <>optimizeView, <gridDivision, <snapToGrid, <useMixerChannel, <mixerChannelTemplates, <globalMixerChannelNames;
   var <isPlaying = false;
   var <playbar = 0.0;
   var playBeats, playStartTime, <playClock;
@@ -20,16 +20,26 @@ ESTimeline {
 
   *at { |val| ^timelines[val] }
 
-  //tempo { ^clock.tempo; }
+  tempo {
+    if (parentClip.notNil and: { parentClip.useParentClock }) {
+      ^parentClip.track.timeline.tempo;
+    } {
+      ^tempo;
+    };
+  }
   tempo_ { |val|
-    tempo = val;
-    if (clock.notNil) {
-      clock.tempo_(val);
-      this.currentClips.do(_.prTempoChanged(val));
+    if (parentClip.notNil and: { parentClip.useParentClock }) {
+      parentClip.track.timeline.tempo = val;
+    } {
+      tempo = val;
+      if (clock.notNil) {
+        clock.tempo_(val);
+        this.currentClips.do(_.prTempoChanged(val));
+      };
     };
     this.changed(\tempo, val);
   }
-  tempoBPM { ^tempo * 60 }
+  tempoBPM { ^this.tempo * 60 }
   tempoBPM_ { |val| this.tempo_(val / 60); }
   gridDivision_ { |val| gridDivision = val; this.changed(\gridDivision); }
   snapToGrid_ { |val| snapToGrid = val; this.changed(\snapToGrid); }
