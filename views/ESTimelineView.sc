@@ -552,7 +552,20 @@ ESTimelineView : UserView {
           timeline.tracks.do { |track, i|
             var clip = this.clipAtX(track, left)[0];
             if ((clip.class == ESTimelineClip) and: { clip.useParentClock.not } and: { timeline.isPlaying }) {
+              if (clip.timeline.isPlaying) {
+                var leftOffset = this.absoluteTimeToPixels(clip.startTime + startTime - clip.offset);
+                // sounding playhead in black
+                left = this.absoluteTimeToPixels(clip.timeline.soundingNow) + leftOffset;
+                Pen.addRect(Rect(left, i * trackHeight, 2, trackHeight));
+                Pen.color = Color.black;
+                Pen.fill;
 
+                // "scheduling playhead" in gray
+                Pen.color = Color.gray(0.5, 0.5);
+                left = this.absoluteTimeToPixels(clip.timeline.now) + leftOffset;
+                Pen.addRect(Rect(left, i * trackHeight, 2, trackHeight));
+                Pen.fill;
+              };
             } {
               // sounding playhead in black
               left = this.absoluteTimeToPixels(timeline.soundingNow);
