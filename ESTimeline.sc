@@ -153,7 +153,7 @@ ESTimeline {
           };
         };
         template.postSends.do { |arr| var sendName = arr[0]; var level = arr[1];
-          var mc = this.mixerChannel(sendName).postln;
+          var mc = this.mixerChannel(sendName);
           if (mc.notNil and: mixerChannels[name].notNil) {
             mixerChannels[name].newPostSend(mc, level);
           };

@@ -40,7 +40,7 @@ ESDrawClip {
         width = width - (clipLeft - left);
         left = clipLeft;
       };
-      Pen.stringAtPoint(title.postcs, (left + 3.5)@(top + 2), font, if ((clip.class == ESTimelineClip) or: (clip.class == ESClip)) { Color.gray(0.5, 0.5) } { clip.color.alpha_(0.3) } );
+      Pen.stringAtPoint(title, (left + 3.5)@(top + 2), font, if ((clip.class == ESTimelineClip) or: (clip.class == ESClip)) { Color.gray(0.5, 0.5) } { clip.color.alpha_(0.3) } );
     } {
       if (editingMode and: this.hasEditingMode) {
         Pen.addRect(Rect(left, top, width, height));
