@@ -154,8 +154,12 @@ ESTimelineView : UserView {
       };
 
       if (hoverClip.notNil and: editingMode) {
+        var trackHeights = this.trackHeights;
+        var top = 0;
+        var i = hoverClip.track.index;
+        i.do { |j| top = top + trackHeights[j] };
         // again, not the best:
-        hoverClip.drawClip.prMouseDown(x, y - (trackHeight * hoverClip.track.index), mods, buttNum, clickCount, *this.clipBounds(hoverClip))
+        hoverClip.drawClip.prMouseDown(x, y - top, mods, buttNum, clickCount, *this.clipBounds(hoverClip))
       };
     };
 
@@ -346,8 +350,12 @@ ESTimelineView : UserView {
         };
       } {  // if editingMode
         if (hoverClip.notNil) {
+          var trackHeights = this.trackHeights;
+          var top = 0;
+          var i = hoverClip.track.index;
+          i.do { |j| top = top + trackHeights[j] };
           //                        not the best
-          hoverClip.drawClip.prMouseMove(x, y - (trackHeight * hoverClip.track.index), xDelta, yDelta, mods, *this.clipBounds(hoverClip));
+          hoverClip.drawClip.prMouseMove(x, y - top, xDelta, yDelta, mods, *this.clipBounds(hoverClip));
         };
       };// end editingMode
 
@@ -357,18 +365,21 @@ ESTimelineView : UserView {
     this.mouseOverAction = { |view, x, y|
       var i, j;
       var oldHoverClip = hoverClip;
+      var trackHeights = this.trackHeights;
+      var top = 0;
       # hoverClip, i, j, hoverCode = this.clipAtPoint(x@y);
       hoverTrack = timeline.tracks[i];
       hoverTime = this.pixelsToAbsoluteTime(x);
+      i.do { |j| top = top + trackHeights[j] };
 
       if (editingMode.not) {
         switch (hoverCode)
         {1} { // left edge
-          dragView.bounds_(dragView.bounds.origin_(this.absoluteTimeToPixels(hoverClip.startTime)@(i * trackHeight)));
+          dragView.bounds_(dragView.bounds.origin_(this.absoluteTimeToPixels(hoverClip.startTime)@top));
           dragView.visible_(true);
         }
         {2} { // right edge
-          dragView.bounds_(dragView.bounds.origin_((this.absoluteTimeToPixels(hoverClip.endTime) - 2)@(i * trackHeight)));
+          dragView.bounds_(dragView.bounds.origin_((this.absoluteTimeToPixels(hoverClip.endTime) - 2)@top));
           dragView.visible_(true);
         }
         { // default
@@ -380,7 +391,7 @@ ESTimelineView : UserView {
         };
         if (hoverClip.notNil) {
           //                  this is bad:
-          hoverClip.drawClip.prHover(x, y - (trackHeight * hoverClip.track.index), hoverTime, *this.clipBounds(hoverClip));
+          hoverClip.drawClip.prHover(x, y - top, hoverTime, *this.clipBounds(hoverClip));
         };
       };
     };
@@ -526,71 +537,82 @@ ESTimelineView : UserView {
     );
   }
 
+  trackHeights {
+    var heightMultipliers = timeline.tracks.collect(_.totalHeightMultiplier);
+    var sum = heightMultipliers.sum;
+    var height = this.bounds.height;
+    trackHeight = height / sum;
+    ^heightMultipliers * trackHeight;
+  }
+
   makeTrackViews {
     // call this when number of tracks changes
     if (this.notNil and: { this.bounds.notNil }) { // wtf?
       var width = this.bounds.width;
       var height = this.bounds.height;
-
-      //[width, height].postln;
-
+      var trackHeights = this.trackHeights;
+      var top = 0;
+      // necessary for scroll view
       heightRatio = height / this.parent.bounds.height;
 
+      // make track views
       trackViews.do(_.remove);
-      trackHeight = height / timeline.tracks.size;
       trackViews = timeline.tracks.collect { |track, i|
-        var top = i * trackHeight;
-        ESTrackView(this, Rect(0, top, width, trackHeight), track)
+        var tv = ESTrackView(this, Rect(0, top, width, trackHeights[i]), track);
+        top = top + trackHeights[i];
+        tv;
       };
 
+      // draw guide lines
       [playheadView, dragView, leftGuideView, rightGuideView].do(_.remove);
       playheadView = UserView(this, this.bounds.copy.origin_(0@0))
       .acceptsMouse_(false)
       .drawFunc_({
         var left = this.absoluteTimeToPixels(timeline.soundingNow);
-        Pen.use {
-          timeline.tracks.do { |track, i|
-            var clip = this.clipAtX(track, left)[0];
-            if ((clip.class == ESTimelineClip) and: { clip.useParentClock.not } and: { timeline.isPlaying }) {
-              if (clip.timeline.isPlaying) {
-                var leftOffset = this.absoluteTimeToPixels(clip.startTime + startTime - clip.offset);
-                // sounding playhead in black
-                left = this.absoluteTimeToPixels(clip.timeline.soundingNow) + leftOffset;
-                Pen.addRect(Rect(left, i * trackHeight, 2, trackHeight));
-                Pen.color = Color.black;
-                Pen.fill;
-
-                // "scheduling playhead" in gray
-                if (clip.timeline.now < (clip.offset + clip.duration)) {
-                  Pen.color = Color.gray(0.5, 0.5);
-                  left = this.absoluteTimeToPixels(clip.timeline.now) + leftOffset;
-                  Pen.addRect(Rect(left, i * trackHeight, 2, trackHeight));
-                  Pen.fill;
-                };
-              };
-              if (timeline.now > clip.endTime) {
-                // "scheduling playhead" in gray
-                Pen.color = Color.gray(0.5, 0.5);
-                left = this.absoluteTimeToPixels(timeline.now);
-                Pen.addRect(Rect(left, i * trackHeight, 2, trackHeight));
-                Pen.fill;
-              };
-            } {
+        var top = 0;
+        timeline.tracks.do { |track, i|
+          var clip = this.clipAtX(track, left)[0];
+          if ((clip.class == ESTimelineClip) and: { clip.useParentClock.not } and: { timeline.isPlaying }) {
+            if (clip.timeline.isPlaying) {
+              var leftOffset = this.absoluteTimeToPixels(clip.startTime + startTime - clip.offset);
               // sounding playhead in black
-              left = this.absoluteTimeToPixels(timeline.soundingNow);
-              Pen.addRect(Rect(left, i * trackHeight, 2, trackHeight));
+              left = this.absoluteTimeToPixels(clip.timeline.soundingNow) + leftOffset;
+              Pen.addRect(Rect(left, top, 2, trackHeights[i]));
               Pen.color = Color.black;
               Pen.fill;
 
-              if (timeline.isPlaying) {
-                // "scheduling playhead" in gray
+              // "scheduling playhead" in gray
+              if (clip.timeline.now < (clip.offset + clip.duration)) {
                 Pen.color = Color.gray(0.5, 0.5);
-                left = this.absoluteTimeToPixels(timeline.now);
-                Pen.addRect(Rect(left, i * trackHeight, 2, trackHeight));
+                left = this.absoluteTimeToPixels(clip.timeline.now) + leftOffset;
+                Pen.addRect(Rect(left, top, 2, trackHeights[i]));
                 Pen.fill;
               };
             };
+            if (timeline.now > clip.endTime) {
+              // "scheduling playhead" in gray
+              Pen.color = Color.gray(0.5, 0.5);
+              left = this.absoluteTimeToPixels(timeline.now);
+              Pen.addRect(Rect(left, top, 2, trackHeights[i]));
+              Pen.fill;
+            };
+          } {
+            // sounding playhead in black
+            left = this.absoluteTimeToPixels(timeline.soundingNow);
+            Pen.addRect(Rect(left, top, 2, trackHeights[i]));
+            Pen.color = Color.black;
+            Pen.fill;
+
+            if (timeline.isPlaying) {
+              // "scheduling playhead" in gray
+              Pen.color = Color.gray(0.5, 0.5);
+              left = this.absoluteTimeToPixels(timeline.now);
+              Pen.addRect(Rect(left, top, 2, trackHeights[i]));
+              Pen.fill;
+            };
           };
+
+          top = top + trackHeights[i];
         };
       });
       dragView = View(this, Rect(0, 0, 2, trackHeight)).visible_(false).background_(Color.red).acceptsMouse_(false);
@@ -619,21 +641,20 @@ ESTimelineView : UserView {
   }
 
   clipAtPoint { |point|
-    timeline.tracks.do { |track, i|
-      var top = i * trackHeight;
-      if (point.y.inRange(top, top + trackHeight)) {
-        ^this.clipAtX(track, point.x, i);
-      };
-    };
-    ^[nil, 0, nil, nil];
+    var track = this.trackAtY(point.y);
+    ^this.clipAtX(track, point.x, track.index);
   }
 
   trackAtY { |y|
+    var trackHeights = this.trackHeights;
+    var top = 0;
+
     timeline.tracks.do { |track, i|
-      var bottom = (i + 1) * trackHeight;
+      var bottom = top + trackHeights[i];
       if (y < bottom) {
         ^track;
       };
+      top = bottom;
     };
     ^timeline.tracks.last;
   }

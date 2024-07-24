@@ -26,7 +26,8 @@ ESTrackPanelView : UserView {
     // call this when number of tracks changes
     var width = this.bounds.width;
     var height = timelineView.bounds.height;
-    var trackHeight = height / timeline.tracks.size;
+    var trackHeights = timelineView.trackHeights;
+    var top = 0;
 
     this.bounds_(this.bounds.height_(height));
 
@@ -35,8 +36,7 @@ ESTrackPanelView : UserView {
 
     trackViews = timeline.tracks.collect { |track, i|
       var ev;
-      var top = i * trackHeight;
-      var view = UserView(this, Rect(0, top, width, trackHeight))
+      var view = UserView(this, Rect(0, top, width, trackHeights[i]))
       .drawFunc_({
         Pen.addRect(Rect(0, 0, width, height));
         Pen.color = Color.gray(if (track.shouldPlay) { 0.8 } { 0.68 });
@@ -44,12 +44,12 @@ ESTrackPanelView : UserView {
         Pen.addRect(Rect(0, 0, width, 1));
         Pen.color = Color.gray(0.55);
         Pen.fill;
-        Pen.addRect(Rect(width - 1, 0, 1, trackHeight));
+        Pen.addRect(Rect(width - 1, 0, 1, trackHeights[i]));
         Pen.color = Color.gray(0.65);
         Pen.fill;
         if (track.name.notNil) {
           Pen.color = Color.gray(1, 0.3);
-          Pen.addRect(Rect(0, 33, width, trackHeight - 36));
+          Pen.addRect(Rect(0, 33, width, trackHeights[i] - 36));
           Pen.fill;
         };
       })
@@ -68,7 +68,7 @@ ESTrackPanelView : UserView {
       StaticText(view, Rect(2, 4, 18, 25)).string_(i.asString).stringColor_(Color.gray(0.4)).font_(Font.monospace(14));
 
       ev = (
-        nameText: StaticText(view, Rect(2, 35, width - 4, trackHeight - 35)).align_(\topLeft).string_(track.name ?? "").stringColor_(Color.gray(0.5)).font_(Font.sansSerif(14, true)).canReceiveDragHandler_(true)
+        nameText: StaticText(view, Rect(2, 35, width - 4, trackHeights[i] - 35)).align_(\topLeft).string_(track.name ?? "").stringColor_(Color.gray(0.5)).font_(Font.sansSerif(14, true)).canReceiveDragHandler_(true)
         .receiveDragHandler_({
           var thisTrack = View.currentDrag;
           timeline.moveTrack(thisTrack.index, i);
@@ -78,7 +78,7 @@ ESTrackPanelView : UserView {
             ev[\nameField].string_(nextName).select(nextName.asString.size, 0).visible_(true).focus;
           };
         }),
-        nameField: TextView(view, Rect(2, 35, width - 4, trackHeight - 40)).keyDownAction_({ |...args| this.handleKey(track, *args) }).focusLostAction_({ |view|
+        nameField: TextView(view, Rect(2, 35, width - 4, trackHeights[i] - 40)).keyDownAction_({ |...args| this.handleKey(track, *args) }).focusLostAction_({ |view|
           // if you click somewhere else, accept changes
           try { // why?
             if (view.visible) {
@@ -110,6 +110,7 @@ ESTrackPanelView : UserView {
         }).value_(track.solo),
       );
       trackButts = trackButts.add(ev);
+      top = top + trackHeights[i];
       view;
     };
   }

@@ -102,6 +102,7 @@ ESTimelineWindow : Window {
       timelineView.makeTrackViews;
     };
     timelineView = ESTimelineView(scrollView, Rect(leftPanelWidth, 0, rightPanelWidth, this.bounds.height - 60), timeline, duration: max(timeline.duration + 5, 15));
+    timelineView.postln;
     trackPanelView = ESTrackPanelView(scrollView, Rect(0, 0, leftPanelWidth, this.bounds.height - 60), timelineView);
     rulerView = ESRulerView(this, Rect(leftPanelWidth, 40, rightPanelWidth, 20), timeline, timelineView).background_(Color.gray(0.97)).resize_(2);
 
