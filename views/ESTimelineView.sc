@@ -641,18 +641,30 @@ ESTimelineView : UserView {
   }
 
   clipAtPoint { |point|
-    var track = this.trackAtY(point.y);
-    ^this.clipAtX(track, point.x, track.index);
+    var track = this.trackAtY(point.y, true);
+    if (track.notNil) {
+      ^this.clipAtX(track, point.x, track.index);
+    } {
+      ^[nil, 0, nil, nil];
+    }
   }
 
-  trackAtY { |y|
+  trackAtY { |y, onlyClip = false|
     var trackHeights = this.trackHeights;
     var top = 0;
 
     timeline.tracks.do { |track, i|
       var bottom = top + trackHeights[i];
       if (y < bottom) {
-        ^track;
+        if (onlyClip.not) {
+          ^track;
+        } {
+          if (y < (top + trackHeight)) {
+            ^track;
+          } {
+            ^nil;
+          };
+        }
       };
       top = bottom;
     };
