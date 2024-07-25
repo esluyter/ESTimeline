@@ -55,9 +55,10 @@ ESRulerView : UserView {
               "%:%".format(minutes, seconds);
             };
             Pen.addRect(Rect(left, 0, 1, 20));
+            Pen.color = Color.gray(0.35);
             Pen.fill;
-            Pen.stringAtPoint(i.asString, (left + 3)@(-1), Font("Courier New", 13));
-            Pen.stringAtPoint(string, (left + 4)@12, Font("Courier New", 9), Color.gray(0.5));
+            Pen.stringAtPoint(i.asString, (left + 3)@(0), Font.monospace(11), Color.gray(0.35));
+            Pen.stringAtPoint(string, (left + 4)@11.5, Font.sansSerif(9), Color.gray(0.5));
           };
         };
 

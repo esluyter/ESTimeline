@@ -572,7 +572,7 @@ ESTimelineView : UserView {
         var top = 0;
         timeline.tracks.do { |track, i|
           var clip = this.clipAtX(track, left)[0];
-          if ((clip.class == ESTimelineClip) and: { clip.useParentClock.not } and: { timeline.isPlaying }) {
+          if ((clip.class == ESTimelineClip)/* and: { clip.useParentClock.not }*/ and: { timeline.isPlaying }) {
             if (clip.timeline.isPlaying) {
               var leftOffset = this.absoluteTimeToPixels(clip.startTime + startTime - clip.offset);
               // sounding playhead in black
