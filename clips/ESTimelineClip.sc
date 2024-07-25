@@ -1,5 +1,6 @@
 ESTimelineClip : ESClip {
   var <timeline, <useParentClock;
+  var <stopRout;
 
   useParentClock_ { |val|
     useParentClock = val;
@@ -45,6 +46,8 @@ ESTimelineClip : ESClip {
   }
 
   play { |startOffset = 0.0, clock, maxDuration = inf|
+    var waitTime = min(duration - startOffset, maxDuration);
+
     clock = timeline.prMakeClock;
 
     // stop if we're playing
@@ -60,14 +63,25 @@ ESTimelineClip : ESClip {
       // start the clip from specified start offset
       this.prStart(startOffset, clock);
 
-      // wait the appropriate time, then stop
-      min(duration - startOffset, maxDuration).wait;
-      this.stop;
+      // wait the appropriate time, then stop if there hasn't been a goto
+      waitTime.wait;
+      if (timeline.now.fuzzyEqual((offset + duration), 0.1).asBoolean) {
+        this.stop;
+      };
     }.fork(clock);
+
+    // make sure clip stops when parent timeline reaches end
+    stopRout = {
+      waitTime.wait;
+      if (isPlaying) {
+        this.stop;
+      };
+    }.fork(track.timeline.playClock);
   }
 
   prStop { |hard = false|
     timeline.stop(hard);
+    stopRout.stop; // playRout has already been stopped
   }
 
   prStart { |startOffset = 0.0, clock|
