@@ -260,6 +260,21 @@ ESDrawEnvClip : ESDrawClip {
     ^points;
   }
 
+  // temp for drawing mc envelopes
+  *envBreakPoints { |thisEnv, left, top, width, height, pratio, tratio|
+    var time = 0;
+    var points = [];
+    thisEnv.levels.do { |level, i|
+      var x = left + (time * tratio);
+      var y = top + ((1 - level) * height);
+      points = points.add(x@y);
+      if (i < thisEnv.times.size) {
+        time = time + thisEnv.times[i];
+      };
+    };
+    ^points;
+  }
+
   envFromBreakPoints { |points, left, top, width, height|
     var pratio = clip.duration / width;
     var tratio = pratio.reciprocal;

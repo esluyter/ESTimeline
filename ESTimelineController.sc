@@ -57,7 +57,7 @@ ESTimelineController {
   addEnvForSynth { |clip, selectedClips|
     if (clip.class == ESSynthClip) {
       var names = clip.argControls.collect(_.name);
-      var thisTrackIndex = clip.track.index + 1;
+      var thisTrackIndex = clip.track.index;
       var arr = if (selectedClips.includes(clip)) { selectedClips.asArray } { [clip] };
       ESBulkEditWindow.menu("Add Env for Synth argument",
         "arg", names, names.indexOf(\amp),
