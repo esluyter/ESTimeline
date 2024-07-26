@@ -11,14 +11,20 @@ ESTrack {
       var ret = [];
       [\level, \pan].do { |thing| var env = envs.perform(thing); if (env.notNil) { ret = ret.add(thing->env) } };
       envs.preSends.do { |env, i|
-        ret = ret.add(("pre" ++ i).asSymbol->env);
+        if (env.notNil) {
+          ret = ret.add(("pre" ++ i).asSymbol->env);
+        };
       };
       envs.postSends.do { |env, i|
-        ret = ret.add(("post" ++ i).asSymbol->env);
+        if (env.notNil) {
+          ret = ret.add(("post" ++ i).asSymbol->env);
+        };
       };
       envs.fx.do { |fxEv, i|
-        fxEv.keysValuesDo { |key, env|
-          ret = ret.add(("fx" ++ i ++ key).asSymbol->env);
+        if (fxEv.notNil) {
+          fxEv.keysValuesDo { |key, env|
+            ret = ret.add(("fx" ++ i ++ key).asSymbol->env);
+          };
         };
       };
       ^ret;
@@ -155,7 +161,7 @@ ESTrack {
   }
 
   mixerChannelTemplate {
-    ^timeline.mixerChannelTemplates[this.mixerChannelName] ?? timeline.defaultMixerChannelTemplate;
+    ^timeline.mixerChannelTemplates[this.mixerChannelName] ?? ESMixerChannelTemplate();
   }
 
   /*

@@ -3,7 +3,7 @@ ESTimeline {
   var <isPlaying = false;
   var <playbar = 0.0;
   var playBeats, playStartTime, <playClock;
-  var dependantFunc;
+  var dependantFunc, templateDependantFunc;
   var <>undoStack, <>redoStack, <>currentState;
   var <envir;
   var <>parentClip;
@@ -55,9 +55,11 @@ ESTimeline {
     this.changed(\useMixerChannel);
   }
 
+  /*
   defaultMixerChannelTemplate {
     ^(inChannels: 2, outChannels: 2, level: 1, pan: 0, fx: [], preSends: [], postSends: [], envs: (level: nil, pan: nil, fx: [], preSends: [], postSends: []));
   }
+  */
 
   storeArgs { ^[tracks, this.tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames] }
   defaultUndoPoint { ^[[ESTrack([])], 1, nil, nil, bootOnPrep, useEnvir, optimizeView, 4, false, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames].asESArray }
@@ -146,7 +148,8 @@ ESTimeline {
 
       // put \master at the end of the global mixer channels for best results
       globalMixerChannelNames.reverse.do { |name|
-        var template = mixerChannelTemplates[name] ?? this.defaultMixerChannelTemplate;
+        //var template = this.defaultMixerChannelTemplate ++ (mixerChannelTemplates[name] ?? ());
+        var template = mixerChannelTemplates[name] ?? ESMixerChannelTemplate();
         newTemplates[name] = template;
         if (mixerChannels[name].isNil) {
           var outbus = if (name == \master) { defaultOutbus } { mixerChannels[\master] ?? defaultOutbus };
@@ -156,7 +159,8 @@ ESTimeline {
 
       tracks.do { |track|
         var name = track.mixerChannelName;
-        var template = mixerChannelTemplates[name] ?? this.defaultMixerChannelTemplate;
+        //var template = this.defaultMixerChannelTemplate ++ (mixerChannelTemplates[name] ?? ());
+        var template = mixerChannelTemplates[name] ?? ESMixerChannelTemplate();
         newTemplates[name] = template;
         if (track.useMixerChannel and: mixerChannels[name].isNil) {
           mixerChannels[name] = MixerChannel(name.asSymbol, Server.default, template.inChannels, template.outChannels, template.level, template.pan, outbus: mixerChannels[\master] ?? defaultOutbus);
@@ -179,7 +183,9 @@ ESTimeline {
         };
       };
 
+      mixerChannelTemplates.do(_.removeDependant(templateDependantFunc));
       mixerChannelTemplates = newTemplates;
+      mixerChannelTemplates.do(_.addDependant(templateDependantFunc));
 
       this.clips.do { |clip|
         if (clip.class == ESTimelineClip) {
@@ -292,6 +298,9 @@ ESTimeline {
   initDependantFunc {
     dependantFunc = { |theTrack, what, value|
       this.changed(\track, [tracks.indexOf(theTrack), theTrack, what, value].flat);
+    };
+    templateDependantFunc = { |theTemplate, what, value|
+      this.changed(\template, [what, value]);
     };
   }
 
@@ -545,6 +554,13 @@ ESTimeline {
     this.prFree(false); // don't free mixer channels yet, this will happen in this.init -> this.initMixerChannels
 
     #tracks, thisTempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, dummyGD, dummySTG, dummyUMC, mixerChannelTemplates, globalMixerChannelNames = Object.fromESArray(currentState);
+
+    // legacy support
+    mixerChannelTemplates.keysValuesDo { |key, value|
+      if (value.class == Event) {
+        mixerChannelTemplates[key] = ESMixerChannelTemplate(value.inChannels, value.outChannels, value.level, value.pan, value.fx, value.preSends, value.postSends);
+      };
+    };
 
     mixerChannelTemplates = mixerChannelTemplates ?? ();
     globalMixerChannelNames = globalMixerChannelNames ?? [\master];
