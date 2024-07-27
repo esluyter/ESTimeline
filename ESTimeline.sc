@@ -116,11 +116,9 @@ ESTimeline {
 
       MixerChannelReconstructor.queueDelay = 0.0001;
       {
-        if (freeQueue.size == 1) {
-          MixerChannelReconstructor.queueBundle(Server.default, nil, (func: func));
-        } {
-          freeQueue.remove(func);
-        };
+        while { freeQueue[0] != func } { 0.1.wait };
+
+        MixerChannelReconstructor.queueBundle(Server.default, nil, (func: func));
       }.fork(SystemClock);
     }
   }
