@@ -62,7 +62,7 @@ ESTimeline {
   */
 
   storeArgs { ^[tracks, this.tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames] }
-  defaultUndoPoint { ^[[ESTrack([])], 1, nil, nil, bootOnPrep, useEnvir, optimizeView, 4, false, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames].asESArray }
+  defaultUndoPoint { ^[[ESTrack([])], 1, nil, nil, bootOnPrep, useEnvir, optimizeView, 4, false, useMixerChannel, (), [\master]].asESArray }
 
   *new { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = true, gridDivision = 4, snapToGrid = false, useMixerChannel = true, mixerChannelTemplates, globalMixerChannelNames|
     //var clock = TempoClock(tempo).permanent_(true);
