@@ -540,7 +540,7 @@ ESTimeline {
     };
   }
 
-  restoreUndoPoint { |undoPoint, clearUndoStack = false, legacy = false|
+  restoreUndoPoint { |undoPoint, clearUndoStack = false, legacy = false, keepMaster = true|
     var thisTempo;
     // leave gridDivision, snapToGrid, and useMixerChannel as they were
     var dummyGD, dummySTG, dummyUMC;
@@ -561,7 +561,11 @@ ESTimeline {
     };
 
     mixerChannelTemplates = mixerChannelTemplates ?? ();
-    globalMixerChannelNames = globalMixerChannelNames ?? [\master];
+    if (keepMaster) {
+      globalMixerChannelNames = globalMixerChannelNames ?? [\master];
+    } {
+      globalMixerChannelNames.remove(\master);
+    };
 
     this.tempo = thisTempo;
     if (clearUndoStack) {
@@ -641,8 +645,9 @@ ESTimeline {
       tracks = [ESTrack([ESTimelineClip(0, duration, timeline: newTimeline)])];
       prepFunc = {};
       cleanupFunc = {};
+      mixerChannelTemplates = (master: mixerChannelTemplates[\master]);
       this.init;
-      newTimeline.restoreUndoPoint(currentState);
+      newTimeline.restoreUndoPoint(currentState, keepMaster: false);
       this.changed(\encapsulateSelf);
     }
   }

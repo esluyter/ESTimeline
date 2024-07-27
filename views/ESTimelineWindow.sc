@@ -65,8 +65,6 @@ ESTimelineWindow : Window {
       StaticText(this, Rect(815, 10, 120, 20)).string_("useParentClock").font_(Font.sansSerif(16));
     } {  //925
       Button(this, Rect(795, 5, 200, 30)).states_([["Open as clip in new timeline"]]).action_({
-        //ESTimelineWindow(bounds: this.bounds, timeline: ESTimeline([ESTrack([ESTimelineClip(0, if (timeline.duration == 0) { 10 } { timeline.duration }, timeline)])], timeline.tempo));
-        //this.close;
         timeline.encapsulateSelf;
         timelineView.editingMode = false;
       })

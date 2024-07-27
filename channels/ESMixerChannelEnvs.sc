@@ -27,6 +27,8 @@ ESMixerChannelEnvs {
     template.changed(\envs);
   }
 
+  storeArgs { ^[level, pan, fx, preSends, postSends]; }
+
   *new { |level, pan, fx, preSends, postSends|
     fx = fx ?? [];
     preSends = preSends ?? [];
