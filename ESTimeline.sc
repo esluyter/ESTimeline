@@ -443,26 +443,46 @@ ESTimeline {
     if (makeClock) {
       this.prMakeClock(altClock);
     };
-
-    // play effects
-    mixerChannelTemplates.keysValuesDo { |name, template|
-      var mc = mixerChannels[name];
-      //[name, template, mc].postln;
-      template.fx.do { |fx|
-        mc.playfx(fx);
-      };
-    };
-
-    /*
-    if (startTime.notNil) {
-      playbar = startTime;
-    };
-    */
-
     // save the starting conditions
     //playClock = clock;
     playBeats = playClock.beats;
     playStartTime = startTime ?? playbar;
+
+    // play effects
+    mixerChannelTemplates.keysValuesDo { |name, template|
+      var mc = mixerChannels[name];
+      var thisEnv, thisDefName;
+      var getEnvAndDefName = { |mcEnv|
+        var thisEnv = mcEnv.envToPlay(playStartTime, this.duration, true);
+        var size = thisEnv.levels.size.nextPowerOfTwo;
+        var defName = 'ESEnvClip_kr';
+        if (size > 512) {
+          "WARNING: Envelope can have max 512 points. Please adjust.".postln;
+          size = 512;
+        };
+        defName = (defName ++ if (mcEnv.isExponential) { "_exp_" } { "_curve_" } ++ size).asSymbol;
+        [thisEnv, defName];
+      };
+      //[name, template, mc].postln;
+      template.fx.do { |fx|
+        mc.playfx(fx);
+      };
+
+      if (template.envs.pan.notNil) {
+        var mcEnv = template.envs.pan;
+        #thisEnv, thisDefName = getEnvAndDefName.(mcEnv).postln;
+        Server.default.bind {
+          mc.panAuto(thisDefName, [env: thisEnv, tempo: playClock.tempo, min: mcEnv.min, max: mcEnv.max, curve: mcEnv.curve]);
+        };
+      };
+      if (template.envs.level.notNil) {
+        var mcEnv = template.envs.level;
+        #thisEnv, thisDefName = getEnvAndDefName.(mcEnv);
+        Server.default.bind {
+          mc.levelAuto(thisDefName, [env: thisEnv, tempo: playClock.tempo, min: mcEnv.min, max: mcEnv.max, curve: mcEnv.curve]);
+        };
+      };
+    };
 
     if (useEnvir) {
       envir.use {
@@ -471,7 +491,6 @@ ESTimeline {
     } {
       tracks.do(_.play(playStartTime, playClock));
     };
-
 
     isPlaying = true;
     this.changed(\isPlaying, true);

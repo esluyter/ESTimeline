@@ -269,4 +269,75 @@ ESMixerChannelEnv {
       if ((points[i].x < thisPoint.x) and: (point.x > thisPoint.x)) { ^i };
     };
   }
+
+  envToPlay { |startOffset = 0, duration, addFinalBreakpoint = false|
+    var thisEnv = env;
+    var playOffset = startOffset;
+    var initlevel = thisEnv[playOffset];
+    var endLevel;
+
+    var levels = thisEnv.levels;
+    var times = thisEnv.times;
+    var curves = thisEnv.curves;
+
+    var thisDuration = (duration ?? env.duration) - startOffset;
+
+    if (playOffset < 0) {
+      levels = [levels[0]] ++ levels;
+      times = [playOffset * -1] ++ times;
+      curves = if (curves.isArray) { [curves[0]] ++ curves } { curves };
+    };
+    if (playOffset > 0) {
+      var runningtime = 0.0;
+      var i = 0;
+      while { (runningtime < playOffset) && (i < times.size) } {
+        runningtime = runningtime + times[i];
+        i = i + 1;
+      };
+      if (runningtime >= playOffset) { // passed target
+        var timetokeep = runningtime - playOffset;
+        levels = levels[(i - 1)..levels.size];
+        times = times[(i - 1)..times.size];
+        curves = if (curves.isArray) { curves[(i - 1)..curves.size] } { curves };
+        times[0] = timetokeep;
+        levels[0] = initlevel;
+      } { // ran out of envelope
+        times = [0];
+        levels = initlevel ! 2;
+        curves = \lin;
+      };
+    };
+
+    endLevel = Env(levels, times, curves)[thisDuration];
+
+    if (times.sum > thisDuration) {
+      var prevTime = 0;
+      var runningtime = 0.0;
+      var i = 0;
+      while { (runningtime < thisDuration) && (i < times.size) } {
+        prevTime = runningtime;
+        runningtime = runningtime + times[i];
+        i = i + 1;
+      };
+      if (i > 0) {
+        i = i - 1;
+      };
+      levels = levels[0..i+1];
+      times = times[0..i];
+      curves = if (curves.isArray) { curves[0..i] } { curves };
+
+      times[i] = thisDuration - prevTime;
+      levels[i+1] = endLevel;
+    };
+
+    if (addFinalBreakpoint) {
+      if (times.sum < thisDuration) {
+        levels = levels.add(endLevel);
+        times = times.add(thisDuration - times.sum);
+        if (curves.isArray) { curves = curves.add(curves.last) };
+      };
+    };
+
+    ^Env(levels, times, curves);
+  }
 }
