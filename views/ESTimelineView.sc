@@ -416,7 +416,7 @@ ESTimelineView : UserView {
       // pass hover on to envelope view
       hoverEnv = this.envAtY(y);
       if (hoverEnv.notNil) {
-        hoverEnv.prHover(x, y - top, hoverTime)
+        hoverEnv.prHover(x, (y - top), hoverTime)
       };
       if (oldHoverEnv.notNil and: (oldHoverEnv != hoverEnv)) {
         oldHoverEnv.prHoverLeave;
@@ -669,10 +669,10 @@ ESTimelineView : UserView {
 
   clipAtPoint { |point|
     var track = this.trackAtY(point.y, true);
-    if (track.notNil) {
-      ^this.clipAtX(track, point.x, track.index);
+    if (track.isInteger) {
+      ^[nil, track, nil, nil];
     } {
-      ^[nil, 0, nil, nil];
+      ^this.clipAtX(track, point.x, track.index);
     }
   }
 
@@ -689,7 +689,7 @@ ESTimelineView : UserView {
           if (y < (top + trackHeight)) {
             ^track;
           } {
-            ^nil;
+            ^i;
           };
         }
       };
