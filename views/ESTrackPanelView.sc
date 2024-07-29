@@ -49,7 +49,7 @@ ESTrackPanelView : UserView {
         Pen.fill;
         if (track.name.notNil) {
           Pen.color = Color.gray(1, 0.3);
-          Pen.addRect(Rect(0, 33, width, timelineView.trackHeight - 36));
+          Pen.addRect(Rect(0, 33, width, timelineView.trackHeight - 33));
           Pen.fill;
         };
         track.envs.do { |val, i|
@@ -75,7 +75,7 @@ ESTrackPanelView : UserView {
       StaticText(view, Rect(2, 4, 18, 25)).string_(i.asString).stringColor_(Color.gray(0.4)).font_(Font.monospace(14));
 
       ev = (
-        nameText: StaticText(view, Rect(2, 35, width - 4, trackHeights[i] - 35)).align_(\topLeft).string_(track.name ?? "").stringColor_(Color.gray(0.5)).font_(Font.sansSerif(14, true)).canReceiveDragHandler_(true)
+        nameText: StaticText(view, Rect(2, 35, width - 4, timelineView.trackHeight - 35)).align_(\topLeft).string_(track.name ?? "").stringColor_(Color.gray(0.5)).font_(Font.sansSerif(14, true)).canReceiveDragHandler_(true)
         .receiveDragHandler_({
           var thisTrack = View.currentDrag;
           timeline.moveTrack(thisTrack.index, i);
