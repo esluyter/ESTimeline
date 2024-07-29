@@ -136,6 +136,7 @@ ESMixerChannelEnv {
         curves = curves.add(curve);
       };
       env = Env(levels, times, curves);
+      template.changed(\env);
     };
 
     if (mods.isAlt and: hoverIndex.notNil) {
@@ -162,6 +163,7 @@ ESMixerChannelEnv {
       };
       hoverIndex = nil;
       env = Env(levels, times, curves);
+      template.changed(\env);
     };
   }
 
@@ -198,6 +200,7 @@ ESMixerChannelEnv {
         };
       };
     };
+    template.changed(\env);
   }
 
   envBreakPoints {

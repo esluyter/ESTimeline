@@ -120,7 +120,25 @@ ESTrackPanelView : UserView {
         var envHeight = timelineView.trackHeight * timeline.envHeightMultiplier;
         var key = assoc.key;
         //[key, val, i, envHeight].postln;
-        StaticText(view, Rect(5, timelineView.trackHeight + (envHeight * i) + 4, width - 10, envHeight)).string_(key).align_(\topRight).stringColor_(Color.gray(0.6));
+        StaticText(view, Rect(5, timelineView.trackHeight + (envHeight * i) + 4, width - 10, envHeight)).string_(key).align_(\topRight).stringColor_(Color.gray(0.6)).setContextMenuActions(
+          MenuAction("Remove automation envelope", {
+            var template = track.mixerChannelTemplate;
+            // hacky
+            switch (key)
+            { \level } {
+              var thisLevel = template.envs.level.valueAtTime(timeline.soundingNow);
+              template.envs.level = nil;
+              template.level = thisLevel;
+              track.mixerChannel.level = thisLevel;
+            }
+            { \pan } {
+              var thisLevel = template.envs.pan.valueAtTime(timeline.soundingNow);
+              template.envs.pan = nil;
+              template.pan = thisLevel;
+              track.mixerChannel.pan = thisLevel;
+            };
+          })
+        );
       };
       trackButts = trackButts.add(ev);
       top = top + trackHeights[i];
