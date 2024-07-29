@@ -78,7 +78,9 @@ ESTrack {
 
   stop { |hard = false|
     playRout.stop;
+    //"track %: playRout stopped".format(this.index).postln;
     this.currentClips.do(_.stop(hard));
+    //"track %: clips stopped".format(this.index).postln;
   }
 
   play { |startTime = 0.0, clock|

@@ -377,7 +377,8 @@ ESTimeline {
 
   stop { |hard = false|
     if (useEnvir) {
-      envir.use { tracks.do(_.stop(hard)); };
+      envir.use {
+        tracks.do(_.stop(hard)); };
     } {
       tracks.do(_.stop(hard));
     };
@@ -400,12 +401,16 @@ ESTimeline {
     // stop effects
     mixerChannelTemplates.keysValuesDo { |name, template|
       var mc = mixerChannels[name];
-      mc.effectgroup.release;
-      if (template.envs.pan.notNil) {
-        mc.stopAuto(\pan);
-      };
-      if (template.envs.level.notNil) {
-        mc.stopAuto(\level);
+      // remember: mc might be nil if track's useMixerChannel is off
+      if (mc.notNil) {
+        mc.effectgroup.release;
+
+        if (template.envs.pan.notNil) {
+          mc.stopAuto(\pan);
+        };
+        if (template.envs.level.notNil) {
+          mc.stopAuto(\level);
+        };
       };
     };
     this.changed(\isPlaying, false);
@@ -458,35 +463,38 @@ ESTimeline {
     // play effects
     mixerChannelTemplates.keysValuesDo { |name, template|
       var mc = mixerChannels[name];
-      var thisEnv, thisDefName;
-      var getEnvAndDefName = { |mcEnv|
-        var thisEnv = mcEnv.envToPlay(playStartTime, this.duration, true);
-        var size = thisEnv.levels.size.nextPowerOfTwo;
-        var defName = 'ESEnvClip_kr';
-        if (size > 512) {
-          "WARNING: Envelope can have max 512 points. Please adjust.".postln;
-          size = 512;
+      // remember: mc might be nil if track's useMixerChannel is off
+      if (mc.notNil) {
+        var thisEnv, thisDefName;
+        var getEnvAndDefName = { |mcEnv|
+          var thisEnv = mcEnv.envToPlay(playStartTime, this.duration, true);
+          var size = thisEnv.levels.size.nextPowerOfTwo;
+          var defName = 'ESEnvClip_kr';
+          if (size > 512) {
+            "WARNING: Envelope can have max 512 points. Please adjust.".postln;
+            size = 512;
+          };
+          defName = (defName ++ if (mcEnv.isExponential) { "_exp_" } { "_curve_" } ++ size).asSymbol;
+          [thisEnv, defName];
         };
-        defName = (defName ++ if (mcEnv.isExponential) { "_exp_" } { "_curve_" } ++ size).asSymbol;
-        [thisEnv, defName];
-      };
-      //[name, template, mc].postln;
-      template.fx.do { |fx|
-        mc.playfx(fx);
-      };
+        //[name, template, mc].postln;
+        template.fx.do { |fx|
+          mc.playfx(fx);
+        };
 
-      if (template.envs.pan.notNil) {
-        var mcEnv = template.envs.pan;
-        #thisEnv, thisDefName = getEnvAndDefName.(mcEnv);
-        Server.default.bind {
-          mc.panAuto(thisDefName, [env: thisEnv, tempo: playClock.tempo, min: mcEnv.min, max: mcEnv.max, curve: mcEnv.curve]);
+        if (template.envs.pan.notNil) {
+          var mcEnv = template.envs.pan;
+          #thisEnv, thisDefName = getEnvAndDefName.(mcEnv);
+          Server.default.bind {
+            mc.panAuto(thisDefName, [env: thisEnv, tempo: playClock.tempo, min: mcEnv.min, max: mcEnv.max, curve: mcEnv.curve]);
+          };
         };
-      };
-      if (template.envs.level.notNil) {
-        var mcEnv = template.envs.level;
-        #thisEnv, thisDefName = getEnvAndDefName.(mcEnv);
-        Server.default.bind {
-          mc.levelAuto(thisDefName, [env: thisEnv, tempo: playClock.tempo, min: mcEnv.min, max: mcEnv.max, curve: mcEnv.curve]);
+        if (template.envs.level.notNil) {
+          var mcEnv = template.envs.level;
+          #thisEnv, thisDefName = getEnvAndDefName.(mcEnv);
+          Server.default.bind {
+            mc.levelAuto(thisDefName, [env: thisEnv, tempo: playClock.tempo, min: mcEnv.min, max: mcEnv.max, curve: mcEnv.curve]);
+          };
         };
       };
     };
