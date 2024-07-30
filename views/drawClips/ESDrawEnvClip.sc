@@ -34,26 +34,6 @@ ESDrawEnvClip : ESDrawClip {
     };
     Pen.drawImage(left@top, image);
     image.free;
-      /*
-      var n = (width / (height / 50).max(1)).asInteger;
-      var nratio = width / n;
-      var firstI, lastI, prevY;
-      var thisEnv = clip.env.value;
-      firstI = ((0 - left) / nratio).asInteger.clip(0, n);
-      lastI = ((Window.screenBounds.width - left) / nratio).asInteger.clip(0, n);
-      prevY = top + ((1 - thisEnv[clip.offset + (firstI * pratio)]) * height);
-      (firstI..lastI).do { |i|
-        var thisY, thisX;
-        i = i * nratio;
-        thisX = left + i;
-        thisY = top + ((1 - thisEnv[clip.offset + (i * pratio)]) * height);
-        Pen.addRect(Rect(thisX, min(prevY, thisY), nratio, max(1, abs(prevY - thisY))));
-        prevY = thisY;
-      };
-
-      Pen.color = Color.gray(1, 0.8);
-      Pen.fill;
-      */
 
     if (editingMode) {
       var thisEnv = clip.envToPlay;
