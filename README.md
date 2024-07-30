@@ -117,7 +117,7 @@ Platform.userExtensionDir
 here is a slightly out of date example in that it doesn't use MixerChannel but still relevant I hope. I will update it...
 ```
 (
-~timeline = ESTimeline(bootOnPrep: true);
+~timeline = ESTimeline(bootOnPrep: true, useMixerChannel: false);
 ~window = ESTimelineWindow(timeline: ~timeline);
 )
 ```
