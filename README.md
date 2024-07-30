@@ -114,6 +114,7 @@ Platform.userExtensionDir
 ```
 
 ## Tutorial: basic workflow examples
+here is a slightly out of date example in that it doesn't use MixerChannel but still relevant I hope. I will update it...
 ```
 (
 ~timeline = ESTimeline(bootOnPrep: true);
@@ -366,7 +367,7 @@ loop {
   <summary><strong>Current ad-hoc mixer interface</strong></summary>
 
 ## Current ad-hoc mixer interface
-Everything works, and everything saves with timeline except mixer channel output bus (will reset to default)
+its not pretty but everything works, you can create/monitor envelopes and everything saves with timeline except mixer channel output bus (will reset to default)
 ```
 (
 // for flattening mixer channel names and timeline ids
