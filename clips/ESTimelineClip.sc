@@ -98,6 +98,7 @@ ESTimelineClip : ESClip {
     // this is called when parent timeline's tempo changes
     if (useParentClock) {
       timeline.currentClips.do(_.prTempoChanged(tempo));
+      timeline.prChangeEnvTempos;
     };
   }
 

@@ -165,6 +165,7 @@ ESEnvClip : ESClip {
     };
   }
 
+  // this is called by parent timeline whenever its tempo changes
   prTempoChanged { |tempo|
     if (synth.notNil) {
       Server.default.bind {

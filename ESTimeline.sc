@@ -36,9 +36,43 @@ ESTimeline {
       if (clock.notNil) {
         clock.tempo_(val);
         this.currentClips.do(_.prTempoChanged(val));
+        this.prChangeEnvTempos;
       };
     };
     this.changed(\tempo, val);
+  }
+  prChangeEnvTempos {
+    var envs = [];
+    mixerChannelTemplates.do { |template|
+      if (template.envs.level.notNil) {
+        envs = envs.add(template.envs.level);
+      };
+      if (template.envs.pan.notNil) {
+        envs = envs.add(template.envs.pan);
+      };
+      template.envs.preSends.do { |env|
+        if (env.notNil) {
+          envs = envs.add(env);
+        };
+      };
+      template.envs.postSends.do { |env|
+        if (env.notNil) {
+          envs = envs.add(env);
+        };
+      };
+      template.envs.fx.do { |env|
+        if (env.notNil) {
+          envs = envs.add(env);
+        };
+      };
+    };
+    envs.do { |env|
+      if (env.synth.notNil) {
+        Server.default.bind {
+          env.synth.set(\tempo, tempo);
+        };
+      };
+    };
   }
   tempoBPM { ^this.tempo * 60 }
   tempoBPM_ { |val| this.tempo_(val / 60); }
@@ -522,14 +556,14 @@ ESTimeline {
           var mcEnv = template.envs.pan;
           #thisEnv, thisDefName = getEnvAndDefName.(mcEnv);
           Server.default.bind {
-            mc.panAuto(thisDefName, [env: thisEnv, tempo: playClock.tempo, min: mcEnv.min, max: mcEnv.max, curve: mcEnv.curve]);
+            mcEnv.synth = mc.panAuto(thisDefName, [env: thisEnv, tempo: playClock.tempo, min: mcEnv.min, max: mcEnv.max, curve: mcEnv.curve]);
           };
         };
         if (template.envs.level.notNil) {
           var mcEnv = template.envs.level;
           #thisEnv, thisDefName = getEnvAndDefName.(mcEnv);
           Server.default.bind {
-            mc.levelAuto(thisDefName, [env: thisEnv, tempo: playClock.tempo, min: mcEnv.min, max: mcEnv.max, curve: mcEnv.curve]);
+            mcEnv.synth = mc.levelAuto(thisDefName, [env: thisEnv, tempo: playClock.tempo, min: mcEnv.min, max: mcEnv.max, curve: mcEnv.curve]);
           };
         };
       };

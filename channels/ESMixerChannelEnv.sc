@@ -3,6 +3,7 @@ ESMixerChannelEnv {
   var <hoverIndex, <editingFirst, <originalCurve, <curveIndex;
   var left, top, width, height, pratio, tratio, envHeight, startTime;
   var <>template;
+  var <>synth;
 
   hoverIndex_ { |val|
     if (val != hoverIndex) {
