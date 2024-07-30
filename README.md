@@ -126,7 +126,7 @@ here is a slightly out of date example in that it doesn't use MixerChannel but s
 ### SynthDefs:
 - put your SynthDef in the timeline's prep function (click the "edit prep/cleanup funcs" button) e.g.
 ```
-SynthDef(\sin, { |out, freq = 200, gate = 1, amp = 0.1, preamp = 1.5, attack = 0.001, release = 0.01, pan, verbbus, verbamt, vibrato = 0.2|
+SynthDef(\sin, { |out, freq = 440, gate = 1, amp = 0.1, preamp = 1.5, attack = 0.001, release = 0.01, pan, verbbus, verbamt, vibrato = 0.2|
   var env, sig;
   var lfo = XLine.ar(0.01, vibrato, ExpRand(0.5, 2.0)) * SinOsc.ar(5.4 + (LFDNoise3.kr(0.1) * 0.5));
   gate = gate + Impulse.kr(0);
@@ -168,7 +168,7 @@ SynthDef(\sin, { |out, freq = 200, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
 
 ### Bulk edit synth clips:
 - click in an empty area and drag to select all the Synth clips (they will be highlighted in cyan when selected)
-- right click, "clip actions > synth actions > bulk edit synth defName"
+- right click, "clip actions > bulk actions > Bulk edit Synth defName"
   - and set them to `'sin'`.
   - play again and you hear they now all play your SynthDef
   - double-click in an empty area to remove selection
@@ -184,25 +184,26 @@ SynthDef(\sin, { |out, freq = 200, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
   - shift-click to add breakpoints,
   - option-click to remove them
 - by default, these envelopes will map to the range of the parameter name .asSpec
-  - to rescale, right click, clip actions > "set env range keeping breakpoint values"
+  - to rescale, right click, clip actions > env actions > "set env range keeping breakpoint values"
 - hit cmd-e again to leave envelope breakpoint editor mode
 
 ### Bulk edit Synths -- To make this envelope affect all your Synths:
 - click and drag to select all the Synth clips (your envelope clip can also be selected, it doesn't matter)
-- right click, "clip actions > synth actions > bulk edit synth arguments"
-- assign the `freq` of all the clips to 
-`\freq0`
+- right click, "clip actions > bulk actions > Bulk edit (change) Synth arguments"
+- assign the `freq` of all the clips to (the single quotes are important!) 
+`'freq0'`
 (or whatever the name of the envelope clip is)
 - you should see all their freqs change show the audio rate bus that the Env clip has created for you
   - if you want, you can change this behavior so the envelope plays on a bus you have created instead
+- double click to deselect all clips, then:
 - drag the edges of the envelope clip to resize it, so that it covers the entire range of your Synth clips
 - cmd-e to edit the breakpoints again
 - you should hear it is now controlling all the synths' pitches
-- make sure you've left breakpoint edit mode when you want to move clips around, and double-click in an empty area to remove the selection.
+- make sure you've left breakpoint edit mode when you want to move clips around
 
 ### Bulk edit Synths -- Random panning:
 - Select all your Synth clips
-- right click > clip actions > synth actions > bulk edit synth arguments
+- right click > clip actions > bulk actions > Bulk edit (change) Synth arguments
 - for `pan` put in `rrand(-1.0, 1.0)` and check the "hard coded" box
   - this will generate a random hard-coded pan per clip. (if you want it to be newly random every time you play it, uncheck the box)
 
