@@ -3,7 +3,6 @@ ESMixerChannelEnv {
   var <hoverIndex, <editingFirst, <originalCurve, <curveIndex;
   var left, top, width, height, pratio, tratio, envHeight, startTime;
   var <>template;
-  var image;
 
   hoverIndex_ { |val|
     if (val != hoverIndex) {
@@ -24,7 +23,7 @@ ESMixerChannelEnv {
   }
 
   prDraw { |aleft, atop, awidth, aheight, apratio, atratio, aenvHeight, astartTime|
-    var points;
+    var points, image;
     var valStringFunc = { |val|
       // this is a real hack
       (if (min == 0) { val.ampdb.round(0.01).asString ++ " dB" } { val.round(0.01).asString });
@@ -40,7 +39,6 @@ ESMixerChannelEnv {
     envHeight = aenvHeight;
     startTime = astartTime;
 
-    image.free;
     image = Image((width.asInteger)@((height + 1).asInteger));
     width.asInteger.do { |x|
       var x2time = { |x| x * pratio + startTime };
@@ -56,6 +54,7 @@ ESMixerChannelEnv {
       image.setPixels(Int32Array.fill(thisHeight, {Image.colorToPixel(Color.gray(0.6))}), Rect(x, thisTop, 1, thisHeight));
     };
     Pen.drawImage(left@top, image);
+    image.free;
 
     // draw breakpoints
     points = this.envBreakPoints;
