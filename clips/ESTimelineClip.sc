@@ -7,9 +7,11 @@ ESTimelineClip : ESClip {
     timeline.changed(\useParentClock, val);
   }
 
-  track_ { |val|
+  track_ { |val, doInitMixerChannels = true|
     track = val;
-    this.initMixerChannels;
+    if (doInitMixerChannels) {
+      this.initMixerChannels;
+    };
   }
 
   storeArgs { ^[startTime, duration, offset, color, name, timeline, useParentClock, mute] }
@@ -25,8 +27,8 @@ ESTimelineClip : ESClip {
     timeline.addDependant(this);
   }
 
-  initMixerChannels {
-    timeline.initMixerChannels;
+  initMixerChannels { |first = false|
+    timeline.initMixerChannels(first);
   }
 
   refreshChildNow {

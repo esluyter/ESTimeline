@@ -11,6 +11,7 @@ ESTimeline {
   var <buses;
   var <mixerChannels;
 
+  var <>notifyOnEndInitMixerChannels = false;
   classvar <freeQueue;
 
   classvar <nextId = 0, <timelines;
@@ -64,7 +65,7 @@ ESTimeline {
   storeArgs { ^[tracks, this.tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames] }
   defaultUndoPoint { ^[[ESTrack([])], 1, nil, nil, bootOnPrep, useEnvir, optimizeView, 4, false, useMixerChannel, (), [\master]].asESArray }
 
-  *new { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = true, gridDivision = 4, snapToGrid = false, useMixerChannel = true, mixerChannelTemplates, globalMixerChannelNames|
+  *newInitMixerChannels { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = true, gridDivision = 4, snapToGrid = false, useMixerChannel = true, mixerChannelTemplates, globalMixerChannelNames|
     //var clock = TempoClock(tempo).permanent_(true);
 
     tracks = tracks ?? [ESTrack()];
@@ -74,7 +75,7 @@ ESTimeline {
     ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames).initId.initEnvir.initDependantFunc.init(true);
   }
 
-  *newNoInitMixerChannels { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = false, gridDivision = 4, snapToGrid = false, useMixerChannel = true, mixerChannelTemplates, globalMixerChannelNames|
+  *new { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = false, gridDivision = 4, snapToGrid = false, useMixerChannel = true, mixerChannelTemplates, globalMixerChannelNames|
     tracks = tracks ?? [ESTrack()];
     mixerChannelTemplates = mixerChannelTemplates ?? ();
     globalMixerChannelNames = globalMixerChannelNames ?? [\master];
@@ -109,21 +110,53 @@ ESTimeline {
           mc.free;
         };
         callback.value;
-        freeQueue.remove(func);
+        //freeQueue.remove(func);
       };
 
-      freeQueue = freeQueue.add(func);
-
       MixerChannelReconstructor.queueDelay = 0.0001;
-      {
-        while { freeQueue[0] != func } { 0.1.wait };
-
-        MixerChannelReconstructor.queueBundle(Server.default, nil, (func: func));
-      }.fork(SystemClock);
+      this.prAddFuncToEndOfFreeQueue(func);
     }
   }
 
-  initMixerChannels {
+  prAddFuncToEndOfFreeQueue { |callback|
+    var func = {
+      callback.value;
+      freeQueue.remove(func);
+    };
+    freeQueue = freeQueue.add(func);
+    {
+      while { freeQueue[0] != func } { 0.01.wait };
+
+      MixerChannelReconstructor.queueBundle(Server.default, nil, (func: func));
+    }.fork(SystemClock);
+  }
+
+  subTimelines { |level = 0|
+    var ret = [level->this];
+    notifyOnEndInitMixerChannels = false;
+    this.clips.do { |clip|
+      if (clip.class == ESTimelineClip) {
+        ret = ret.add(clip.timeline.subTimelines(level + 1));
+      };
+    };
+    ^ret;
+  }
+
+  initMixerChannels { |first = true|
+    this.changed(\beginInitMixerChannels);
+
+    if (first) {
+      var maxLevel = 0;
+      var thisTimeline;
+      this.subTimelines.flat.do { |assoc|
+        if (assoc.key > maxLevel) { maxLevel = assoc.key };
+      };
+      this.subTimelines.flat.do { |assoc|
+        if (assoc.key == maxLevel) { thisTimeline = assoc.value };
+      };
+      thisTimeline.notifyOnEndInitMixerChannels = true;
+    };
+
     // already checks if we're usingMixerChannel
     this.prFreeMixerChannels({
       var defaultOutbus;
@@ -187,8 +220,11 @@ ESTimeline {
 
       this.clips.do { |clip|
         if (clip.class == ESTimelineClip) {
-          clip.initMixerChannels;
+          clip.initMixerChannels(false);
         };
+      };
+      if (notifyOnEndInitMixerChannels) {
+        this.prAddFuncToEndOfFreeQueue({ this.changed(\endInitMixerChannels) });
       };
 
       this.changed(\initMixerChannels);
@@ -679,7 +715,7 @@ ESTimeline {
   encapsulateSelf {
     var duration = this.duration;
     if (duration > 0) {
-      var newTimeline = ESTimeline.newNoInitMixerChannels(bootOnPrep: bootOnPrep, gridDivision: gridDivision, snapToGrid: snapToGrid, useMixerChannel: useMixerChannel);
+      var newTimeline = ESTimeline(bootOnPrep: bootOnPrep, gridDivision: gridDivision, snapToGrid: snapToGrid, useMixerChannel: useMixerChannel);
       this.prFree;
       tracks = [ESTrack([ESTimelineClip(0, duration, timeline: newTimeline)])];
       prepFunc = {};
