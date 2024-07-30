@@ -107,6 +107,8 @@ These are all things I would like to implement someday:
 <details>
   <summary><strong>Getting started: installing and tutorial</strong></summary>
   
+here is a slightly out of date tutorial in that it doesn't use MixerChannel. definitely still relevant up to environment variables - adding reverb, and the patterns and routines are relevant but under-documented.
+  
 ## Installing
 Download or clone this repository into your SuperCollider Extensions directory. To see where this is, go to `File > Open user support directory` and find the `Extensions` directory, or evaluate:
 ```
@@ -114,7 +116,6 @@ Platform.userExtensionDir
 ```
 
 ## Tutorial: basic workflow examples
-here is a slightly out of date example in that it doesn't use MixerChannel but still relevant I hope. I will update it...
 ```
 (
 ~timeline = ESTimeline(bootOnPrep: true, useMixerChannel: false);
