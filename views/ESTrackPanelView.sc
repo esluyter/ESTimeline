@@ -124,7 +124,7 @@ ESTrackPanelView : UserView {
           MenuAction("Remove automation envelope", {
             var template = track.mixerChannelTemplate;
             // hacky
-            switch (key)
+            switch (key.asSymbol)
             { \level } {
               var thisLevel = template.envs.level.valueAtTime(timeline.soundingNow);
               template.envs.level = nil;
@@ -136,6 +136,25 @@ ESTrackPanelView : UserView {
               template.envs.pan = nil;
               template.pan = thisLevel;
               track.mixerChannel.pan = thisLevel;
+            };
+
+            if (key.asString.beginsWith("post")) {
+              var index = key.asString.split($_)[1].interpret;
+              var arr = template.envs.postSends;
+              var val = arr[index].valueAtTime(timeline.soundingNow);
+              arr[index].stop; arr[index] = nil;
+              template.envs.postSends = arr;
+              template.postSends[index][1] = val;
+              track.mixerChannel.postSends[index].level = val;
+            };
+            if (key.asString.beginsWith("pre")) {
+              var index = key.asString.split($_)[1].interpret;
+              var arr = template.envs.preSends;
+              var val = arr[index].valueAtTime(timeline.soundingNow);
+              arr[index].stop; arr[index] = nil;
+              template.envs.preSends = arr;
+              template.preSends[index][1] = val;
+              track.mixerChannel.preSends[index].level = val;
             };
           })
         );

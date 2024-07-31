@@ -411,6 +411,25 @@ ESMixerChannelEnv {
     }.fork(clock);
   }
 
+  playSend { |startTime = 0.0, clock, mc, duration|
+    var thisEnv, thisDefName, method, index;
+    #thisEnv, thisDefName = this.getEnvAndDefName(startTime, duration);
+    #method, index = name.split($_);
+    index = index.interpret;
+    method = if (method == "pre") { \preSends } { \postSends };
+    playRout = {
+      thisEnv.times.do { |time, i|
+        var levels = thisEnv.levels[i..i+1];
+        var curves = if (thisEnv.curves.isArray) { thisEnv.curves[i] } { thisEnv.curves };
+        Server.default.bind {
+          synth.release;
+          synth = mc.perform(method)[index].levelAuto(this.defName, [env: Env(levels, [time], curves), tempo: clock.tempo, min: min, max: max, curve: curve]);
+        };
+        time.wait;
+      };
+    }.fork(clock);
+  }
+
   stop {
     //(name ++ " stopped").postln;
     if (playRout.notNil) { playRout.stop; playRout = nil; };

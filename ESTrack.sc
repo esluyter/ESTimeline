@@ -13,18 +13,18 @@ ESTrack {
       [\level, \pan].do { |thing| var env = envs.perform(thing); if (env.notNil) { ret = ret.add(thing->env) } };
       envs.preSends.do { |env, i|
         if (env.notNil) {
-          ret = ret.add(("pre" ++ i).asSymbol->env);
+          ret = ret.add(env.name->env);
         };
       };
       envs.postSends.do { |env, i|
         if (env.notNil) {
-          ret = ret.add(("post" ++ i).asSymbol->env);
+          ret = ret.add(env.name->env);
         };
       };
       envs.fx.do { |fxEv, i|
         if (fxEv.notNil) {
           fxEv.keysValuesDo { |key, env|
-            ret = ret.add(("fx" ++ i ++ key).asSymbol->env);
+            ret = ret.add(env.name->env);
           };
         };
       };
