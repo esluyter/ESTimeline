@@ -33,6 +33,7 @@ Also note that because timelines are built to execute user-supplied code they ar
     - although the competing goal is to make it easy to do the things you want to do, which is subjective
   - for the moment just real-time but some of this could be translated easily to work NRT
     - there are certain things impossible in NRT, i.e. to do with real-time input
+    - ddwMixerChannel doesn't yet work NRT so this would be a big rewrite
   - as little architecture as possible is forced on you
     - possible to disable timeline-specific clock and environment so as to interact with the timeline as part of a larger project
     - possible to play clips with any bus, target, addAction, etc. for full flexibility
@@ -66,7 +67,7 @@ Also note that because timelines are built to execute user-supplied code they ar
 - **Timeline Clip** -- embed one timeline in another!
   - Each timeline clip can optionally use its own TempoClock, and optionally use its own Environment 
   - Each timeline (and timeline clip) has an init / free hook for e.g. allocating and freeing resources
-- **Undo and redo** at each timeline level -- *this is buggy but I will fix*
+- **Undo and redo** at each timeline level -- *sometimes this works a charm.. I need to fix it though*
 - **Save and recall**
   - Save as plain text files in SC array format
   - Once you have saved, the timeline will update a backup file every time you add an undo point, in case of crash
@@ -639,14 +640,9 @@ OSCdef(\test, { |msg|
         .stringColor_(Color.gray(0.8))
         .mouseDownAction_({ |view, x, y, mods, buttNum, clickCount|
           if (clickCount > 1) {
-            ESBulkEditWindow.code("Insert FX:", template.fx[index].asCompileString, { |string|
-              var func = string.interpret;
-              if (func.isNil) {
-                ESBulkEditWindow.ok;
-              } {
-                template.fx[index] = func;
-              };
-            });
+            // edit fx clip
+            var clip = template.fx[index];
+            clip.guiClass.new(clip, timeline);
           };
         }).setContextMenuActions(
           MenuAction("Delete", {
@@ -764,15 +760,13 @@ OSCdef(\test, { |msg|
               UserView(insertView, bounds)
               .background_(Color.gray(0.82)).setContextMenuActions(
                 MenuAction("New Insert Func", {
-                  ESBulkEditWindow.code("New Insert FX:", "{ |out|\n  var sig = In.ar(out, " ++ template.inChannels ++ ");\n  sig;\n}", { |string|
-                    var func = string.interpret;
-                    if (func.isNil) {
-                      ESBulkEditWindow.ok;
-                    } {
-                      template.fx = template.fx.add(func);
-                      ~winFunc.value;
-                    };
-                  });
+                  var newClip = ESFxSynth(func: {
+  var sig = In.ar(~out, 2);
+  sig;
+}, doPlayFunc: true).prep;
+                  newClip.guiClass.new(newClip, timeline);
+                  template.fx = template.fx.add(newClip);
+                  ~winFunc.value;
                 }),
                 MenuAction("New Send", {
                   ESBulkEditWindow.keyValue("New Send:", "name", "'verb'", "db", 0.0, "pre fade", callback: { |name, level, pre|
@@ -851,7 +845,7 @@ OSCdef(\test, { |msg|
         ~dbViews[i].value = level.ampdb;
       };
     };
-    
+
     ~insertUserViews.flat.do(_.refresh);
   };
 
