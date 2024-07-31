@@ -478,9 +478,10 @@ OSCdef(\test, { |msg|
     // names
     top = top - nameHeight - 5;
     mixerChannelsFlat.do { |arr, i| var mc = arr[0]; var level = arr[1];
+      var name = mixerChannelNamesFlat[i][0];
       var bounds = Rect(i * trackWidth + 15, top - (level * levelAdjust), trackWidth - 5, 40);
       var color = Color.gray(0.9 - (level * 0.015));
-      StaticText(~scrollView, bounds).align_(\center).string_(mc.name).font_(Font.sansSerif(12, true)).stringColor_(Color.gray(0.5)).background_(color);
+      StaticText(~scrollView, bounds).align_(\center).string_(name).font_(Font.sansSerif(12, true)).stringColor_(Color.gray(0.5)).background_(color);
       // draw folder indicators
       if ((i > 0) and: { mixerChannelsFlat[i - 1][1] > level }) {
         UserView(~scrollView, Rect(i * trackWidth + 7 - levelAdjust, top + nameHeight - (mixerChannelsFlat[i - 1][1] * levelAdjust), levelAdjust + 3, levelAdjust)).drawFunc_({ |view|
@@ -657,16 +658,21 @@ OSCdef(\test, { |msg|
       var sendViewFactory = { |bounds, index, method, stringColor, dbColor, barColor|
         var send = template.perform(method)[index];
         var clickPoint, clickVal;
+
         UserView(insertView, bounds).background_(Color.gray(0.75)).drawFunc_({ |view|
-          var levelPx = faderSpec.unmap(send[1]) * view.bounds.width;
-          var dbString = send[1].ampdb.round(0.1).asString;
-          var dbStringWidth = QtGUI.stringBounds(dbString, Font.sansSerif(8)).width + 2;
+          var levelPx, dbString, dbStringWidth;
+          if (template.envs.perform(method)[index].notNil) {
+            send[1] = template.envs.perform(method)[index].valueAtTime(timeline.soundingNow);
+          };
+          levelPx = faderSpec.unmap(send[1]) * view.bounds.width;
+          dbString = send[1].ampdb.round(0.1).asString;
+          dbStringWidth = QtGUI.stringBounds(dbString, Font.sansSerif(8)).width + 2;
           Pen.addRect(Rect(0, 0, levelPx, view.bounds.height));
-          Pen.color = barColor;
+          Pen.color = barColor.copy.alpha_(if (template.envs.perform(method)[index].isNil) { 1 } { 0.5 });
           Pen.fill;
           Pen.stringAtPoint(send[0].asCompileString, 2@2, Font.monospace(9), stringColor);
           Pen.stringAtPoint(dbString, (view.bounds.width - dbStringWidth)@4, Font.sansSerif(8), dbColor);
-        }).mouseDownAction_({ |view, x, y, mods, buttNum, clickCount|
+      }).mouseDownAction_({ |view, x, y, mods, buttNum, clickCount|
           if (clickCount > 1) {
             var wasPre = method == 'preSends';
             ESBulkEditWindow.keyValue("Edit Send:", "name", send[0].asCompileString, "db", send[1].ampdb.asCompileString, "pre fade", wasPre, callback: { |name, level, pre|
@@ -693,23 +699,50 @@ OSCdef(\test, { |msg|
             clickVal = template.perform(method)[index][1];
           };
         }).mouseMoveAction_({ |view, x, y, mods|
-          var yDelta = clickPoint.y - y;
-          var step = 0.005;
-          var val;
-          if (mods.isAlt) {
-            step = step * 0.2;
+          // only adjust if there's no automation
+          if (template.envs.perform(method)[index].isNil) {
+            var yDelta = clickPoint.y - y;
+            var step = 0.005;
+            var val;
+            if (mods.isAlt) {
+              step = step * 0.2;
+            };
+            if (mods.isCmd) {
+              step = step * 2;
+            };
+            val = faderSpec.map(faderSpec.unmap(clickVal) + (yDelta * step));
+            template.perform(method)[index][1] = val;
+            timeline.mixerChannels[name].perform(method)[index].level = val;
+            view.refresh;
           };
-          if (mods.isCmd) {
-            step = step * 2;
-          };
-          val = faderSpec.map(faderSpec.unmap(clickVal) + (yDelta * step));
-          template.perform(method)[index][1] = val;
-          timeline.mixerChannels[name].perform(method)[index].level = val;
-          view.refresh;
         }).setContextMenuActions(
-          MenuAction("Delete", {
-            template.perform(method).removeAt(index);
+          MenuAction(if (template.envs.perform(method)[index].isNil) { "Add automation envelope" } { "Remove automation envelope" }, {
+            var arr = template.envs.perform(method);
+            var unmappedLevel = faderSpec.unmap(template.perform(method)[index][1]);
+            while { (arr.size - 1) < index } {
+              arr = arr.add(nil);
+            };
+            // add envelope if there's not one already there, otherwise remove it
+            if (arr[index].isNil) {
+              arr[index] = ESMixerChannelEnv(Env(unmappedLevel.dup(2), [0], [0]), faderSpec.minval, faderSpec.maxval, 4); // <- this curve could be issue, assumes faderSpec will always have curve 4...
+              template.envs.perform((method ++ "_").asSymbol, arr);
+            } {
+              var val = arr[index].valueAtTime(timeline.soundingNow);
+              arr[index].stop; arr[index] = nil;
+              template.envs.perform((method ++ "_").asSymbol, arr);
+              template.perform(method)[index][1] = val;
+              timeline.mixerChannels[name].perform(method)[index].level = val;
+            };
             ~winFunc.value;
+          }),
+          MenuAction("Delete", {
+            var arr = template.envs.perform(method);
+            template.perform(method).removeAt(index);
+            if ((arr.size - 1) >= index) {
+              arr.removeAt(index);
+              template.envs.perform((method ++ "_").asSymbol, arr);
+            };
+            timeline.initMixerChannels;
           })
         );
       };
@@ -818,6 +851,8 @@ OSCdef(\test, { |msg|
         ~dbViews[i].value = level.ampdb;
       };
     };
+    
+    ~insertUserViews.flat.do(_.refresh);
   };
 
   //[self, what, args].postln;
@@ -830,23 +865,40 @@ OSCdef(\test, { |msg|
     { \beginInitMixerChannels } {
       if (~waitWin.isNil) {
         var bounds = ~window.bounds;
-        ~waitWin = Window("please wait", bounds).front;
+        ~waitWin = Window("please wait", bounds).alpha_(0.5).front;
         StaticText(~waitWin, bounds.copy.origin_(0@0)).string_("loading MixerChannels").align_(\center).font_(Font.monospace.size_(40));
       };
     }
     { \endInitMixerChannels } {
       ~winFunc.value;
-      ~waitWin.close;
-      ~waitWin = nil;
+      if (~waitWin.notNil) {
+        ~waitWin.close;
+        ~waitWin = nil;
+      };
     }
     { \playbar } {
       ~winFunc.value;
     }
+    { \tracks } {
+      ~winFunc.value;
+    }
     { \track } {
+      if (args.indexOf(\tracks).notNil) {
+        ~winFunc.value;
+      };
+      if (args.indexOf(\beginInitMixerChannels).notNil) {
+        if (~waitWin.isNil) {
+          var bounds = ~window.bounds;
+          ~waitWin = Window("please wait", bounds).alpha_(0.5).front;
+          StaticText(~waitWin, bounds.copy.origin_(0@0)).string_("loading MixerChannels").align_(\center).font_(Font.monospace.size_(40));
+        };
+      };
       if (args.indexOf(\endInitMixerChannels).notNil) {
         ~winFunc.value;
-        ~waitWin.close;
-        ~waitWin = nil;
+        if (~waitWin.notNil) {
+          ~waitWin.close;
+          ~waitWin = nil;
+        };
       };
     }
     { \template } {
