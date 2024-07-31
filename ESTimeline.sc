@@ -176,6 +176,20 @@ ESTimeline {
     ^ret;
   }
 
+  defaultOutbus {
+    if (
+      parentClip.notNil and:
+      { parentClip.track.useMixerChannel } and:
+      { parentClip.track.timeline.useMixerChannel } and:
+      { parentClip.track.mixerChannel.notNil } and:
+      { parentClip.track.mixerChannel.active }
+    ) {
+      ^parentClip.track.mixerChannel
+    } {
+      ^0
+    };
+  }
+
   initMixerChannels { |first = true|
     if (first) {
       var maxLevel = 0;
@@ -200,17 +214,7 @@ ESTimeline {
       mixerChannels = ();
 
       //Server.default.sync;
-      defaultOutbus = if (
-        parentClip.notNil and:
-        { parentClip.track.useMixerChannel } and:
-        { parentClip.track.timeline.useMixerChannel } and:
-        { parentClip.track.mixerChannel.notNil } and:
-        { parentClip.track.mixerChannel.active }
-      ) {
-        parentClip.track.mixerChannel
-      } {
-        0
-      };
+      defaultOutbus = this.defaultOutbus;
 
       // put \master at the end of the global mixer channels for best results
       globalMixerChannelNames.reverse.do { |name|
@@ -550,6 +554,7 @@ ESTimeline {
   }
 
   addTrack { |index, track, mcTemplate|
+    mcTemplate = mcTemplate ?? ESMixerChannelTemplate();
     index = index ?? tracks.size;
     track = track ?? { ESTrack([]) };
     track.addDependant(dependantFunc);
@@ -560,10 +565,24 @@ ESTimeline {
       if (thisTrack.useMixerChannel and: thisTrack.mixerChannelName.isInteger) {
         mixerChannelTemplates[thisTrack.mixerChannelName] = mixerChannelTemplates[thisTrack.mixerChannelName - 1];
         mixerChannelTemplates[thisTrack.mixerChannelName - 1] = nil;
+
+        mixerChannels[thisTrack.mixerChannelName] = mixerChannels[thisTrack.mixerChannelName - 1];
+        mixerChannels[thisTrack.mixerChannelName - 1] = nil;
       };
     };
-    mixerChannelTemplates[track.mixerChannelName] = mcTemplate;
-    this.initMixerChannels;
+    if (track.useMixerChannel) {
+      mixerChannelTemplates[track.mixerChannelName] = mcTemplate;
+    };
+    //this.initMixerChannels;
+
+    if (track.useMixerChannel and: mixerChannels[track.mixerChannelName].isNil) {
+      mixerChannels[track.mixerChannelName] = MixerChannel(track.mixerChannelName.asSymbol, Server.default, mcTemplate.inChannels, mcTemplate.outChannels, mcTemplate.level, mcTemplate.pan, outbus: mixerChannels[\master] ?? this.defaultOutbus);
+    };
+
+    mixerChannelTemplates.do(_.addDependant(templateDependantFunc));
+
+
+
     this.changed(\tracks);
   }
 
