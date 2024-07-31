@@ -10,7 +10,7 @@ ESTimelineClip : ESClip {
   track_ { |val, doInitMixerChannels = true|
     track = val;
     if (doInitMixerChannels) {
-      this.initMixerChannels;
+      this.initMixerChannels(true);
     };
   }
 
