@@ -3,6 +3,7 @@ ESMixerChannelEnv {
   var <hoverIndex, <editingFirst, <originalCurve, <curveIndex;
   var left, top, width, height, pratio, tratio, envHeight, startTime;
   var <>template;
+  var <>name;
   var <>synth;
 
   hoverIndex_ { |val|
@@ -352,5 +353,45 @@ ESMixerChannelEnv {
     };
 
     ^Env(levels, times, curves);
+  }
+
+  getEnvAndDefName { |startTime, duration|
+    var thisEnv = this.envToPlay(startTime, duration, true);
+    var size = thisEnv.levels.size.nextPowerOfTwo;
+    var defName = 'ESEnvClip_kr';
+    if (size > 512) {
+      "WARNING: Envelope can have max 512 points. Please adjust.".postln;
+      size = 512;
+    };
+    defName = (defName ++ if (isExponential) { "_exp_" } { "_curve_" } ++ size).asSymbol;
+    ^[thisEnv, defName];
+  }
+
+  getDefName {
+    if (isExponential) {
+      ^'ESEnvClip_kr_exp_2'
+    } {
+      ^'ESEnvClip_kr_curve_2'
+    };
+  }
+
+  playPan { |startTime = 0.0, clock, mc, duration|
+    var thisEnv, thisDefName;
+    #thisEnv, thisDefName = this.getEnvAndDefName(startTime, duration);
+    Server.default.bind {
+      synth = mc.panAuto(thisDefName, [env: thisEnv, tempo: clock.tempo, min: min, max: max, curve: curve]);
+    };
+  }
+
+  playLevel { |startTime = 0.0, clock, mc, duration|
+    var thisEnv, thisDefName;
+    #thisEnv, thisDefName = this.getEnvAndDefName(startTime, duration);
+    Server.default.bind {
+      synth = mc.levelAuto(thisDefName, [env: thisEnv, tempo: clock.tempo, min: min, max: max, curve: curve]);
+    };
+  }
+
+  stop {
+    (name ++ " stopped").postln;
   }
 }

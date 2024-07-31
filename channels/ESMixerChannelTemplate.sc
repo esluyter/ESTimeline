@@ -14,4 +14,17 @@ ESMixerChannelTemplate {
   init {
     envs.template = this;
   }
+
+  play { |startTime, clock, mc, duration|
+    fx.do { |fx|
+      mc.playfx(fx);
+    };
+
+    envs.play(startTime, clock, mc, duration);
+  }
+
+  stop { |mc|
+    mc.effectgroup.release;
+    envs.stop(mc);
+  }
 }
