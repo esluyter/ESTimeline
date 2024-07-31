@@ -686,10 +686,18 @@ ESTimeline {
 
     #tracks, thisTempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, dummyGD, dummySTG, dummyUMC, mixerChannelTemplates, globalMixerChannelNames = Object.fromESArray(currentState);
 
-    // legacy support
+    // prep fx and legacy support
     mixerChannelTemplates.keysValuesDo { |key, value|
       if (value.class == Event) {
-        mixerChannelTemplates[key] = ESMixerChannelTemplate(value.inChannels, value.outChannels, value.level, value.pan, value.fx, value.preSends, value.postSends);
+        value = ESMixerChannelTemplate(value.inChannels, value.outChannels, value.level, value.pan, value.fx, value.preSends, value.postSends);
+        mixerChannelTemplates[key] = value;
+      };
+      value.fx.do { |fxSynth, i|
+        if (fxSynth.isFunction) {
+          fxSynth = ESFxSynth(func: fxSynth, doPlayFunc: true);
+          value.fx[i] = fxSynth;
+        };
+        fxSynth.prep;
       };
     };
 

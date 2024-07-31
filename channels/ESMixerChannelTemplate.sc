@@ -17,7 +17,8 @@ ESMixerChannelTemplate {
 
   play { |startTime, clock, mc, duration|
     fx.do { |fx|
-      mc.playfx(fx);
+      //mc.playfx(fx);
+      mc.playfx(fx.playDefName, fx.prArgsValue(clock));
     };
 
     envs.play(startTime, clock, mc, duration);
