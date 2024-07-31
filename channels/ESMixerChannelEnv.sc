@@ -4,7 +4,7 @@ ESMixerChannelEnv {
   var left, top, width, height, pratio, tratio, envHeight, startTime;
   var <>template;
   var <>name;
-  var <>synth;
+  var <synth, playRout;
 
   hoverIndex_ { |val|
     if (val != hoverIndex) {
@@ -296,6 +296,10 @@ ESMixerChannelEnv {
 
     var thisDuration = (duration ?? env.duration) - startOffset;
 
+    if (times.size >= levels.size) {
+      times = times[0..levels.size - 2];
+    };
+
     if (playOffset < 0) {
       levels = [levels[0]] ++ levels;
       times = [playOffset * -1] ++ times;
@@ -367,7 +371,7 @@ ESMixerChannelEnv {
     ^[thisEnv, defName];
   }
 
-  getDefName {
+  defName {
     if (isExponential) {
       ^'ESEnvClip_kr_exp_2'
     } {
@@ -378,20 +382,39 @@ ESMixerChannelEnv {
   playPan { |startTime = 0.0, clock, mc, duration|
     var thisEnv, thisDefName;
     #thisEnv, thisDefName = this.getEnvAndDefName(startTime, duration);
-    Server.default.bind {
-      synth = mc.panAuto(thisDefName, [env: thisEnv, tempo: clock.tempo, min: min, max: max, curve: curve]);
-    };
+    playRout = {
+      thisEnv.times.do { |time, index|
+        var levels = thisEnv.levels[index..index+1];
+        var curves = if (thisEnv.curves.isArray) { thisEnv.curves[index] } { thisEnv.curves };
+        Server.default.bind {
+          synth.release;
+          synth = mc.panAuto(this.defName, [env: Env(levels, [time], curves), tempo: clock.tempo, min: min, max: max, curve: curve]);
+        };
+        time.wait;
+      };
+    }.fork(clock);
   }
 
   playLevel { |startTime = 0.0, clock, mc, duration|
     var thisEnv, thisDefName;
     #thisEnv, thisDefName = this.getEnvAndDefName(startTime, duration);
-    Server.default.bind {
-      synth = mc.levelAuto(thisDefName, [env: thisEnv, tempo: clock.tempo, min: min, max: max, curve: curve]);
-    };
+    playRout = {
+      thisEnv.times.do { |time, index|
+        var levels = thisEnv.levels[index..index+1];
+        var curves = if (thisEnv.curves.isArray) { thisEnv.curves[index] } { thisEnv.curves };
+        Server.default.bind {
+          synth.release;
+          synth = mc.levelAuto(this.defName, [env: Env(levels, [time], curves), tempo: clock.tempo, min: min, max: max, curve: curve]);
+        };
+        time.wait;
+      };
+    }.fork(clock);
   }
 
   stop {
-    (name ++ " stopped").postln;
+    //(name ++ " stopped").postln;
+    if (playRout.notNil) { playRout.stop; playRout = nil; };
+    //synth.release; should have already been freed....eek
+    synth = nil;
   }
 }
