@@ -83,11 +83,11 @@ ESMixerChannelEnvs {
   stop { |mc|
     if (pan.notNil) {
       pan.stop;
-      mc.stopAuto(\pan);
+      //mc.stopAuto(\pan);
     };
     if (level.notNil) {
       level.stop;
-      mc.stopAuto(\level);
+      //mc.stopAuto(\level);
     };
   }
 }

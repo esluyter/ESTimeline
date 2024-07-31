@@ -414,7 +414,9 @@ ESMixerChannelEnv {
   stop {
     //(name ++ " stopped").postln;
     if (playRout.notNil) { playRout.stop; playRout = nil; };
-    //synth.release; should have already been freed....eek
+    Server.default.bind {
+      synth.release;
+    };
     synth = nil;
   }
 }
