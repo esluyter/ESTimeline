@@ -4,7 +4,7 @@ ESMixerChannelEnv {
   var left, top, width, height, pratio, tratio, envHeight, startTime;
   var <>template;
   var <>name;
-  var <synth, playRout;
+  var <synth, playRout, <bus;
 
   hoverIndex_ { |val|
     if (val != hoverIndex) {
@@ -18,6 +18,34 @@ ESMixerChannelEnv {
     template.changed(\env);
   }
 
+  min_ { |val|
+    if (val != min) {
+      min = val;
+      template.changed(\env);
+    };
+  }
+
+  max_ { |val|
+    if (val != max) {
+      max = val;
+      template.changed(\env);
+    };
+  }
+
+  curve_ { |val|
+    if (val != curve) {
+      curve = val;
+      template.changed(\env);
+    };
+  }
+
+  isExponential_ { |val|
+    if (val != isExponential) {
+      isExponential = val;
+      template.changed(\env);
+    };
+  }
+
   storeArgs { ^[env, min, max, curve, isExponential]; }
 
   *new { |env, min = 0, max = 1, curve = 0, isExponential = false|
@@ -28,7 +56,7 @@ ESMixerChannelEnv {
     var points, image;
     var valStringFunc = { |val|
       // this is a real hack
-      (if (min == 0) { val.ampdb.round(0.01).asString ++ " dB" } { val.round(0.01).asString });
+      (if ((name == "level") or: (name.beginsWith("pre") or: (name.beginsWith("post")))) { val.ampdb.round(0.01).asString ++ " dB" } { val.round(0.01).asString });
     };
     var minString = valStringFunc.(min);
     var maxString = valStringFunc.(max);
@@ -177,39 +205,41 @@ ESMixerChannelEnv {
   }
 
   prMouseMove { |x, y, xDelta, yDelta, mods|
-    var thisEnv = env;
-    var points;
-    if (hoverIndex == 0) {
-      env = Env([thisEnv.levels[0]] ++ thisEnv.levels, [0] ++ thisEnv.times, if (thisEnv.curves.isArray) { [thisEnv.curves[0]] ++ thisEnv.curves } { thisEnv.curves });
-      hoverIndex = 1;
-      editingFirst = true;
-      thisEnv = env;
-    };
-    points = this.envBreakPoints;
-    if (hoverIndex.notNil) {
-      var newEnv, offset;
-      // adjust breakpoint
-      var prevPoint = points[max(0, hoverIndex - 1)];
-      var nextPoint = if (hoverIndex < (points.size - 1)) { points[hoverIndex + 1] } { (left + width)@0 };
-      var adjustedX = x.clip(prevPoint.x, nextPoint.x).clip(left, left + width);
-      var adjustedY = y.clip(top, top + height);
-      points[hoverIndex] = adjustedX@adjustedY;
-      if (editingFirst) { points[0] = left@adjustedY; };
-      this.env = this.envFromBreakPoints(points);
-    } {
-      // adjust curve if not over breakpoint and no modifiers
-      if (mods == 0) {
-        var curves = if (thisEnv.curves.isArray) { thisEnv.curves } { thisEnv.curves.dup(thisEnv.times.size) };
-        curveIndex = curveIndex ?? this.segmentIndex(points, x@y);
-        originalCurve = originalCurve ?? curves[curveIndex];
-        if (originalCurve.isNumber) {
-          var slope = thisEnv.levels[curveIndex + 1] - thisEnv.levels[curveIndex];
-          curves[curveIndex] = originalCurve + (yDelta * 0.1 * slope.sign);
-          this.env = Env(thisEnv.levels, thisEnv.times, curves);
+    try {
+      var thisEnv = env;
+      var points;
+      if (hoverIndex == 0) {
+        env = Env([thisEnv.levels[0]] ++ thisEnv.levels, [0] ++ thisEnv.times, if (thisEnv.curves.isArray) { [thisEnv.curves[0]] ++ thisEnv.curves } { thisEnv.curves });
+        hoverIndex = 1;
+        editingFirst = true;
+        thisEnv = env;
+      };
+      points = this.envBreakPoints;
+      if (hoverIndex.notNil) {
+        var newEnv, offset;
+        // adjust breakpoint
+        var prevPoint = points[max(0, hoverIndex - 1)];
+        var nextPoint = if (hoverIndex < (points.size - 1)) { points[hoverIndex + 1] } { (left + width)@0 };
+        var adjustedX = x.clip(prevPoint.x, nextPoint.x).clip(left, left + width);
+        var adjustedY = y.clip(top, top + height);
+        points[hoverIndex] = adjustedX@adjustedY;
+        if (editingFirst) { points[0] = left@adjustedY; };
+        this.env = this.envFromBreakPoints(points);
+      } {
+        // adjust curve if not over breakpoint and no modifiers
+        if (mods == 0) {
+          var curves = if (thisEnv.curves.isArray) { thisEnv.curves } { thisEnv.curves.dup(thisEnv.times.size) };
+          curveIndex = curveIndex ?? this.segmentIndex(points, x@y);
+          originalCurve = originalCurve ?? curves[curveIndex];
+          if (originalCurve.isNumber) {
+            var slope = thisEnv.levels[curveIndex + 1] - thisEnv.levels[curveIndex];
+            curves[curveIndex] = originalCurve + (yDelta * 0.1 * slope.sign);
+            this.env = Env(thisEnv.levels, thisEnv.times, curves);
+          };
         };
       };
+      template.changed(\env);
     };
-    template.changed(\env);
   }
 
   envBreakPoints {
@@ -384,13 +414,15 @@ ESMixerChannelEnv {
     #thisEnv, thisDefName = this.getEnvAndDefName(startTime, duration);
     playRout = {
       thisEnv.times.do { |time, index|
-        var levels = thisEnv.levels[index..index+1];
-        var curves = if (thisEnv.curves.isArray) { thisEnv.curves[index] } { thisEnv.curves };
-        Server.default.bind {
-          synth.release;
-          synth = mc.panAuto(this.defName, [env: Env(levels, [time], curves), tempo: clock.tempo, min: min, max: max, curve: curve]);
+        if (time > 0) {
+          var levels = thisEnv.levels[index..index+1];
+          var curves = if (thisEnv.curves.isArray) { thisEnv.curves[index] } { thisEnv.curves };
+          Server.default.bind {
+            synth.release;
+            synth = mc.panAuto(this.defName, [env: Env(levels, [time], curves), tempo: clock.tempo, min: min, max: max, curve: curve]);
+          };
+          time.wait;
         };
-        time.wait;
       };
     }.fork(clock);
   }
@@ -400,13 +432,15 @@ ESMixerChannelEnv {
     #thisEnv, thisDefName = this.getEnvAndDefName(startTime, duration);
     playRout = {
       thisEnv.times.do { |time, index|
-        var levels = thisEnv.levels[index..index+1];
-        var curves = if (thisEnv.curves.isArray) { thisEnv.curves[index] } { thisEnv.curves };
-        Server.default.bind {
-          synth.release;
-          synth = mc.levelAuto(this.defName, [env: Env(levels, [time], curves), tempo: clock.tempo, min: min, max: max, curve: curve]);
+        if (time > 0) {
+          var levels = thisEnv.levels[index..index+1];
+          var curves = if (thisEnv.curves.isArray) { thisEnv.curves[index] } { thisEnv.curves };
+          Server.default.bind {
+            synth.release;
+            synth = mc.levelAuto(this.defName, [env: Env(levels, [time], curves), tempo: clock.tempo, min: min, max: max, curve: curve]);
+          };
+          time.wait;
         };
-        time.wait;
       };
     }.fork(clock);
   }
@@ -419,13 +453,43 @@ ESMixerChannelEnv {
     method = if (method == "pre") { \preSends } { \postSends };
     playRout = {
       thisEnv.times.do { |time, i|
-        var levels = thisEnv.levels[i..i+1];
-        var curves = if (thisEnv.curves.isArray) { thisEnv.curves[i] } { thisEnv.curves };
-        Server.default.bind {
-          synth.release;
-          synth = mc.perform(method)[index].levelAuto(this.defName, [env: Env(levels, [time], curves), tempo: clock.tempo, min: min, max: max, curve: curve]);
+        if (time > 0) {
+          var levels = thisEnv.levels[i..i+1];
+          var curves = if (thisEnv.curves.isArray) { thisEnv.curves[i] } { thisEnv.curves };
+          Server.default.bind {
+            synth.release;
+            synth = mc.perform(method)[index].levelAuto(this.defName, [env: Env(levels, [time], curves), tempo: clock.tempo, min: min, max: max, curve: curve]);
+          };
+          time.wait;
         };
-        time.wait;
+      };
+    }.fork(clock);
+  }
+
+  playFx { |startTime = 0.0, clock, mc, duration|
+    var thisEnv, thisDefName, method, index, param;
+    #thisEnv, thisDefName = this.getEnvAndDefName(startTime, duration);
+    #method, index, param = name.split($_);
+    index = index.interpret;
+    param = param.asSymbol;
+
+    bus.free;
+    bus = Bus.control(Server.default, 1);
+    Server.default.bind {
+      template.fxSynths[index].set(param, bus.asMap);
+    };
+
+    playRout = {
+      thisEnv.times.do { |time, i|
+        if (time > 0) {
+          var levels = thisEnv.levels[i..i+1];
+          var curves = if (thisEnv.curves.isArray) { thisEnv.curves[i] } { thisEnv.curves };
+          Server.default.bind {
+            synth.release;
+            synth = Synth(this.defName, [env: Env(levels, [time], curves), tempo: clock.tempo, min: min, max: max, curve: curve, out: bus], mc.effectgroup);
+          };
+          time.wait;
+        };
       };
     }.fork(clock);
   }
@@ -437,5 +501,7 @@ ESMixerChannelEnv {
       synth.release;
     };
     synth = nil;
+    bus.free;
+    bus = nil;
   }
 }

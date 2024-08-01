@@ -119,8 +119,30 @@ ESTrackPanelView : UserView {
       track.envs.do { |assoc, i|
         var envHeight = timelineView.trackHeight * timeline.envHeightMultiplier;
         var key = assoc.key;
+        var env = assoc.value;
         //[key, val, i, envHeight].postln;
         StaticText(view, Rect(5, timelineView.trackHeight + (envHeight * i) + 4, width - 10, envHeight)).string_(key).align_(\topRight).stringColor_(Color.gray(0.6)).setContextMenuActions(
+          MenuAction("Set automation range", {
+            ESBulkEditWindow.keyValue("Set automation range keeping breakpoint values",
+              "min", env.min, "max", env.max, "isExponential", env.isExponential, true, "curve", env.curve,
+              callback: { |min, max, isExponential, curve|
+                min = min.interpret;
+                max = max.interpret;
+                curve = curve.interpret;
+                if ((isExponential and: ((min.sign != max.sign))).not) {
+                  var oldLevels = env.env.levels;
+                  var values = oldLevels.collect(env.prValueScale(_));
+                  var newLevels;
+                  env.min = min;
+                  env.max = max;
+                  env.curve = curve;
+                  env.isExponential = isExponential;
+                  newLevels = values.collect(env.prValueUnscale(_));
+                  env.env = Env(newLevels, env.env.times, env.env.curves);
+                };
+              }
+            );
+          }),
           MenuAction("Remove automation envelope", {
             var template = track.mixerChannelTemplate;
             // hacky
@@ -155,6 +177,13 @@ ESTrackPanelView : UserView {
               template.envs.preSends = arr;
               template.preSends[index][1] = val;
               track.mixerChannel.preSends[index].level = val;
+            };
+            if (key.asString.beginsWith("fx")) {
+              var index = key.asString.split($_)[1].interpret;
+              var param = key.asString.split($_)[2].asSymbol;
+              var arr = template.envs.fx;
+              arr[index][param].stop; arr[index][param] = nil;
+              template.envs.fx = arr;
             };
           })
         );

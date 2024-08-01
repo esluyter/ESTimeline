@@ -60,9 +60,13 @@ ESTimeline {
           envs = envs.add(env);
         };
       };
-      template.envs.fx.do { |env|
-        if (env.notNil) {
-          envs = envs.add(env);
+      template.envs.fx.do { |ev|
+        if (ev.notNil) {
+          ev.do { |env|
+            if (env.notNil) {
+              envs = envs.add(env);
+            };
+          };
         };
       };
     };
@@ -237,7 +241,7 @@ ESTimeline {
         };
       };
 
-      // sends
+      // sends + fx prep
       newTemplates.keysValuesDo { |name, template|
         template.preSends.do { |arr| var sendName = arr[0]; var level = arr[1];
           var mc = this.mixerChannel(sendName);
@@ -250,6 +254,9 @@ ESTimeline {
           if (mc.notNil and: mixerChannels[name].notNil) {
             mixerChannels[name].newPostSend(mc, level);
           };
+        };
+        template.fx.do { |fx|
+          fx.prep;
         };
       };
 
@@ -381,7 +388,6 @@ ESTimeline {
     if (cleanupFirst) {
       this.cleanup;
     };
-
     // forward changed messages from clips
     tracks.do { |track, i|
       track.removeDependant(dependantFunc);
