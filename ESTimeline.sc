@@ -88,9 +88,16 @@ ESTimeline {
     this.init;
     this.changed(\tracks);
   }
-  useMixerChannel_ { |val|
+  useMixerChannel_ { |val, initMcs = true|
     useMixerChannel = val;
-    this.initMixerChannels;
+    this.clips.do { |clip|
+      if (clip.class == ESTimelineClip) {
+        clip.timeline.useMixerChannel_(val, false);
+      };
+    };
+    if (initMcs) {
+      this.initMixerChannels;
+    };
     this.changed(\useMixerChannel);
   }
 
@@ -592,7 +599,7 @@ ESTimeline {
     if (initMc) {
       this.initMixerChannels;
     } {
-      if (track.useMixerChannel and: mixerChannels[track.mixerChannelName].isNil) {
+      if (useMixerChannel and: track.useMixerChannel and: mixerChannels[track.mixerChannelName].isNil) {
         mixerChannels[track.mixerChannelName] = mc ?? {
           MixerChannel(track.mixerChannelName.asSymbol, Server.default, mcTemplate.inChannels, mcTemplate.outChannels, mcTemplate.level, mcTemplate.pan, outbus: mixerChannels[\master] ?? this.defaultOutbus);
         };
