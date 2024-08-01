@@ -47,10 +47,12 @@ Also note that because timelines are built to execute user-supplied code they ar
     - track insert FX, pre fade sends and post fade sends
     - automate mixer channel parameters (level, pan, sends, fx parameters) with editable envelopes
 - **Non-linear:** "goto" command to jump to a clip or a point in time enabling complex real-time behaviors (variable-length looping, conditional branching...
-- **Tracks** can contain all clip types
+- **Tracks** are the main form of organization of clips
+  - tracks can contain any type of clip in any combination
   - tracks can be muted/soloed and rearranged
   - individual clips can be muted
   - if using ddwMixerChannel, tracks will play on a mixer channel specified by the track's name
+    - sub timelines will play on mixer channels feeding into their parent track's mixer channel
 - **Synth, Pattern, Routine, and Env** clip types
   - Synth clips can either instantiate a SynthDef or run their own single-use function a la `{ }.play`
     - You can select multiple Synth clips and bulk edit their arguments
@@ -113,7 +115,8 @@ These are all things I would like to implement someday:
 <details>
   <summary><strong>Getting started: installing and tutorial</strong></summary>
   <br /><br />
-Here is a slightly out of date tutorial in that it doesn't use MixerChannel. All parts are still relevant except "Environment variables - adding reverb" -- which is useful to demonstrate how the timeline works but there is a much better way in the form of mixer channels, which I will soon update this tutorial to encompass. 
+<!--Here is a slightly out of date tutorial in that it doesn't use MixerChannel. All parts are still relevant except "Environment variables - adding reverb" -- which is useful to demonstrate how the timeline works but there is a much better way in the form of mixer channels, which I will soon update this tutorial to encompass. -->
+This tutorial uses mac keyboard shortcuts. I believe for other platforms you can substitute ctrl and alt.
   
 ## Installing
 Download or clone this repository into your SuperCollider Extensions directory. To see where this is, go to `File > Open user support directory` and find the `Extensions` directory, or evaluate:
@@ -128,35 +131,23 @@ Platform.userExtensionDir
 ~window = ESTimelineWindow(timeline: ~timeline);
 )
 ```
-- this boots the default server. You can make it not do this by setting `bootOnPrep` to false or going into "Prep / Cleanup funcs" and unchecking `bootOnPrep`.
+- this boots the default server, but does not use ddwMixerChannel.
 
-### SynthDefs:
-- put your SynthDef in the timeline's prep function (click the "edit prep/cleanup funcs" button) e.g.
-```
-SynthDef(\sin, { |out, freq = 440, gate = 1, amp = 0.1, preamp = 1.5, attack = 0.001, release = 0.01, pan, verbbus, verbamt, vibrato = 0.2|
-  var env, sig;
-  var lfo = XLine.ar(0.01, vibrato, ExpRand(0.5, 2.0)) * SinOsc.ar(5.4 + (LFDNoise3.kr(0.1) * 0.5));
-  gate = gate + Impulse.kr(0);
-  env = Env.adsr(attack, 0.1, 0.4, release).ar(2, gate);
-  sig = SinOsc.ar(freq * lfo.midiratio) * env;
-  sig = (sig * preamp).tanh;
-  sig = Pan2.ar(sig, pan, amp);
-  Out.ar(out, sig);
-  Out.ar(verbbus, sig * verbamt);
-}).add;
-```
-- hit save when you're done to save the prepFunc and load it.
-
-### Making tracks:
+### Tracks:
+- Tracks are the main form of clip organization.
+- click anywhere in the timeline to make sure it is focused
 - press cmd-t to add a track after the one your mouse is currently over, or shift-cmd-T to add it before the current track
-- cmd-delete deletes a track
-- each track can contain any kind of clip in any combination
+- cmd-delete deletes the track under your mouse
 - mute and solo tracks using the buttons on the left panel
+- double click in the left panel to rename tracks
 - click and drag in the left panel to rearrange tracks
 
 ### Synth Clips:
 - create a bunch of Synth clips (point the mouse where you want it and press shift-S, or use right click menu)
-- drag them around to move them
+  - spacebar to play
+- drag them around to move them in time or between tracks
+  - they will always snap to the playhead in time
+    - to move playhead to beginning of clip, make sure your mouse is inside of clip and press [
   - check the `snapToGrid` box or press opt-s to align your edits with the tempo grid
   - drag their edges to resize them (a red bar appears when you are within the resize zone)
   - option-drag to copy a clip
@@ -173,25 +164,48 @@ SynthDef(\sin, { |out, freq = 440, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
 - cmd-scroll to zoom in and out horizontally
 - opt-scroll to zoom in and out vertically (when there are more than one track)
 
+### SynthDefs:
+- put your SynthDef in the timeline's prep function (click the "edit prep/cleanup funcs" button) e.g.
+```
+SynthDef(\sin, { |out, freq = 440, gate = 1, amp = 0.1, preamp = 1.5, attack = 0.001, release = 0.01, pan, verbbus, verbamt, vibrato = 0.2|
+  var env, sig;
+  var lfo = XLine.ar(0.01, vibrato, ExpRand(0.5, 2.0)) * SinOsc.ar(5.4 + (LFDNoise3.kr(0.1) * 0.5));
+  gate = gate + Impulse.kr(0);
+  env = Env.adsr(attack, 0.1, 0.4, release).ar(2, gate);
+  sig = SinOsc.ar(freq * lfo.midiratio) * env;
+  sig = (sig * preamp).tanh;
+  sig = Pan2.ar(sig, pan, amp);
+  Out.ar(out, sig);
+  Out.ar(verbbus, sig * verbamt);
+}).add;
+```
+- hit save when you're done to save the prepFunc and load it. close the window, if you want
+
 ### Bulk edit synth clips:
 - click in an empty area and drag to select all the Synth clips (they will be highlighted in cyan when selected)
 - right click, "clip actions > bulk actions > Bulk edit Synth defName"
-  - and set them to `'sin'`.
-  - play again and you hear they now all play your SynthDef
+  - and set them to `'sin'` and hit ok
+- play again and you hear they now all play your SynthDef
   - double-click in an empty area to remove selection
+  - double-click on a clip now and you will see all the new parameters you can control.
 
 ### Envelopes for Synth parameters:
 - right click a Synth clip, "clip actions > synth actions > add env for synth argument"
 - pick "freq" from the list and hit OK
-  - this will by default add a new track with an envelope clip on it that is the length of your Synth clip, with a unique name (starting from 'freq0'), and it will update the freq argument of the Synth clip to read from this envelope's bus
+  - this will add a new track above your clip with an envelope clip on it that is the length of your Synth clip
+    - with a unique name (starting from 'freq0'),
+    - initialized with the current value of that parameter
+    - and it will update the freq argument of the Synth clip to read from this envelope's bus
 
 ### Editing Envelopes:
 - cmd-e to enter envelope breakpoint editor mode
-  - click and drag to move the breakpoints around or adjust curves,
+  - click and drag on a breakpoint to move it around,
+  - click and drag between breakpoints to adjust the curve,
   - shift-click to add breakpoints,
   - option-click to remove them
-- by default, these envelopes will map to the range of the parameter name .asSpec
-  - to rescale, right click, clip actions > env actions > "set env range keeping breakpoint values"
+  - to adjust the envelope range, right click, clip actions > env actions > "set env range keeping breakpoint values"
+    - now you can change the frequency range of the envelope, say min `100` max `5000`
+    - ok to save changes -- this will keep your values intact so long as they fall within the new range
 - hit cmd-e again to leave envelope breakpoint editor mode
 
 ### Bulk edit Synths -- To make this envelope affect all your Synths:
@@ -200,21 +214,115 @@ SynthDef(\sin, { |out, freq = 440, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
 - assign the `freq` of all the clips to (the single quotes are important!) 
 `'freq0'`
 (or whatever the name of the envelope clip is)
-- you should see all their freqs change show the audio rate bus that the Env clip has created for you
-  - if you want, you can change this behavior so the envelope plays on a bus you have created instead
+- you should see all their freqs change to show the audio rate bus that the Env clip has created for you (for me this is a8)
 - double click to deselect all clips, then:
 - drag the edges of the envelope clip to resize it, so that it covers the entire range of your Synth clips
 - cmd-e to edit the breakpoints again
 - you should hear it is now controlling all the synths' pitches
 - make sure you've left breakpoint edit mode when you want to move clips around
 
-### Bulk edit Synths -- Random panning:
+### Bulk adjust Synths -- Random panning:
+- set one of your clips to pan hard left by double-clicking and setting its pan to -1
 - Select all your Synth clips
-- right click > clip actions > bulk actions > Bulk edit (change) Synth arguments
-- for `pan` put in `rrand(-1.0, 1.0)` and check the "hard coded" box
-  - this will generate a random hard-coded pan per clip. (if you want it to be newly random every time you play it, uncheck the box)
+- right click > clip actions > bulk actions > Bulk adjust (modify) Synth arguments
+- for `pan` put in `+ 0.5.rand2` and check the "hard coded" box
+  - this will generate a random pan per clip that is within 0.5 of its original panning. (if you want it to be newly random every time you play it, uncheck the "hard-coded" box)
+
+### Pattern Clips:
+- make a new track and shift-P to make a pattern clip
+- double click to edit, e.g.:
+```
+Pbind(
+  \instrument, \sin,
+  \degree, Pbrown(0, 7 * 3 + 1, 3),
+  \octave, Pdup(Pwhite(1, 10), Pwhite(3, 5)),
+  \pan, Pwhite(-1.0, 1.0),
+  \dur, Pbrown().linexp(0, 1, 0.02, 1.0),
+)
+```
+- if you want to try a new random seed, click "re-roll" button and save
+  - you can always undo if you don't like it (cmd-z undo, shift-cmd-Z redo)
+- you can drag the edges to adjust start and end point without changing the timing of the notes
+  - you can split it into two by pointing with the mouse where you want the split and pressing s
+- if you make a new track and a new envelope (shift-E),
+  - double click on the envelope, name it `pan0` and set its range from -1 to 1
+  - click "save" to save it, and close the window if you want
+- double click on each of the pattern clips and add
+```
+  \pan, ~thisTimeline[\pan0],
+```
+- cmd-e and edit the panning to your liking
+
+### Saving
+- click "save as" button or hit cmd-s
+    
+### Timeline clips:
+- above the main timeline, click "Open as clip in new timeline"
+  - Now this little system, the synths, patterns, buses and envelopes, are all encapsulated in this timeline clip
+    - (in fact you can duplicate the timeline clip by option-dragging onto a new track, and the two will play simultanously each using its own environment and buses)
+  - you can also resize the clips, move the mouse cursor over the clip and use the s key to split it into two separate timeline clips, etc.
+ 
+### Mixer channels:
+This will now assume you have ddwMixerChannel installed.
+- check the `useMixerChannel` box
+- scroll down to the "current ad-hoc mixer interface" on this page
+  - copy and paste that code into your SuperCollider IDE and evaluate it
+  - you will now see a mixer on which currently playing channels are visible
+    - subtimelines feed into their parent track's channel
+  - you can move these faders and pan knobs around to mix the inputs
+   
+### Adding reverb:
+- create a new track by pressing cmd-T while your mouse is over the last track
+- double click on the left panel to name it `verb` and press enter.
+- right-click one of the gray rectangles above the "verb" channel strip on the mixer
+- select "new insert fx"
+- replace the function with:
+```
+{ |time = 2.5|
+  var sig = In.ar(~out, 2);
+  NHHall.ar(sig, time);
+}
+```
+- save and close window, if you want
+- right click on one of the gray rectangles above one of the tracks with a timeline clip on it and select "new send"
+  - it defaults to `'verb'` at 0db
+  - click ok
+  - you will hear the timelines on this track play with reverb, other tracks not
+  - use its slot on the mixer interface to tune levels
+
+### Using Routine clips:
+- shift-R to make a Routine clip, double click to edit
+- it's important to use `s.bind` for server operations inside of routines, otherwise the timing is off.
+```
+var syn;
+10.do { |i|
+  s.bind { syn = Synth(\default, [freq: (40 + i).midicps]) };
+  0.2.wait;
+  s.bind { syn.free };
+  0.2.wait;
+};
+```
+- You can think of Routine clips as kind of your generic "execute this code here", and if you want say OSC out to a light board to line up with the sounding events, check the `addLatency` box.
+- You can interact with the timeline using `~thisTimeline` which always refers to the timeline you're currently working in, or `~timeline` which refers to either this or the nearest parent timeline whose `useEnvir` box is checked
+  - if no parent timeline is set to `useEnvir`, then `~thisTimeline` will overwrite anything you might have in your current environment.
+  - in that case, `~timeline` might be nil unless you've set it in your current environment.
+- to get the current value of an envelope named `env` from within a routine:
+```
+loop {
+  ~thisTimeline[\env].valueNow.postln;
+  1.wait;
+};
+```
+- to jump to a clip named `next`, use
+```
+~thisTimeline.goto(\next)
+```
+- you can use a comment clip (shift-C) for this dummy "next" clip -- the first line of the comment is its name
+- you can also goto a number, which will be interpreted as beat number.
+
 
 ### Environment variables -- adding reverb:
+This is just to demonstrate how environment variables work inside the timeline. The better way of adding reverb demonstrated earlier with mixer channels.
 - add to your timeline prep func:
 ```
 SynthDef(\verb, { |out, verbbus, gate = 1, amp = 1|
@@ -248,67 +356,6 @@ SynthDef(\verb, { |out, verbbus, gate = 1, amp = 1|
   - now when you play you will hear they all are affected by the reverb Synth.
 - you could now make an envelope to control the amplitude of this reverb, analogous to overall return level.
 - you could also make an envelope to control the verbamt of all of the Synths, analogous to send level.
-
-### Pattern Clips:
-- make a new track and shift-P to make a pattern clip
-- double click to edit, e.g.:
-```
-Pbind(
-  \instrument, \sin,
-  \verbbus, ~verbbus,
-  \verbamt, Pwhite(0.0, 1.0).linexp(0, 1, 0.1, 3.0),
-  \degree, Pbrown(0, 7 * 3 + 1, 3),
-  \octave, Pdup(Pwhite(1, 10), Pwhite(3, 5)),
-  \pan, Pwhite(-1.0, 1.0),
-  \dur, Pbrown().linexp(0, 1, 0.02, 1.0)
-)
-```
-- you will hear this uses the same reverb synth
-- if you want to try a new random seed, click "re-roll" button and save
-  - you can always undo if you don't like it
-- you can drag the edges to adjust start and end point without changing the timing of the notes
-  - you can split it into two by pointing with the mouse where you want the split and pressing s
-- if you make a new track and a new envelope, name the envelope `pan0` and set its range from -1 to 1
-- edit the panning to your liking, and update the pattern(s) with
-```
-  \pan, ~thisTimeline[\pan0],
-```
-    
-### Timeline clips:
-- above the main timeline, click "Open as clip in new timeline"
-  - Now this little system, the synths, patterns, buses and envelopes, are all encapsulated in this timeline clip, which won't interfere with e.g. another ~verbbus that you happen to use elsewhere.
-  - (in fact you can duplicate the timeline clip by option-dragging onto a new track, and the two will play simultanously each using its own environment and bus.)
-  - you can also resize the clips, move the mouse cursor over the clip and use the s key to split it into two separate timeline clips, etc.
-
-### Using Routine clips:
-- shift-R to make a Routine clip, double click to edit
-- it's important to use `s.bind` for server operations inside of routines, otherwise the timing is off.
-```
-var syn;
-10.do { |i|
-  s.bind { syn = Synth(\default, [freq: (40 + i).midicps]) };
-  0.2.wait;
-  s.bind { syn.free };
-  0.2.wait;
-};
-```
-- You can think of Routine clips as kind of your generic "execute this code here", and if you want say OSC out to a light board to line up with the sounding events, check the `addLatency` box.
-- You can interact with the timeline using `~thisTimeline` which always refers to the timeline you're currently working in, or `~timeline` which refers to either this or the nearest parent timeline whose `useEnvir` box is checked
-  - if no parent timeline is set to `useEnvir`, then `~thisTimeline` will overwrite anything you might have in your current environment.
-  - in that case, `~timeline` might be nil unless you've set it in your current environment.
-- to get the current value of an envelope named `env` from within a routine:
-```
-loop {
-  ~thisTimeline[\env].valueNow.postln;
-  1.wait;
-};
-```
-- to jump to a clip named `next`, use
-```
-~thisTimeline.goto(\next)
-```
-- you can use a comment clip (shift-C) for this dummy "next" clip -- the first line of the comment is its name
-- you can also goto a number, which will be interpreted as beat number.
 <br />
 </details>
 
