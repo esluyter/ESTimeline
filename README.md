@@ -35,17 +35,18 @@ Also note that because timelines are built to execute user-supplied code they ar
     - there are certain things impossible in NRT, i.e. to do with real-time input
     - ddwMixerChannel doesn't yet work NRT so this would be a big rewrite
   - as little architecture as possible is forced on you
-    - possible to disable timeline-specific clock and environment so as to interact with the timeline as part of a larger project
+    - possible to disable ddwMixerChannel, timeline-specific clock and environment so as to interact with the timeline as part of a larger project
     - possible to play clips with any bus, target, addAction, etc. for full flexibility
 - **DAW-like GUI** for editing and playback
+  - The goal is an accurate visual representation of what you are hearing / when the code is executed
+    - gray playhead is "scheduling playhead" and black playhead is "sounding playhead" -- to take into account server latency
+    - Routines can be played with additional latency so non-sounding events line up with the sounding playhead
   - Keyboard and mouse interface to full extent of Timeline capabilities, with built-in code editing
-    - Snap to grid optional
+  - Snap to grid optional
   - Optional full GUI mixing interface using ddwMixerChannel
     - track insert FX, pre fade sends and post fade sends
-    - automate mixer channel parameters (level, pan, sends) with envelopes -- *fx parameters coming soon*
-  - Gray playhead is "scheduling playhead" and black playhead is "sounding playhead" -- to take into account server latency.
-    - Routines can be played with additional latency so non-sounding events line up with the sounding playhead. The goal is an accurate visual representation of what you are hearing / when the code is executed
-- **Non-linear:** "goto" command to jump to a clip or a point in time enabling complex real-time behaviors (variable-length looping, conditional branching...)
+    - automate mixer channel parameters (level, pan, sends, fx parameters) with editable envelopes
+- **Non-linear:** "goto" command to jump to a clip or a point in time enabling complex real-time behaviors (variable-length looping, conditional branching...
 - **Tracks** can contain all clip types
   - tracks can be muted/soloed and rearranged
   - individual clips can be muted
@@ -67,7 +68,7 @@ Also note that because timelines are built to execute user-supplied code they ar
 - **Timeline Clip** -- embed one timeline in another!
   - Each timeline clip can optionally use its own TempoClock, and optionally use its own Environment 
   - Each timeline (and timeline clip) has an init / free hook for e.g. allocating and freeing resources
-- **Undo and redo** at each timeline level -- *sometimes this works a charm.. I need to fix it though*
+- **Undo and redo** at each timeline level -- *sometimes this works a charm.. not reliable though. I need to fix.*
 - **Save and recall**
   - Save as plain text files in SC array format
   - Once you have saved, the timeline will update a backup file every time you add an undo point, in case of crash
@@ -83,6 +84,7 @@ Also note that because timelines are built to execute user-supplied code they ar
     - to avoid this I have created a light custom file format that compiles complex timeline structures from the inside out
 4. At high track counts, it takes a little while to load and free all the MixerChannels.
     - I have tried to reduce the occasions on which this needs to happen.
+5. Changes will generally not take effect until you've stopped and restarted playback. This will be difficult to fix, but someday I hope to.
 
 ## Hypothetical features
 These are all things I would like to implement someday:
@@ -642,7 +644,7 @@ OSCdef(\test, { |msg|
           if (clickCount > 1) {
             // edit fx clip
             var clip = template.fx[index];
-            clip.guiClass.new(clip, timeline);
+            clip.guiClass.new(clip, timeline, template, index);
           };
         }).setContextMenuActions(
           MenuAction("Delete", {
@@ -759,12 +761,12 @@ OSCdef(\test, { |msg|
             } {
               UserView(insertView, bounds)
               .background_(Color.gray(0.82)).setContextMenuActions(
-                MenuAction("New Insert Func", {
+                MenuAction("New Insert FX", {
                   var newClip = ESFxSynth(func: {
   var sig = In.ar(~out, 2);
   sig;
 }, doPlayFunc: true).prep;
-                  newClip.guiClass.new(newClip, timeline);
+                  newClip.guiClass.new(newClip, timeline, template, template.fx.size);
                   template.fx = template.fx.add(newClip);
                   ~winFunc.value;
                 }),
