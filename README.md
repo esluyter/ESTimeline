@@ -41,12 +41,12 @@ Also note that because timelines are built to execute user-supplied code they ar
   - The goal is an accurate visual representation of what you are hearing / when the code is executed
     - gray playhead is "scheduling playhead" and black playhead is "sounding playhead" -- to take into account server latency
     - Routines can be played with additional latency so non-sounding events line up with the sounding playhead
-- **Non-linear:** "goto" command to jump to a clip or a point in time enabling complex real-time behaviors (variable-length looping, conditional branching...)
   - Keyboard and mouse interface to full extent of Timeline capabilities, with built-in code editing
-    - Snap to grid optional
+  - Snap to grid optional
   - Optional full GUI mixing interface using ddwMixerChannel
     - track insert FX, pre fade sends and post fade sends
     - automate mixer channel parameters (level, pan, sends, fx parameters) with editable envelopes
+- **Non-linear:** "goto" command to jump to a clip or a point in time enabling complex real-time behaviors (variable-length looping, conditional branching...
 - **Tracks** can contain all clip types
   - tracks can be muted/soloed and rearranged
   - individual clips can be muted
