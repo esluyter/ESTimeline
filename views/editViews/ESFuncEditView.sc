@@ -78,7 +78,7 @@ ESFuncEditView : ESClipEditView {
         timeline.useEnvir = envirBox.value;
         timeline.optimizeView = optimizeBox.value;
 
-        timeline.init(cleanupFirst: true);
+        timeline.init(cleanupFirst: true, initMixerChannels: false);
         timeline.addUndoPoint;
       };
     });
