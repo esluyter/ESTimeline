@@ -292,6 +292,15 @@ This will now assume you have ddwMixerChannel installed.
 
 ### Using Routine clips:
 - shift-R to make a Routine clip, double click to edit
+- You can think of Routine clips as kind of your generic "execute this code here"
+- to jump to beat 1 on this timeline, use
+```
+~thisTimeline.goto(1)
+```
+- to jump to a clip named `next`, use
+```
+~thisTimeline.goto(\next)
+```
 - it's important to use `s.bind` for server operations inside of routines, otherwise the timing is off.
 ```
 var syn;
@@ -302,7 +311,7 @@ var syn;
   0.2.wait;
 };
 ```
-- You can think of Routine clips as kind of your generic "execute this code here", and if you want say OSC out to a light board to line up with the sounding events, check the `addLatency` box.
+- if you want say OSC out to a light board to line up with the sounding events, check the `addLatency` box.
 - You can interact with the timeline using `~thisTimeline` which always refers to the timeline you're currently working in, or `~timeline` which refers to either this or the nearest parent timeline whose `useEnvir` box is checked
   - if no parent timeline is set to `useEnvir`, then `~thisTimeline` will overwrite anything you might have in your current environment.
   - in that case, `~timeline` might be nil unless you've set it in your current environment.
@@ -312,10 +321,6 @@ loop {
   ~thisTimeline[\env].valueNow.postln;
   1.wait;
 };
-```
-- to jump to a clip named `next`, use
-```
-~thisTimeline.goto(\next)
 ```
 - you can use a comment clip (shift-C) for this dummy "next" clip -- the first line of the comment is its name
 - you can also goto a number, which will be interpreted as beat number.
