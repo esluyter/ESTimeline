@@ -89,13 +89,19 @@ ESTimeline {
     this.changed(\tracks);
   }
   useMixerChannel_ { |val, initMcs = true|
+    if (val == false) {
+      this.prFreeMixerChannels;
+    };
     useMixerChannel = val;
     this.clips.do { |clip|
       if (clip.class == ESTimelineClip) {
+        if (val == false) {
+          clip.timeline.prFreeMixerChannels;
+        };
         clip.timeline.useMixerChannel_(val, false);
       };
     };
-    if (initMcs) {
+    if (initMcs and: (val == true)) {
       this.initMixerChannels;
     };
     this.changed(\useMixerChannel);
