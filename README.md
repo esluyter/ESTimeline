@@ -42,7 +42,7 @@ Also note that because timelines are built to execute user-supplied code they ar
     - Snap to grid optional
   - Optional full GUI mixing interface using ddwMixerChannel
     - track insert FX, pre fade sends and post fade sends
-    - automate mixer channel parameters (level, pan, sends) with envelopes -- *fx parameters coming soon*
+    - automate mixer channel parameters (level, pan, sends, fx parameters) with envelopes
   - Gray playhead is "scheduling playhead" and black playhead is "sounding playhead" -- to take into account server latency.
     - Routines can be played with additional latency so non-sounding events line up with the sounding playhead. The goal is an accurate visual representation of what you are hearing / when the code is executed
 - **Non-linear:** "goto" command to jump to a clip or a point in time enabling complex real-time behaviors (variable-length looping, conditional branching...)
@@ -642,7 +642,7 @@ OSCdef(\test, { |msg|
           if (clickCount > 1) {
             // edit fx clip
             var clip = template.fx[index];
-            clip.guiClass.new(clip, timeline);
+            clip.guiClass.new(clip, timeline, template, index);
           };
         }).setContextMenuActions(
           MenuAction("Delete", {
@@ -759,12 +759,12 @@ OSCdef(\test, { |msg|
             } {
               UserView(insertView, bounds)
               .background_(Color.gray(0.82)).setContextMenuActions(
-                MenuAction("New Insert Func", {
+                MenuAction("New Insert FX", {
                   var newClip = ESFxSynth(func: {
   var sig = In.ar(~out, 2);
   sig;
 }, doPlayFunc: true).prep;
-                  newClip.guiClass.new(newClip, timeline);
+                  newClip.guiClass.new(newClip, timeline, template, template.fx.size);
                   template.fx = template.fx.add(newClip);
                   ~winFunc.value;
                 }),
