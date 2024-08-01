@@ -267,6 +267,7 @@ This will now assume you have ddwMixerChannel installed.
 - check the `useMixerChannel` box
 - scroll down to the "current ad-hoc mixer interface" on this page
   - copy and paste that code into your SuperCollider IDE and evaluate it
+- click back on the timeline and press play
   - you will now see a mixer on which currently playing channels are visible
     - subtimelines feed into their parent track's channel
   - you can move these faders and pan knobs around to mix the inputs
@@ -289,6 +290,8 @@ This will now assume you have ddwMixerChannel installed.
   - click ok
   - you will hear the timelines on this track play with reverb, other tracks not
   - use its slot on the mixer interface to tune levels
+
+Automating mixer levels, send levels, and fx parameters left as an exercise, for now...
 
 ### Using Routine clips:
 - shift-R to make a Routine clip, double click to edit
