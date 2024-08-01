@@ -137,9 +137,9 @@ Platform.userExtensionDir
 - Tracks are the main form of clip organization.
 - click anywhere in the timeline to make sure it is focused
 - press cmd-t to add a track after the one your mouse is currently over, or shift-cmd-T to add it before the current track
+- double click in the left panel to rename tracks
 - cmd-delete deletes the track under your mouse
 - mute and solo tracks using the buttons on the left panel
-- double click in the left panel to rename tracks
 - click and drag in the left panel to rearrange tracks
 
 ### Synth Clips:
@@ -153,7 +153,7 @@ Platform.userExtensionDir
   - option-drag to copy a clip
 - double-click on a clip to edit it
   - double-click on the grayed out `freq` parameter to activate it, then you can set it to any valid SuperCollider expression, like `220` or `60.midicps`
-  - press save when you're done
+  - press save when you're done, and close the edit window if you want.
 - if you play now by clicking to place the playhead and pressing space, you will hear they play the default synth with your parameters at the appropriate time
   - the gray playhead is the "scheduling playhead" -- this is when the code is executed
   - the black playhead is the "sounding playhead" -- because of server latency, this is when the events actually sound. this is generally the one you want to watch
