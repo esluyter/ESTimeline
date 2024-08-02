@@ -255,6 +255,7 @@ Pbind(
 
 ### Saving
 - click "save as" button or hit cmd-s
+- navigate to the directory you want to save in, and enter a file name to save as (e.g. "tutorial0.scd")
     
 ### Timeline clips:
 - above the main timeline, click "Open as clip in new timeline"
