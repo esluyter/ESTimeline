@@ -86,6 +86,16 @@ ESTimelineWindow : Window {
       timelineView.focus;
     });
 
+    Button(this, Rect(1450, 5, 25, 30)).states_([["⇤"]]).font_(Font.sansSerif(17)).action_({
+      timeline.goto(0);
+    });
+    Button(this, Rect(1477.5, 5, 105, 30)).states_([["Find playhead"]]).action_({
+      timelineView.timelineController.findPlayhead;
+    });
+    Button(this, Rect(1585, 5, 25, 30)).states_([["⇥"]]).font_(Font.sansSerif(17)).action_({
+      timeline.goto(timeline.duration);
+    });
+
     //Button(this, Rect(1200, 5, 100, 30)).states_([["Load legacy"]]).action_({timeline.restoreUndoPoint(Document.current.string, false, true); timelineView.focus;});
 
     [saveIDEButt, loadIDEButt, funcEditButt, undoButt, redoButt, tempoKnob.numberView, tempoKnob.knobView].do { |thing|
@@ -127,9 +137,7 @@ ESTimelineWindow : Window {
             this.close;
           }
           { \playbar } {
-            if ((timeline.now < timelineView.startTime) or: (timeline.now > timelineView.endTime)) {
-              timelineView.startTime = timeline.now - (timelineView.duration / 6);
-            };
+            timelineView.timelineController.findPlayhead;
             timelineView.refresh;
             rulerView.refresh;
           }
@@ -137,10 +145,11 @@ ESTimelineWindow : Window {
             if (timeline.isPlaying) {
               var waitTime = 20.reciprocal; // 20 fps
               playheadRout.stop; // just to make sure
+              timelineView.didScroll = false;
               playheadRout = {
                 inf.do { |i|
-                  if ((timeline.now < timelineView.startTime) or: (timeline.now > timelineView.endTime)) {
-                    timelineView.startTime = timeline.now - (timelineView.duration / 6);
+                  if (timelineView.didScroll.not) {
+                    timelineView.timelineController.findPlayhead;
                   };
                   timelineView.playheadView.refresh;
                   rulerView.playheadView.refresh;

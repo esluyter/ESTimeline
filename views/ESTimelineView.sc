@@ -13,6 +13,8 @@ ESTimelineView : UserView {
   var <editingMode = false;
   var <drawClipGuides = false;
 
+  var <>didScroll = false;
+
   var <timelineController;
 
   selectedClips { ^(clipSelection -- stagedClipSelection) }
@@ -95,6 +97,12 @@ ESTimelineView : UserView {
       view.startTime = xTime - view.pixelsToRelativeTime(x);
       view.startTime = view.startTime + (xDelta * view.duration * -0.002);
       dragView.visible_(false);
+
+      if ((timeline.now < startTime) or: (timeline.now > this.endTime)) {
+        didScroll = true;
+      } {
+        didScroll = false;
+      };
 
       if (mods.isCmd or: mods.isAlt) {
         true;
