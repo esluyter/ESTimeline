@@ -236,7 +236,6 @@ Pbind(
   \instrument, \sin,
   \degree, Pbrown(0, 7 * 3 + 1, 3),
   \octave, Pdup(Pwhite(1, 10), Pwhite(3, 5)),
-  \pan, Pwhite(-1.0, 1.0),
   \dur, Pbrown().linexp(0, 1, 0.02, 1.0),
 )
 ```
