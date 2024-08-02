@@ -298,7 +298,7 @@ and reload your class library (shift-cmd-L). Then run the code from earlier to s
   - you will hear the timelines on this track play with reverb, other tracks not
   - use its slot on the mixer interface to tune levels
 
-###Automating mixer levels, send levels
+### Automating mixer levels, send levels, fx parameters
 - right click on a fader, pan knob, or send in the mixer window to add an automation envelope to it
   - double-click the verb insert fx, right click on one of the args to add an automation envelope to it
 - edit these envelopes
