@@ -618,13 +618,16 @@ OSCdef(\test, { |msg|
           timeline.setMixerChannel(name, \level, 1);
           true;
         } { false }
-      }).enabled_(template.envs.level.isNil);
-      slider.setContextMenuActions(
+      }).enabled_(template.envs.level.isNil)
+      .setContextMenuActions(
         MenuAction("Add automation envelope", {
           var unmappedLevel = faderSpec.unmap(mc.level);
           template.envs.level = ESMixerChannelEnv(Env(unmappedLevel.dup(2), [0], [0]), faderSpec.minval, faderSpec.maxval, 4); // <- this curve could be issue, assumes faderSpec will always have curve 4...
+          timeline.addUndoPoint;
         });
-      );
+      ).mouseUpAction_({ 
+        timeline.addUndoPoint 
+      });
 
       UserView(~scrollView, bounds).drawFunc_({
         var color = Color.gray(0.5);
@@ -671,8 +674,11 @@ OSCdef(\test, { |msg|
           MenuAction("Add automation envelope", {
             var unmappedLevel = panSpec.unmap(mc.pan);
             template.envs.pan = ESMixerChannelEnv(Env(unmappedLevel.dup(2), [0], [0]), panSpec.minval, panSpec.maxval); // <- this curve could be issue, assumes faderSpec will always have curve 4...
+            timeline.addUndoPoint;
           });
-        ),
+        ).mouseUpAction_({
+          timeline.addUndoPoint;
+        }),
         StaticText(~scrollView, bounds.copy.left_(i * trackWidth + 20, top, 30, panHeight)).align_(\right).string_(panString).font_(Font.sansSerif(10, true)).stringColor_(Color.gray(0.5));
       ];
     };
@@ -703,16 +709,17 @@ OSCdef(\test, { |msg|
         }).setContextMenuActions(
           MenuAction("Delete", {
             template.fx.removeAt(index);
+            timeline.addUndoPoint;
             ~winFunc.value;
           })
         );
       };
       var sendViewFactory = { |bounds, index, method, stringColor, dbColor, barColor|
-        var send = template.perform(method)[index];
         var clickPoint, clickVal;
 
         UserView(insertView, bounds).background_(Color.gray(0.75)).drawFunc_({ |view|
           var levelPx, dbString, dbStringWidth;
+          var send = template.perform(method)[index].copy;
           if (template.envs.perform(method)[index].notNil) {
             send[1] = template.envs.perform(method)[index].valueAtTime(timeline.soundingNow);
           };
@@ -727,6 +734,7 @@ OSCdef(\test, { |msg|
       }).mouseDownAction_({ |view, x, y, mods, buttNum, clickCount|
           if (clickCount > 1) {
             var wasPre = method == 'preSends';
+            var send = template.perform(method)[index].copy;
             ESBulkEditWindow.keyValue("Edit Send:", "name", send[0].asCompileString, "db", send[1].ampdb.asCompileString, "pre fade", wasPre, callback: { |name, level, pre|
               var arr = [name.interpret, level.interpret.dbamp];
               if (pre) {
@@ -750,6 +758,8 @@ OSCdef(\test, { |msg|
             clickPoint = x@y;
             clickVal = template.perform(method)[index][1];
           };
+        }).mouseUpAction_({
+          timeline.addUndoPoint;
         }).mouseMoveAction_({ |view, x, y, mods|
           // only adjust if there's no automation
           if (template.envs.perform(method)[index].isNil) {
@@ -909,6 +919,9 @@ OSCdef(\test, { |msg|
 
   defer {
     switch (what)
+    { \addUndoPoint } {
+      "addUndoPoint".postln;
+    }
     { \free } {
       ~mixerWindow.close;
     }
