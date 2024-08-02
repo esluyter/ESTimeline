@@ -144,7 +144,10 @@ Platform.userExtensionDir
 
 ### Synth Clips:
 - create a bunch of Synth clips (point the mouse where you want it and press shift-S, or use right click menu)
-  - spacebar to play
+- press the spacebar to play your clips
+  - the gray playhead is the "scheduling playhead" -- this is when the code is executed
+  - the black playhead is the "sounding playhead" -- because of server latency, this is when the events actually sound. this is generally the one you want to watch
+  - press space again to stop playback
 - drag them around to move them in time or between tracks
   - they will always snap to the playhead in time
     - to move playhead to beginning of clip, make sure your mouse is inside of clip and press [
@@ -155,9 +158,6 @@ Platform.userExtensionDir
   - double-click on the grayed out `freq` parameter to activate it, then you can set it to any valid SuperCollider expression, like `220` or `60.midicps`
   - press save when you're done, and close the edit window if you want.
 - if you play now by clicking to place the playhead and pressing space, you will hear they play the default synth with your parameters at the appropriate time
-  - the gray playhead is the "scheduling playhead" -- this is when the code is executed
-  - the black playhead is the "sounding playhead" -- because of server latency, this is when the events actually sound. this is generally the one you want to watch
-  - press space again to stop playback
 
 ### Scrolling and zooming:
 - use trackpad to scroll left and right or click and drag ruler at top
