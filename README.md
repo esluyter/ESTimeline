@@ -298,7 +298,14 @@ and reload your class library (shift-cmd-L). Then run the code from earlier to s
   - you will hear the timelines on this track play with reverb, other tracks not
   - use its slot on the mixer interface to tune levels
 
-Automating mixer levels, send levels, and fx parameters left as an exercise, for now...
+###Automating mixer levels, send levels
+- right click on a fader, pan knob, or send in the mixer window to add an automation envelope to it
+  - double-click the verb insert fx, right click on one of the args to add an automation envelope to it
+- edit these envelopes
+  - shift-click to add breakpoints
+  - opt-click to remove them
+  - click and drag on breakpoints to adjust them
+  - click and drag between breakpoints to adjust curves 
 
 ### Using Routine clips:
 - shift-R to make a Routine clip, double click to edit
@@ -334,6 +341,9 @@ loop {
 };
 ```
 
+<br />
+<br />
+<br />
 
 ### Environment variables -- adding reverb:
 This is just to demonstrate how environment variables work inside the timeline. The better way of adding reverb demonstrated earlier with mixer channels.
