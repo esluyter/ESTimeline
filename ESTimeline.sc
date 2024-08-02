@@ -501,6 +501,9 @@ ESTimeline {
       };
     };
     this.changed(\isPlaying, false);
+    if (parentClip.notNil and: { parentClip.track.timeline.isPlaying.not }) {
+      parentClip.track.timeline.changed(\isPlaying, false);
+    };
     this.changed(\playbar);
   }
 
@@ -566,6 +569,9 @@ ESTimeline {
 
     isPlaying = true;
     this.changed(\isPlaying, true);
+    if (parentClip.notNil and: { parentClip.track.timeline.isPlaying.not }) {
+      parentClip.track.timeline.changed(\isPlaying, true);
+    };
   }
 
   togglePlay {
