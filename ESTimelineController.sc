@@ -273,7 +273,7 @@ ESTimelineController {
       };
 
       timeline.addDependant(func);
-      timeline.restoreUndoPoint(File.readAllString(path).interpret);
+      timeline.restoreUndoPoint(File.readAllString(path).interpret, useAllFields: true);
       //timeline.restoreUndoPoint(Document.current.string.interpret);
       lastPath = path;
     }, path: lastPath);

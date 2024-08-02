@@ -212,6 +212,8 @@ ESTimeline {
   }
 
   initMixerChannels { |first = true|
+    if (useMixerChannel.not) { ^false };
+
     if (first) {
       var maxLevel = 0;
       var thisTimeline;
@@ -227,7 +229,6 @@ ESTimeline {
       thisTimeline.notifyOnEndInitMixerChannels = true;
     };
 
-    // already checks if we're usingMixerChannel
     this.prFreeMixerChannels({
       var defaultOutbus;
       var newTemplates = ();
@@ -292,13 +293,6 @@ ESTimeline {
 
       this.changed(\initMixerChannels);
     });
-
-    // this will be replaced by callback function above:
-    //mixerChannels = ();
-
-    //if (useMixerChannel) {
-
-    //};
   }
 
   orderedMixerChannels {
@@ -698,7 +692,8 @@ ESTimeline {
     };
   }
 
-  restoreUndoPoint { |undoPoint, clearUndoStack = false, legacy = false, keepMaster = true|
+  restoreUndoPoint { |undoPoint, clearUndoStack = false, legacy = false, keepMaster = true, useAllFields = false|
+    var arr;
     var thisTempo;
     // leave gridDivision, snapToGrid, and useMixerChannel as they were
     var dummyGD, dummySTG, dummyUMC;
@@ -709,11 +704,26 @@ ESTimeline {
 
     this.prFree(false); // don't free mixer channels yet, this will happen in this.init -> this.initMixerChannels
 
+    arr = Object.fromESArray(currentState);
+    #dummyGD, dummySTG, dummyUMC = arr[7..9];
+
+    if (useAllFields) {
+      var oldUMC = useMixerChannel;
+      gridDivision = dummyGD;
+      snapToGrid = dummySTG;
+      if (oldUMC and: dummyUMC.not) {
+        // this will free old MCs
+        this.useMixerChannel = false;
+      } {
+        useMixerChannel = dummyUMC;
+      };
+    };
+
     mixerChannelTemplates.do { |template|
       template.releaseDependants;
     };
 
-    #tracks, thisTempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, dummyGD, dummySTG, dummyUMC, mixerChannelTemplates, globalMixerChannelNames = Object.fromESArray(currentState);
+    #tracks, thisTempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, dummyGD, dummySTG, dummyUMC, mixerChannelTemplates, globalMixerChannelNames = arr;
 
     // prep fx and legacy support
     mixerChannelTemplates.keysValuesDo { |key, value|

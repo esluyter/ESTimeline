@@ -221,6 +221,9 @@ ESTimelineWindow : Window {
           { \restoreUndoPoint } {
             //timelineView.timelineController.saveBackup;
             {
+              snapToGridBox.value = timeline.snapToGrid;
+              useMixerChannelBox.value = timeline.useMixerChannel;
+              gridDivisionBox.value = timeline.gridDivision;
               timelineView.makeTrackViews;
               ESClipEditView.closeWindow;
             }.fork(AppClock);
