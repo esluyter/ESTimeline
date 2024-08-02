@@ -1,3 +1,7 @@
+/*
+The code is not pretty but the mixer interface is!
+The only thing that doesn't work is the mixer channel output bus (will reset to default).
+*/
 ESMixerWindow {
   var <timeline, <timelineWindow;
   var <window, <waitWin;
