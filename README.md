@@ -264,7 +264,11 @@ Pbind(
 - navigate to the directory you want to save in, and enter a file name to save as (e.g. "tutorial0.scd")
  
 ### Mixer channels:
-This will now assume you have ddwMixerChannel installed. (`Quarks.install("ddwMixerChannel")`)
+If you don't have ddwMixerChannel quark installed, make sure you have saved your timeline, then run
+```
+Quarks.install("ddwMixerChannel")
+```
+and reload your class library (cmd-L). Then run the code from earlier to start the timeline GUI, and open the file you have saved.
 - check the `useMixerChannel` box
 - show the mixer window: evaluate this in the IDE
 ```
