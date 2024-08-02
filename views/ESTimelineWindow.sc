@@ -88,12 +88,15 @@ ESTimelineWindow : Window {
 
     Button(this, Rect(1450, 5, 25, 30)).states_([["⇤"]]).font_(Font.sansSerif(17)).action_({
       timeline.goto(0);
+      timelineView.focus;
     });
     Button(this, Rect(1477.5, 5, 105, 30)).states_([["Find playhead"]]).action_({
       timelineView.timelineController.findPlayhead;
+      timelineView.focus;
     });
     Button(this, Rect(1585, 5, 25, 30)).states_([["⇥"]]).font_(Font.sansSerif(17)).action_({
       timeline.goto(timeline.duration);
+      timelineView.focus;
     });
 
     //Button(this, Rect(1200, 5, 100, 30)).states_([["Load legacy"]]).action_({timeline.restoreUndoPoint(Document.current.string, false, true); timelineView.focus;});
