@@ -4,7 +4,7 @@ ESEvent : Event {
   asCompileString {
     var cs = "ESEvent.newFrom((";
     this.keys.asArray.sort({ |a, b| a.asString < b.asString }).do { |key|
-      cs = cs ++ key.asCompileString ++ ": " ++ this[key].asCompileString ++ ", \n";
+      cs = cs ++ key.asCompileString ++ ": " ++ this[key].asCompileString ++ ", ";
     };
     cs = cs ++ "))";
     ^cs;
