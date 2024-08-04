@@ -64,6 +64,8 @@ ESMixerChannelEnvs {
     fx = arr;
     arr.do { |ev, i|
       if (ev.notNil) {
+        ev = ESEvent.newFrom(ev);
+        arr[i] = ev;
         ev.keysValuesDo { |param, env|
           if (env.notNil) {
             env.template = template;
@@ -107,6 +109,8 @@ ESMixerChannelEnvs {
     };
     fx.do { |ev, i|
       if (ev.notNil) {
+        ev = ESEvent.newFrom(ev);
+        fx[i] = ev;
         ev.keysValuesDo { |param, env|
           if (env.notNil) {
             env.template = template;
