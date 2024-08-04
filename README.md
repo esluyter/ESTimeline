@@ -121,6 +121,11 @@ Download or clone this repository into your SuperCollider Extensions directory. 
 Platform.userExtensionDir
 ```
 
+If you want to use the mixing interface, you also need to install ddwMixerChannel:
+```
+Quarks.install("ddwMixerChannel")
+```
+
 ## Tutorial: basic workflow examples
 ```
 (
