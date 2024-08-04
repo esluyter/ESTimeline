@@ -754,6 +754,8 @@ ESTimeline {
     };
 
     this.init;
+
+    currentState = this.asUndoPoint;
     this.changed(\restoreUndoPoint);
   }
 
