@@ -28,15 +28,6 @@ Also note that because timelines are built to execute user-supplied code they ar
   <summary><strong>Features, hypothetical features, and issues</strong></summary>
   
 ## Features
-- **Non-prescriptive:**
-  - the basic goal is only to "execute this code at this particular time"
-    - although the competing goal is to make it easy to do the things you want to do, which is subjective
-  - for the moment just real-time but some of this could be translated easily to work NRT
-    - there are certain things impossible in NRT, i.e. to do with real-time input
-    - ddwMixerChannel doesn't yet work NRT so this would be a big rewrite
-  - as little architecture as possible is forced on you
-    - possible to disable ddwMixerChannel, timeline-specific clock and environment so as to interact with the timeline as part of a larger project
-    - possible to play clips with any bus, target, addAction, etc. for full flexibility
 - **DAW-like GUI** for editing and playback
   - The goal is an accurate visual representation of what you are hearing / when the code is executed
     - gray playhead is "scheduling playhead" and black playhead is "sounding playhead" -- to take into account server latency
@@ -46,7 +37,6 @@ Also note that because timelines are built to execute user-supplied code they ar
   - Optional full GUI mixing interface using ddwMixerChannel
     - track insert FX, pre fade sends and post fade sends
     - automate mixer channel parameters (level, pan, sends, fx parameters) with editable envelopes
-- **Non-linear:** "goto" command to jump to a clip or a point in time enabling complex real-time behaviors (variable-length looping, conditional branching...
 - **Tracks** are the main form of organization of clips
   - tracks can contain any type of clip in any combination
   - tracks can be muted/soloed and rearranged
@@ -70,10 +60,20 @@ Also note that because timelines are built to execute user-supplied code they ar
 - **Timeline Clip** -- embed one timeline in another!
   - Each timeline clip can optionally use its own TempoClock, and optionally use its own Environment 
   - Each timeline (and timeline clip) has an init / free hook for e.g. allocating and freeing resources
+- **Non-linear:** "goto" command to jump to a clip or a point in time enabling complex real-time behaviors (variable-length looping, conditional branching...
 - **Undo and redo** at each timeline level
 - **Save and recall**
   - Save as plain text files in SC array format
   - Once you have saved, the timeline will update a backup file every time you add an undo point, in case of crash
+- **Non-prescriptive:**
+  - the basic goal is only to "execute this code at this particular time"
+    - although the competing goal is to make it easy to do the things you want to do, which is subjective
+  - for the moment just real-time but some of this could be translated easily to work NRT
+    - there are certain things impossible in NRT, i.e. to do with real-time input
+    - ddwMixerChannel doesn't yet work NRT so this would be a big rewrite
+  - as little architecture as possible is forced on you
+    - possible to disable ddwMixerChannel, timeline-specific clock and environment so as to interact with the timeline as part of a larger project
+    - possible to play clips with any bus, target, addAction, etc. for full flexibility
  
 ## Issues
 1. Although I've tried to make it pleasant, the GUI based code editing environment does not syntax highlight, autocomplete, etc -- for this reason I've added "Open in IDE" / "Copy from IDE" buttons as necessary.
