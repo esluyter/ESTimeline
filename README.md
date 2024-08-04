@@ -78,15 +78,12 @@ Also note that because timelines are built to execute user-supplied code they ar
 ## Issues
 1. Although I've tried to make it pleasant, the GUI based code editing environment does not syntax highlight, autocomplete, etc -- for this reason I've added "Open in IDE" / "Copy from IDE" buttons as necessary.
     - Solution would be to someday add a Qt code view to core SC
-2. ~~When there are lots of quick zig-zags, high-resolution envelope drawing makes the GUI freeze up~~
-    - ~~to avoid this I have extremely pixelated the envelope drawing when zoomed in. Solution would be to someday add a better Qt envelope view to core sc.~~
-    - I have improved this by drawing envelopes as images. Still not perfect.
-3. I would have liked to have saved the timeline files as executable SCLang just as you would write by hand; however:
+2. I would have liked to have saved the timeline files as executable SCLang just as you would write by hand; however:
     - There is a limit to the complexity of a timeline created using SCLang (i.e. by evaluating `ESTimeline([ESTrack([....`) -- it may only contain max 256 functions.
     - to avoid this I have created a light custom file format that compiles complex timeline structures from the inside out
-4. At high track counts, it takes a little while to load and free all the MixerChannels.
+3. At high track counts, it takes a little while to load and free all the MixerChannels.
     - I have tried to reduce the occasions on which this needs to happen.
-5. Changes will generally not take effect until you've stopped and restarted playback. This will be difficult to fix, but someday I hope to.
+4. Changes will generally not take effect until you've stopped and restarted playback. This will be difficult to fix, but someday I hope to.
 
 ## Hypothetical features
 These are all things I would like to implement someday:
