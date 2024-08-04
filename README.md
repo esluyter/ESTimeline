@@ -126,7 +126,7 @@ If you want to use the mixing interface, you also need to install ddwMixerChanne
 Quarks.install("ddwMixerChannel")
 ```
 
-## Tutorial: basic workflow examples
+## Tutorial
 ```
 (
 ~timeline = ESTimeline(bootOnPrep: true, useMixerChannel: false);
@@ -144,15 +144,23 @@ Quarks.install("ddwMixerChannel")
 - mute and solo tracks using the buttons on the left panel
 - click and drag in the left panel to rearrange tracks
 
+<img src="img/tutorial/1.png" />
+
 ### Synth Clips:
 - create a bunch of Synth clips (point the mouse where you want it and press shift-S, or use right click menu)
 - press the spacebar to play your clips
   - the gray playhead is the "scheduling playhead" -- this is when the code is executed
   - the black playhead is the "sounding playhead" -- because of server latency, this is when the events actually sound. this is generally the one you want to watch
   - press space again to stop playback
+
+<img src="img/tutorial/2.png" />
+
 - double-click on a clip to edit it
   - double-click on the grayed out `freq` parameter to activate it, then you can set it to any valid SuperCollider expression, like `220` or `60.midicps`
   - press save when you're done, and close the edit window if you want.
+
+<img src="img/tutorial/3.png" />
+
 - drag them around to move them in time or between tracks
   - they will always snap to the playhead in time
     - to move playhead to beginning of clip, make sure your mouse is inside of clip and press [
@@ -182,16 +190,24 @@ SynthDef(\sin, { |out, freq = 440, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
 ```
 - hit save when you're done to save the prepFunc and load it. close the window, if you want
 
+<img src="img/tutorial/4.png" />
+
 ### Bulk edit synth clips:
 - click in an empty area and drag to select all the Synth clips (they will be highlighted in cyan when selected)
 - right click, "clip actions > bulk actions > Bulk edit Synth defName"
   - and set them to `'sin'` and hit ok
+
+<img src="img/tutorial/5.png" />
+
 - play again and you hear they now all play your SynthDef
   - double-click in an empty area to remove selection
   - double-click on a clip now and you will see all the new parameters you can control.
 
 ### Envelopes for Synth parameters:
 - right click a Synth clip, "clip actions > synth actions > add env for synth argument"
+
+<img src="img/tutorial/6.png" />
+
 - pick "freq" from the list and hit OK
   - this will add a new track above your clip with an envelope clip on it that is the length of your Synth clip
     - with a unique name (starting from 'freq0'),
@@ -207,6 +223,9 @@ SynthDef(\sin, { |out, freq = 440, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
   - to adjust the envelope range, right click, clip actions > env actions > "set env range keeping breakpoint values"
     - now you can change the frequency range of the envelope, say min `100` max `5000`
     - ok to save changes -- this will keep your values intact so long as they fall within the new range
+
+<img src="img/tutorial/7.png" />
+    
 - hit cmd-e again to leave envelope breakpoint editor mode
 
 ### Bulk edit Synths -- To make this envelope affect all your Synths:
@@ -231,6 +250,9 @@ SynthDef(\sin, { |out, freq = 440, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
 
 ### Pattern Clips:
 - make a new track and shift-P to make a pattern clip
+
+<img src="img/tutorial/8.png" />
+
 - double click to edit, e.g.:
 ```
 Pbind(
@@ -245,20 +267,29 @@ Pbind(
   - you can always undo if you don't like it (cmd-z undo, shift-cmd-Z redo)
 - you can drag the edges to adjust start and end point without changing the timing of the notes
   - you can split it into two by pointing with the mouse where you want the split and pressing s
-- if you make a new track and a new envelope (shift-E),
-  - double click on the envelope, name it `pan0` and set its range from -1 to 1
+ 
+### Envelope for pattern clip
+- make a new track
+- make a new envelope (shift-E),
+  - double click on the envelope to edit its parameters
+    - name it `pan0`
+    - set its range from -1 to 1
   - click "save" to save it, and close the window if you want
 - double click on each of the pattern clips and add
 ```
   \pan, ~thisTimeline[\pan0],
 ```
 - cmd-e and edit the panning to your liking
+
+<img src="img/tutorial/9.png" />
     
 ### Timeline clips:
 - above the main timeline, click "Open as clip in new timeline"
   - Now this little system, the synths, patterns, buses and envelopes, are all encapsulated in this timeline clip
     - (in fact you can duplicate the timeline clip by option-dragging onto a new track, and the two will play simultanously each using its own environment and buses)
   - you can also resize the clips, move the mouse cursor over the clip and use the s key to split it into two separate timeline clips, etc.
+
+<img src="img/tutorial/10.png" />
 
 ### Saving
 - click "save as" button or hit cmd-s
@@ -279,6 +310,8 @@ and reload your class library (shift-cmd-L). Then run the code from earlier to s
   - you will now see a mixer on which currently playing channels are visible
     - subtimelines feed into their parent track's channel
   - you can move these faders and pan knobs around to mix the inputs
+
+<img src="img/tutorial/11.png" />
    
 ### Adding reverb:
 - create a new track by pressing cmd-T while your mouse is over the last track
@@ -306,7 +339,11 @@ and reload your class library (shift-cmd-L). Then run the code from earlier to s
   - shift-click to add breakpoints
   - opt-click to remove them
   - click and drag on breakpoints to adjust them
-  - click and drag between breakpoints to adjust curves 
+  - click and drag between breakpoints to adjust curves
+
+<img src="img/tutorial/12.png" />
+<img src="img/tutorial/13.png" />
+<img src="img/tutorial/14.png" />
 
 ### Using Routine clips:
 - shift-R to make a Routine clip, double click to edit
