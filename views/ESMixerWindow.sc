@@ -10,6 +10,8 @@ ESMixerWindow {
   var channelIndexMap;
   var dependantFunc;
 
+  var <oscFunc;
+
   classvar <panSpec, <faderSpec;
 
   *initClass {
@@ -119,13 +121,9 @@ ESMixerWindow {
     ^ret;
   }
 
-  init {
-    var width = 1500, height = 600;
-    var left = Window.availableBounds.width - width;
-    if (window.notNil) { window.close };
-    window = Window("Mixer", Rect(left, 0, width, height)).background_(Color.gray(0.55)).front;
-
-    OSCdef(\test, { |msg|
+  initOSCFunc {
+    if (oscFunc.notNil) { oscFunc.free };
+    oscFunc = OSCFunc({ |msg|
       var oscMsg, synthId, busIndex, thisPeaks, powers;
       var index;
       //msg.postln;
@@ -143,6 +141,28 @@ ESMixerWindow {
         };
       };
     }, '/mixerChannel');
+  }
+
+  freeOSCFunc {
+    oscFunc.free;
+  }
+
+  cmdPeriod {
+    this.initOSCFunc;
+  }
+
+  init {
+    var width = 1500, height = 600;
+    var left = Window.availableBounds.width - width;
+    if (window.notNil) { window.close };
+    window = Window("Mixer", Rect(left, 0, width, height)).background_(Color.gray(0.55)).front.onClose_({
+      this.freeOSCFunc;
+      CmdPeriod.remove(this);
+    });
+
+    // OSC func for channel metering
+    this.initOSCFunc;
+    CmdPeriod.add(this); // so oscFunc is restored on cmd-.
 
     timeline.addDependant(this);
 
