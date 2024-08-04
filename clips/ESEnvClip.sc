@@ -74,6 +74,7 @@ ESEnvClip : ESClip {
   }
 
   *new { |startTime, duration, offset = 0, color, name, env, bus, target, addAction = 'addToHead', min = 0, max = 1, curve = 0, isExponential = false, makeBus = true, makeBusRate = \audio, mute = false, prep = false|
+    env = env ?? Env([0.5, 0.5], [0], [0]);
     ^super.new(startTime, duration, offset, color, name, mute: mute).init(env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate, prep);
   }
 
