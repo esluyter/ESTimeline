@@ -57,7 +57,7 @@ ESSynthClip : ESClip {
 
   prHasOffset { ^false } // whether to show offset parameter for editing
 
-  defaultColor { ^Color.hsv(0.85, 0.45, 0.5) }
+  defaultColor { ^Color.hsv(0.63, 0.4, 0.53) }
 
   guiClass { ^ESSynthClipEditView }
   drawClass { ^ESDrawSynthClip }

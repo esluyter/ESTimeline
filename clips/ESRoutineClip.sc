@@ -81,5 +81,5 @@ ESRoutineClip : ESClip {
   guiClass { ^ESRoutineClipEditView }
   drawClass { ^ESDrawRoutineClip }
 
-  defaultColor { ^Color.hsv(0.5, 0.4, 0.4) }
+  defaultColor { ^Color.hsv(0.4, 0.2, 0.3) }
 }
