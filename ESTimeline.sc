@@ -55,16 +55,20 @@ ESTimeline {
   }
 
   initMixerChannels {
-    mixerChannels.do(_.free);
-    mixerChannels = ();
-    if (useMixerChannel) {
-      tracks.do { |track|
-        if (track.useMixerChannel and: mixerChannels[track.mixerChannelName].isNil) {
-          mixerChannels[track.mixerChannelName] = MixerChannel(track.mixerChannelName, Server.default, 2, 2);
+    {
+      Server.default.sync;
+      mixerChannels.do(_.free);
+      mixerChannels = ();
+      if (useMixerChannel) {
+        Server.default.sync;
+        tracks.do { |track|
+          if (track.useMixerChannel and: mixerChannels[track.mixerChannelName].isNil) {
+            mixerChannels[track.mixerChannelName] = MixerChannel(track.mixerChannelName, Server.default, 2, 2);
+          };
         };
       };
-    };
-    this.changed(\initMixerChannels);
+      this.changed(\initMixerChannels);
+    }.fork(SystemClock);
   }
 
   orderedMixerChannels {

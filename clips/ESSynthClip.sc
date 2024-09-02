@@ -43,7 +43,11 @@ ESSynthClip : ESClip {
 
   prStart { |startOffset = 0.0, clock|
     Server.default.bind {
-      synth = Synth(this.playDefName, this.prArgsValue(clock), target.value, addAction.value)
+      if (track.timeline.useMixerChannel and: track.useMixerChannel) {
+        synth = track.timeline.mixerChannels[track.mixerChannelName].play(this.playDefName, this.prArgsValue(clock));
+      } {
+        synth = Synth(this.playDefName, this.prArgsValue(clock), target.value, addAction.value);
+      };
     };
   }
 
