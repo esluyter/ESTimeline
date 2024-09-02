@@ -554,9 +554,15 @@ ESTimeline {
   }
 
   addTrack { |index, track, mcTemplate|
+    var initMc = false;
     mcTemplate = mcTemplate ?? ESMixerChannelTemplate();
     index = index ?? tracks.size;
     track = track ?? { ESTrack([]) };
+    track.clips.do { |clip|
+      if (clip.class == ESTimelineClip) {
+        initMc = true;
+      };
+    };
     track.addDependant(dependantFunc);
     track.timeline = this;
     tracks = tracks.insert(index, track);
@@ -573,15 +579,16 @@ ESTimeline {
     if (track.useMixerChannel) {
       mixerChannelTemplates[track.mixerChannelName] = mcTemplate;
     };
-    //this.initMixerChannels;
 
-    if (track.useMixerChannel and: mixerChannels[track.mixerChannelName].isNil) {
-      mixerChannels[track.mixerChannelName] = MixerChannel(track.mixerChannelName.asSymbol, Server.default, mcTemplate.inChannels, mcTemplate.outChannels, mcTemplate.level, mcTemplate.pan, outbus: mixerChannels[\master] ?? this.defaultOutbus);
+    if (initMc) {
+      this.initMixerChannels;
+    } {
+      if (track.useMixerChannel and: mixerChannels[track.mixerChannelName].isNil) {
+        mixerChannels[track.mixerChannelName] = MixerChannel(track.mixerChannelName.asSymbol, Server.default, mcTemplate.inChannels, mcTemplate.outChannels, mcTemplate.level, mcTemplate.pan, outbus: mixerChannels[\master] ?? this.defaultOutbus);
+      };
+
+      mixerChannelTemplates.do(_.addDependant(templateDependantFunc));
     };
-
-    mixerChannelTemplates.do(_.addDependant(templateDependantFunc));
-
-
 
     this.changed(\tracks);
   }
@@ -619,7 +626,7 @@ ESTimeline {
       };
     };
 
-    if (track.useMixerChannel and: (mcName.isInteger or: hasSameMcName.not)) {
+    if (track.useMixerChannel and: (mcName.isInteger or: hasSameMcName.not) and: doFree) {
       mc.releaseDependants;
       mc.free;
     };
