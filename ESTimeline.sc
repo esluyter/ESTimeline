@@ -159,9 +159,12 @@ ESTimeline {
     this.changed(\tracks);
   }
 
-  removeTrack { |index|
+  removeTrack { |index, doFree = true|
     var track = tracks.removeAt(index);
     track.removeDependant(dependantFunc);
+    if (doFree) {
+      track.free;
+    };
     this.changed(\tracks);
   }
 
