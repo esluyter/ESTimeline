@@ -209,7 +209,7 @@ ESEnvClip : ESClip {
         curves = curves ++ (0.dup(levels.size - 1 - times.size));
         changed = true;
       };
-      curves.collect { |curve|
+      curves = curves.collect { |curve|
         if (curve.isNil) {
           changed = true;
           0;
