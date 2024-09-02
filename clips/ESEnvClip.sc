@@ -1,6 +1,7 @@
 ESEnvClip : ESClip {
   var <env, <bus, <>target, <>addAction, <min, <max, <>curve, <>isExponential, <makeBus = false, <>makeBusRate, <useLiveInput, <>liveInput, <>ccNum, <armed;
   var <synth;
+  var <recordedLevels, <recordedTimes, <oscFunc;
 
   //classvar <buses;  // event format name -> [bus, nClips] -- when nClips becomes 0 bus should be freed.
 
@@ -74,11 +75,12 @@ ESEnvClip : ESClip {
         };
         [\kr, \ar].do { |rate|
           [\curve, \exp].do { |type|
-            SynthDef(('ESEnvClip_' ++ rate ++ '_' ++ type ++ '_mouseX').asSymbol, { |out, gate = 1, tempo = 1, min = 0, max = 1|
+            SynthDef(('ESEnvClip_' ++ rate ++ '_' ++ type ++ '_mouseX').asSymbol, { |out, gate = 1, tempo = 1, min = 0, max = 1, id|
               //var env = \env.kr(Env.newClear(n).asArray);
               var index = Sweep.perform(rate, 0, tempo);
               //var sig = IEnvGen.perform(rate, env/*Env.fromArray(env)*/, index);
               var sig = MouseX.kr;
+              SendReply.kr(Impulse.kr(20), "/mouse", [index, sig], id);
               if (rate == \ar) {
                 sig = K2A.ar(sig);
               };
@@ -94,11 +96,12 @@ ESEnvClip : ESClip {
 
               Out.perform(rate, out, sig);
             }).add;
-            SynthDef(('ESEnvClip_' ++ rate ++ '_' ++ type ++ '_mouseY').asSymbol, { |out, gate = 1, tempo = 1, min = 0, max = 1|
+            SynthDef(('ESEnvClip_' ++ rate ++ '_' ++ type ++ '_mouseY').asSymbol, { |out, gate = 1, tempo = 1, min = 0, max = 1, id|
               //var env = \env.kr(Env.newClear(n).asArray);
               var index = Sweep.perform(rate, 0, tempo);
               //var sig = IEnvGen.perform(rate, env/*Env.fromArray(env)*/, index);
               var sig = MouseY.kr;
+              SendReply.kr(Impulse.kr(20), "/mouse", [index, sig], id);
               if (rate == \ar) {
                 sig = K2A.ar(sig);
               };
@@ -198,24 +201,72 @@ ESEnvClip : ESClip {
   prStop {
     Server.default.bind { synth.release };
     synth = nil;
+
+    if (useLiveInput and: armed) {
+      {
+        (Server.default.latency * 2).wait; // make sure all OSC messages have been recieved
+        oscFunc.free;
+        this.env = Env(recordedLevels, recordedTimes, 0);
+        this.armed = false;
+        this.useLiveInput = false;
+      }.fork(SystemClock);
+    };
   }
 
   prStart { |startOffset = 0.0, clock|
-    var thisEnv = this.envToPlay(startOffset, true);
-    var size = thisEnv.levels.size.nextPowerOfTwo;
-    /*if (size > 8190) {
+    if (useLiveInput.not) {
+      var thisEnv = this.envToPlay(startOffset, true);
+      var size = thisEnv.levels.size.nextPowerOfTwo;
+      /*if (size > 8190) {
       "Envelope can have max 8190 points. Please adjust.".warn;
       size = 8190;
-    };*/
-    if (size > 512) {
-      "WARNING: Envelope can have max 512 points. Please adjust.".postln;
-      size = 512;
-    };
-    if (bus.value.notNil) {
-      var defName = if (this.rate == 'control') { 'ESEnvClip_kr' } { 'ESEnvClip_ar' };
-      defName = (defName ++ if (this.isExponential) { "_exp_" } { "_curve_" } ++ if (useLiveInput) { ["mouseX", "mouseY"][liveInput] } { size }).asSymbol;
-      Server.default.bind {
-        synth = Synth(defName, [env: thisEnv.asArrayForInterpolation.collect(_.reference).unbubble, out: bus.value, tempo: clock.tempo, min: min, max: max, curve: curve], target.value, addAction.value);
+      };*/
+      if (size > 512) {
+        "WARNING: Envelope can have max 512 points. Please adjust.".postln;
+        size = 512;
+      };
+      if (bus.value.notNil) {
+        var defName = if (this.rate == 'control') { 'ESEnvClip_kr' } { 'ESEnvClip_ar' };
+        defName = (defName ++ if (this.isExponential) { "_exp_" } { "_curve_" } ++ size).asSymbol;
+        Server.default.bind {
+          synth = Synth(defName, [env: thisEnv.asArrayForInterpolation.collect(_.reference).unbubble, out: bus.value, tempo: clock.tempo, min: min, max: max, curve: curve], target.value, addAction.value);
+        };
+      };
+    } { // useLiveInput
+      if (bus.value.notNil) {
+        var defName = if (this.rate == 'control') { 'ESEnvClip_kr' } { 'ESEnvClip_ar' };
+        defName = (defName ++ if (this.isExponential) { "_exp_" } { "_curve_" } ++ ["mouseX", "mouseY"][liveInput]).asSymbol;
+        Server.default.bind {
+          synth = Synth(defName, [out: bus.value, tempo: clock.tempo, min: min, max: max, curve: curve, id: id], target.value, addAction.value);
+        };
+
+        if (armed) {
+          var prevLevel;
+          var prevTime;
+          var prevPointTime;
+          recordedLevels = [];
+          recordedTimes = [];
+
+          oscFunc = OSCFunc({ |msg|
+            var thisId, time, level;
+            #thisId, time, level = msg[2..].postln;
+            if (id == thisId) {
+              if (level != prevLevel) {
+                if (recordedLevels.size == 0) {
+                  recordedLevels = [level];
+                } {
+                  recordedLevels = recordedLevels.add(prevLevel);
+                  recordedTimes = recordedTimes.add(prevTime - prevPointTime);
+                  recordedLevels = recordedLevels.add(level);
+                  recordedTimes = recordedTimes.add(time - prevTime);
+                };
+                prevPointTime = time;
+                prevTime = time;
+                prevLevel = level;
+              };
+            };
+          }, "/mouse");
+        };
       };
     };
   }
