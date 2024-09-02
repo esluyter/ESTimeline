@@ -41,7 +41,7 @@ Also note that because timelines are built to execute user-supplied code they ar
     - Snap to grid optional
   - Optional full GUI mixing interface using ddwMixerChannel
     - track insert FX, pre fade sends and post fade sends
-    - automate mixer channel parameters (level, pan, sends, insert fx parameters) with envelopes -- *only level and pan yet implemented*
+    - automate mixer channel parameters (level, pan, sends) with envelopes -- *fx parameters coming soon*
   - Gray playhead is "scheduling playhead" and black playhead is "sounding playhead" -- to take into account server latency.
     - Routines can be played with additional latency so non-sounding events line up with the sounding playhead. The goal is an accurate visual representation of what you are hearing / when the code is executed
 - **Non-linear:** "goto" command to jump to a clip or a point in time enabling complex real-time behaviors (variable-length looping, conditional branching...)
@@ -80,24 +80,25 @@ Also note that because timelines are built to execute user-supplied code they ar
 3. I would have liked to have saved the timeline files as executable SCLang just as you would write by hand; however:
     - There is a limit to the complexity of a timeline created using SCLang (i.e. by evaluating `ESTimeline([ESTrack([....`) -- it may only contain max 256 functions.
     - to avoid this I have created a light custom file format that compiles complex timeline structures from the inside out
+4. At high track counts, it takes a little while to load and free all the MixerChannels.
+    - I have tried to reduce the occasions on which this needs to happen.
 
 ## Hypothetical features
 These are all things I would like to implement someday:
-- Time features
-  - Clock follow: e.g. sync up with an Ableton timeline or midi show control
+- NRT: this will be difficult unless ddwMixerChannel gains NRT support
+- Clock follow: e.g. sync up with an Ableton timeline or midi show control
 - More clip types
   - audio file
+    - possible to record input or bounce tracks to audio clip in real time
   - loop
   - OSCdef
   - midi/piano/drum roll
   - "clones" that change with their parents
-- Envelopes
+- Envelope improvements
   - Ability to draw freehand with mouse 
   - More live interaction - e.g. map a controller to a bus and record its movements to an envelope
   - Higher dimensional envelopes - e.g. movement through x/y space
-  - Timeline tempo envelopes (this is already possible but kind of annoying, using an Env clip and a Routine clip)
-- Record audio clip in real time and/or offline bounce
-- MIDI integration
+  - Timeline tempo envelopes (this is already possible but kind of annoying, using an Env clip and a Routine clip
 - Library integration
   - VSTPlugin for adding VST effects to mixing chain
   - ddwPlug -- simplify bus routing for modulation
