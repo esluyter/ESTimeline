@@ -90,6 +90,7 @@ ESTimelineView : UserView {
         }),
         MenuAction("Set Env range keeping breakpoint values", {
           var minDefault = 0, maxDefault = 1, curveDefault = 0, isExponentialDefault = false;
+          var arr = if (this.selectedClips.includes(hoverClip)) { this.selectedClips } { [hoverClip] };
           if (hoverClip.class == ESEnvClip) {
             minDefault = hoverClip.min;
             maxDefault = hoverClip.max;
@@ -103,7 +104,6 @@ ESTimelineView : UserView {
               max = max.interpret;
               curve = curve.interpret;
               if ((isExponential and: ((min.sign != max.sign))).not) {
-                var arr = if (this.selectedClips.includes(hoverClip)) { this.selectedClips } { [hoverClip] };
                 arr.do { |clip|
                   if (clip.class == ESEnvClip) {
                     var oldLevels = clip.env.levels;
@@ -122,23 +122,40 @@ ESTimelineView : UserView {
           );
         }),
         MenuAction("Bulk edit Synth arguments", {
+          var arr = this.selectedClips;
+          if (arr.size == 0) { arr = [hoverClip] };
           ESBulkEditWindow.keyValue(callback: { |key, val, hardCode|
+            var func;
             key = key.asSymbol;
             val = ("{" ++ val ++ "}").interpret;
-            this.selectedClips.do { |clip|
-              if (clip.class == ESSynthClip) {
-                clip.setArg(key, if (hardCode) { val.value } { val });
+            func = { |clips|
+              clips.do { |clip|
+                if (clip.class == ESSynthClip) {
+                  clip.setArg(key, if (hardCode) { val.value } { val });
+                };
+                if (clip.class == ESTimelineClip) {
+                  func.(clip.timeline.clips);
+                };
               };
             };
+            func.(arr);
           });
         }),
         MenuAction("Bulk edit Synth defName", {
+          var arr = this.selectedClips;
+          if (arr.size == 0) { arr = [hoverClip] };
           ESBulkEditWindow.value(callback: { |val|
-            this.selectedClips.do { |clip|
-              if (clip.class == ESSynthClip) {
-                clip.defName = val;
+            var func = { |clips|
+              clips.do { |clip|
+                if (clip.class == ESSynthClip) {
+                  clip.defName = val;
+                };
+                if (clip.class == ESTimelineClip) {
+                  func.(clip.timeline.clips);
+                };
               };
             };
+            func.(arr);
           });
         }),
         MenuAction.separator(""),
