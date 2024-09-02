@@ -3,6 +3,7 @@ ESTimeline {
   var <isPlaying = false;
   var <playbar = 0.0;
   var playBeats, playStartTime, <playClock;
+  var tempoRout;
   var dependantFunc, templateDependantFunc;
   var <>undoStack, <>redoStack, <>currentState;
   var <envir;
@@ -507,6 +508,9 @@ ESTimeline {
 
   prStop {
     isPlaying = false;
+    // stop tempo env
+    tempoRout.stop;
+    tempoRout = nil;
     // stop effects/automation
     mixerChannelTemplates.keysValuesDo { |name, template|
       var mc = mixerChannels[name];
@@ -564,6 +568,19 @@ ESTimeline {
     //playClock = clock;
     playBeats = playClock.beats;
     playStartTime = startTime ?? playbar;
+
+    // play tempo env if exists;
+    tempoRout.stop;
+    if (tempoEnv.notNil) {
+      tempoRout = {
+        loop {
+          this.tempoBPM = tempoEnv.valueAtTime(this.now);
+          0.1.wait;
+        };
+      }.fork(SystemClock);
+    } {
+      tempoRout = nil;
+    };
 
     // play effects/automation
     mixerChannelTemplates.keysValuesDo { |name, template|
