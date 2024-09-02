@@ -132,7 +132,36 @@ ESTimeline {
     ^ret ++ globalRet;
   }
 
-  //setMixerChannel
+  orderedMixerChannelNames {
+    var globalRet = [];
+    var ret = [];
+    globalMixerChannelNames.do { |name|
+      if (globalRet.includes(name).not) {
+        globalRet = globalRet.add(name);
+      };
+    };
+    tracks.do { |track|
+      if (track.useMixerChannel) {
+        var name = track.mixerChannelName;
+        if (ret.includes(name).not and: globalRet.includes(name).not) {
+          ret = ret.add(name);
+        };
+      };
+    };
+    ^ret ++ globalRet;
+  }
+
+  setMixerChannel { |name, what, val|
+    switch (what)
+    { \level } {
+      mixerChannels[name].level = val;
+      mixerChannelTemplates[name].level = val;
+    }
+    { \pan } {
+      mixerChannels[name].pan = val;
+      mixerChannelTemplates[name].pan = val;
+    }
+  }
 
   initDependantFunc {
     dependantFunc = { |theTrack, what, value|
