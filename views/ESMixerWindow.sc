@@ -13,75 +13,77 @@ ESMixerWindow {
   classvar <panSpec, <faderSpec;
 
   *initClass {
-    Class.initClassTree(MixerChannelDef);
-    StartUp.add {
-      MixerChannelDef(\mix1x1, 1, 1,
-        fader: SynthDef("mixers/Mxb1x1", {
-          arg busin, busout, level, clip = 2;
-          var in, bad, badEG;
-          in = In.ar(busin, 1) * level;
-          // On server quit, `clip` may be set to 0 before processing is finished
-          // In that case, spurious out-of-range warnings are produced
-          clip = max(1, clip);
-          bad = CheckBadValues.ar(in, post: 0) + (8 * (in.abs > clip));
-          SendReply.ar(bad, '/mixerChBadValue', [bad, in].flat, 0);
-          badEG = EnvGen.ar(Env(#[1, 0, 1], #[0, 0.05], releaseNode: 1), bad);
-          in = Select.ar(bad > 0, [in * badEG, DC.ar(0)]);
-          SendPeakRMS.ar(in, 20, 3, "/mixerChannel", busin);
-          // so that mixerchan bus can be used as postsendbus
-          ReplaceOut.ar(busin, in);
-          Out.ar(busout, in);
-        }, [nil, nil, 0.08]),
-        controls: (
-          level: (spec: \amp, value: 0.75),
-          clip: (spec: [0.1, 100, \exp], value: 20.dbamp)
-        )
-      );
+    try {
+      Class.initClassTree(MixerChannelDef);
+      StartUp.add {
+        MixerChannelDef(\mix1x1, 1, 1,
+          fader: SynthDef("mixers/Mxb1x1", {
+            arg busin, busout, level, clip = 2;
+            var in, bad, badEG;
+            in = In.ar(busin, 1) * level;
+            // On server quit, `clip` may be set to 0 before processing is finished
+            // In that case, spurious out-of-range warnings are produced
+            clip = max(1, clip);
+            bad = CheckBadValues.ar(in, post: 0) + (8 * (in.abs > clip));
+            SendReply.ar(bad, '/mixerChBadValue', [bad, in].flat, 0);
+            badEG = EnvGen.ar(Env(#[1, 0, 1], #[0, 0.05], releaseNode: 1), bad);
+            in = Select.ar(bad > 0, [in * badEG, DC.ar(0)]);
+            SendPeakRMS.ar(in, 20, 3, "/mixerChannel", busin);
+            // so that mixerchan bus can be used as postsendbus
+            ReplaceOut.ar(busin, in);
+            Out.ar(busout, in);
+          }, [nil, nil, 0.08]),
+          controls: (
+            level: (spec: \amp, value: 0.75),
+            clip: (spec: [0.1, 100, \exp], value: 20.dbamp)
+          )
+        );
 
-      MixerChannelDef(\mix1x2, 1, 2,
-        fader: SynthDef("mixers/Mxb1x2", {
-          arg busin, busout, level, pan, clip = 2;
-          var in, out, bad, badEG;
-          in = In.ar(busin, 1) * level;
-          clip = max(1, clip);
-          bad = CheckBadValues.ar(in, post: 0) + (8 * (in.abs > clip));
-          SendReply.ar(bad, '/mixerChBadValue', [bad, in].flat, 0);
-          badEG = EnvGen.ar(Env(#[1, 0, 1], #[0, 0.05], releaseNode: 1), bad);
-          in = Select.ar(bad > 0, [in * badEG, DC.ar(0)]);
-          out = Pan2.ar(in, pan);
-          SendPeakRMS.ar(out, 20, 3, "/mixerChannel", busin);
-          // so that mixerchan bus can be used as postsendbus
-          ReplaceOut.ar(busin, out);
-          Out.ar(busout, out);
-        }, [nil, nil, 0.08, 0.08]),
-        controls: (level: (spec: \amp, value: 0.75),
-          pan: \bipolar,
-          clip: (spec: [0.1, 100, \exp], value: 20.dbamp)
-        )
-      );
+        MixerChannelDef(\mix1x2, 1, 2,
+          fader: SynthDef("mixers/Mxb1x2", {
+            arg busin, busout, level, pan, clip = 2;
+            var in, out, bad, badEG;
+            in = In.ar(busin, 1) * level;
+            clip = max(1, clip);
+            bad = CheckBadValues.ar(in, post: 0) + (8 * (in.abs > clip));
+            SendReply.ar(bad, '/mixerChBadValue', [bad, in].flat, 0);
+            badEG = EnvGen.ar(Env(#[1, 0, 1], #[0, 0.05], releaseNode: 1), bad);
+            in = Select.ar(bad > 0, [in * badEG, DC.ar(0)]);
+            out = Pan2.ar(in, pan);
+            SendPeakRMS.ar(out, 20, 3, "/mixerChannel", busin);
+            // so that mixerchan bus can be used as postsendbus
+            ReplaceOut.ar(busin, out);
+            Out.ar(busout, out);
+          }, [nil, nil, 0.08, 0.08]),
+          controls: (level: (spec: \amp, value: 0.75),
+            pan: \bipolar,
+            clip: (spec: [0.1, 100, \exp], value: 20.dbamp)
+          )
+        );
 
-      MixerChannelDef(\mix2x2, 2, 2,
-        fader: SynthDef("mixers/Mxb2x2", {
-          arg busin, busout, level, pan, clip = 2;
-          var in, l, r, out, bad, badEG, silent = DC.ar(0);
-          in = In.ar(busin, 2) * level;
-          clip = max(1, clip);
-          bad = (CheckBadValues.ar(in, post: 0) + (8 * (in.abs > clip)));
-          SendReply.ar(bad, '/mixerChBadValue', [bad, in, clip].flat, 0);
-          bad = bad.sum;
-          badEG = EnvGen.ar(Env(#[1, 0, 1], #[0, 0.05], releaseNode: 1), bad);
-          bad = bad > 0;
-          #l, r = in.collect { |chan| Select.ar(bad, [chan * badEG, silent]) };
-          out = Balance2.ar(l, r, pan) * 1.4142135623731; // to offset balance2 center dip
-          SendPeakRMS.ar(out, 20, 3, "/mixerChannel", busin);
-          ReplaceOut.ar(busin, out);
-          Out.ar(busout, out);
-        }, [nil, nil, 0.08, 0.08]),
-        controls: (level: (spec: \amp, value: 0.75),
-          pan: \bipolar,
-          clip: (spec: [0.1, 100, \exp], value: 20.dbamp)
-        )
-      );
+        MixerChannelDef(\mix2x2, 2, 2,
+          fader: SynthDef("mixers/Mxb2x2", {
+            arg busin, busout, level, pan, clip = 2;
+            var in, l, r, out, bad, badEG, silent = DC.ar(0);
+            in = In.ar(busin, 2) * level;
+            clip = max(1, clip);
+            bad = (CheckBadValues.ar(in, post: 0) + (8 * (in.abs > clip)));
+            SendReply.ar(bad, '/mixerChBadValue', [bad, in, clip].flat, 0);
+            bad = bad.sum;
+            badEG = EnvGen.ar(Env(#[1, 0, 1], #[0, 0.05], releaseNode: 1), bad);
+            bad = bad > 0;
+            #l, r = in.collect { |chan| Select.ar(bad, [chan * badEG, silent]) };
+            out = Balance2.ar(l, r, pan) * 1.4142135623731; // to offset balance2 center dip
+            SendPeakRMS.ar(out, 20, 3, "/mixerChannel", busin);
+            ReplaceOut.ar(busin, out);
+            Out.ar(busout, out);
+          }, [nil, nil, 0.08, 0.08]),
+          controls: (level: (spec: \amp, value: 0.75),
+            pan: \bipolar,
+            clip: (spec: [0.1, 100, \exp], value: 20.dbamp)
+          )
+        );
+      };
     };
 
     faderSpec = ControlSpec(0.0, 4.0, 4);//ControlSpec(0.0, 2, \amp);

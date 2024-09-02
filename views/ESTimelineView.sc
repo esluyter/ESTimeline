@@ -89,7 +89,7 @@ ESTimelineView : UserView {
         var ratio = yDelta.linexp(-100, 100, 0.5, 2, nil);
         var diff = y - this.parent.visibleOrigin.y;
         var oldHeight = this.bounds.height;
-        this.bounds = this.bounds.height_((oldHeight * ratio).max(this.parent.bounds.height).min(this.parent.bounds.height * timeline.tracks.size));
+        this.bounds = this.bounds.height_((oldHeight * ratio).max(this.parent.bounds.height).min(this.parent.bounds.height * timeline.tracks.size * 2));
         ratio = this.bounds.height / oldHeight;
         this.makeTrackViews;
         this.parent.visibleOrigin_(0@((this.parent.visibleOrigin.y + diff) * ratio - diff));
