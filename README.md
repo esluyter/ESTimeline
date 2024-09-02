@@ -98,9 +98,6 @@ These are all things I would like to implement someday:
 
 <details>
   <summary><strong>Getting started: installing and tutorial</strong></summary>
-  <br /><br />
-<!--Here is a slightly out of date tutorial in that it doesn't use MixerChannel. All parts are still relevant except "Environment variables - adding reverb" -- which is useful to demonstrate how the timeline works but there is a much better way in the form of mixer channels, which I will soon update this tutorial to encompass. -->
-This tutorial uses mac keyboard shortcuts. I believe for other platforms you can substitute ctrl and alt.
   
 ## Installing
 Download or clone this repository into your SuperCollider Extensions directory. To see where this is, go to `File > Open user support directory` and find the `Extensions` directory, or evaluate:
@@ -108,19 +105,42 @@ Download or clone this repository into your SuperCollider Extensions directory. 
 Platform.userExtensionDir
 ```
 
-If you want to use the mixing interface, you also need to install ddwMixerChannel:
+If you want to use the mixing interface later in this tutorial, you also need to install ddwMixerChannel:
 ```
 Quarks.install("ddwMixerChannel")
 ```
 
 ## Tutorial
+
+<br />
+
+*This tutorial uses mac keyboard shortcuts. I believe for other platforms you can substitute ctrl and alt.*
+
+<br />
+
+### Opening a new timeline
+
+Copy and paste this into your IDE and evaluate:
 ```
 (
-~timeline = ESTimeline(bootOnPrep: true, useMixerChannel: false);
+~timeline.free;
+~timeline = ESTimeline(bootOnPrep: true);
 ~window = ESTimelineWindow(timeline: ~timeline);
 )
 ```
-- this boots the default server, but does not use ddwMixerChannel.
+You will now see the GUI timeline editing interface, with a timeline containing a single empty track.
+- this will also boot the default server; if you don't want this, specify `bootOnPrep: false`
+
+If you want to use the mixing interface from the beginning, instead evaluate:
+```
+(
+~timeline.free;
+~timeline = ESTimeline.newInitMixerChannels;
+~window = ESTimelineWindow(timeline: ~timeline);
+~mixerWindow = ESMixerWindow(~timeline, ~window);
+)
+```
+The first part of this tutorial does not require the mixing interface, or the ddwMixerChannel Quark to be installed.
 
 ### Tracks:
 - Tracks are the main form of clip organization.
@@ -143,7 +163,7 @@ Quarks.install("ddwMixerChannel")
 <img src="img/tutorial/2.png" />
 
 - double-click on a clip to edit it
-  - double-click on the grayed out `freq` parameter to activate it, then you can set it to any valid SuperCollider expression, like `220` or `60.midicps`
+  - double-click on the grayed out `freq` parameter to activate it, then you can set it to any valid SuperCollider expression, like `220` or `57.midicps`
   - press save when you're done, and close the edit window if you want.
 
 <img src="img/tutorial/3.png" />
@@ -179,7 +199,7 @@ SynthDef(\sin, { |out, freq = 440, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
 
 <img src="img/tutorial/4.png" />
 
-### Bulk edit synth clips:
+### Bulk edit def name:
 - click in an empty area and drag to select all the Synth clips (they will be highlighted in cyan when selected)
 - right click, "clip actions > bulk actions > Bulk edit Synth defName"
   - and set them to `'sin'` and hit ok
@@ -258,6 +278,7 @@ Pbind(
 ### Envelope for pattern clip
 - make a new track
 - make a new envelope (shift-E),
+  - if you are using the mixing interface, deselect its "mix" button in the left panel to remove the track from the mixer (it will just be an envelope to control our pattern)
   - double click on the envelope to edit its parameters
     - name it `pan0`
     - set its range from -1 to 1
@@ -287,7 +308,9 @@ If you don't have ddwMixerChannel quark installed, make sure you have saved your
 ```
 Quarks.install("ddwMixerChannel")
 ```
-and reload your class library (shift-cmd-L). Then run the code from earlier to start the timeline GUI, and open the file you have saved.
+and reload your class library (shift-cmd-L). Then run the code from earlier to start the timeline GUI, and open the file you have saved. You should be right where you left off.
+
+Show the mixing interface:
 - check the `useMixerChannel` box
 - show the mixer window: evaluate this in the IDE
 ```
@@ -316,12 +339,13 @@ and reload your class library (shift-cmd-L). Then run the code from earlier to s
 - right click on one of the gray rectangles above one of the tracks with a timeline clip on it and select "new send"
   - it defaults to `'verb'` at 0db
   - click ok
-  - you will hear the timelines on this track play with reverb, other tracks not
-  - use its slot on the mixer interface to tune levels
+  - you will hear the timelines on this track play with a lot of reverb, other tracks not
+  - click and drag on its slot on the mixer interface to lower the send level
 
 ### Automating mixer levels, send levels, fx parameters
 - right click on a fader, pan knob, or send in the mixer window to add an automation envelope to it
-  - double-click the verb insert fx, right click on one of the args to add an automation envelope to it
+  - (if the corresponding track is in a subtimeline, the envelope GUI will appear in that subtimeline's window -- double-click on the timeline clip to open it up)
+- if you double-click an insert fx to open its edit window, right click on one of the args to add an automation envelope to it
 - edit these envelopes
   - shift-click to add breakpoints
   - opt-click to remove them
