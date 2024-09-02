@@ -4,10 +4,10 @@ A hypothetical general purpose SuperCollider timeline
 The distant goal is that anything you can do in SuperCollider could be sequenced on a timeline...
 
 ![screenshot](img/ss.png)
-<img src="img/rss.png" width="600" /><img src="img/fss.png" width="600" />
+<img src="img/rss.png" width="700" /><img src="img/fss.png" width="700" />
 
 ## Features
-- Comment, Synth, Pattern, Routine, and Env clips
+- Comment, Synth, Pattern, Routine, and Env clip types
 - Tracks can contain all clip types, and can be muted/soloed
 - Non-prescriptive: no server architecture is forced on you, possible to disable timeline-specific clock and environment so as to interact with the timeline as part of a larger project; the goal is only to "execute this code at this particular time"
 - Gray playhead is "scheduling playhead" and black playhead is "sounding playhead" -- to take into account server latency. Routines can be played with additional latency so non-sounding events line up with the sounding playhead.
@@ -20,7 +20,7 @@ The distant goal is that anything you can do in SuperCollider could be sequenced
 - Easy to export timeline to IDE as compile string and load it back again
 
 ## Hypothetical features
-- Timeline Clip -- embed one timeline in another!
+- Timeline Clip -- embed one timeline in another! This should be easily doable, and encouraged, to avoid issue#2 below
 - Name clips to access them from other clips - e.g. to set Synth params
 - Reference clips to create clones that all change together
 - Better GUI editing
@@ -38,11 +38,11 @@ The distant goal is that anything you can do in SuperCollider could be sequenced
 - clothesline integration -- put whole .scd files on the timeline
 
 ## Issues
-- Although I've tried to make it pleasant, the GUI based code editing environment does not syntax highlight, autocomplete, etc -- for this reason I've added "Open in IDE" / "Copy from IDE" buttons as necessary.
+1. Although I've tried to make it pleasant, the GUI based code editing environment does not syntax highlight, autocomplete, etc -- for this reason I've added "Open in IDE" / "Copy from IDE" buttons as necessary.
   - Solution would be to someday add a Qt code view to core SC
-- When the timeline gets too big, it can't be saved / restored from a SCLang text format.
+2. When the timeline gets too big, it can't be saved / restored from a SCLang text format.
   - Solution would be to make some kind of custom file format, or optimize the way functions are stored/loaded.
-- When there are lots of quick zig-zags, high-resolution envelope drawing makes the GUI freeze up
+3. When there are lots of quick zig-zags, high-resolution envelope drawing makes the GUI freeze up
   - to avoid this I have extremely pixelated the envelope drawing when zoomed in. Still looking for a good solution for this.
 
 ## Installing
