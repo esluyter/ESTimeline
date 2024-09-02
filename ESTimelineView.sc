@@ -185,6 +185,9 @@ ESTimelineView : UserView {
       if (char == $R) {
         timeline.tracks[hoverTrack].addClip(ESRoutineClip(hoverTime, 5, { }));
       };
+      if (char == $E) {
+        timeline.tracks[hoverTrack].addClip(ESEnvClip(hoverTime, 5, Env([0, 1, 0], [2.5, 2.5], \sin)));
+      };
       if (char == $e) {
         hoverClip.guiClass.new(hoverClip, timeline);
       };

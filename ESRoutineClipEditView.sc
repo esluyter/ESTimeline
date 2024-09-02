@@ -29,6 +29,12 @@ ESRoutineClipEditView : ESClipEditView {
 
     funcView = CodeView(editorWindow, Rect(0, 30, 800, 570)).font_(Font.monospace(16)).string_(clip.funcString);
     cleanupFuncView = CodeView(editorWindow, Rect(0, 30, 800, 570)).font_(Font.monospace(16)).string_(clip.cleanupFuncString).visible_(false);
+
+    if (timeline.useEnvir) {
+      funcView.interpretEnvir_(timeline.envir);
+      cleanupFuncView.interpretEnvir_(timeline.envir);
+    };
+
     sidePanel = View(editorWindow, Rect(810, 30, 180, 550));
     StaticText(sidePanel, Rect(0, 0, 180, 20)).string_("startTime").font_(panelFont);
     startTimeView = NumberBox(sidePanel, Rect(0, 20, 180, 20)).font_(Font.monospace(16)).value_(clip.startTime);

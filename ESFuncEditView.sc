@@ -29,6 +29,11 @@ ESFuncEditView : ESClipEditView {
     funcView = CodeView(editorWindow, Rect(0, 30, 900, 570)).font_(Font.monospace(16)).string_(timeline.initFuncString);
     cleanupFuncView = CodeView(editorWindow, Rect(0, 30, 900, 570)).font_(Font.monospace(16)).string_(timeline.cleanupFuncString).visible_(false);
 
+    if (timeline.useEnvir) {
+      funcView.interpretEnvir_(timeline.envir);
+      cleanupFuncView.interpretEnvir_(timeline.envir);
+    };
+
     sidePanel = View(editorWindow, Rect(905, 30, 90, 550));
 
     StaticText(sidePanel, Rect(0, 0, 90, 20)).string_("bootOnInit").font_(panelFont);
