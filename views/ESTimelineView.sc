@@ -394,9 +394,14 @@ ESTimelineView : UserView {
       if (char == $ ) { timelineController.togglePlay };
       // enter goes to beginning
       if (key == 16777220) { timelineController.goto(0) };
-      // [ and ] move playhead to nearest clip edge on hovered track
+      // [ and ] move playhead to nearest clip edge to cursor on hovered track
       if ((char == $[) or: (char == $])) {
+        timeline.now = hoverTime;
         timelineController.moveToClipEdge(char == $], hoverTrack);
+      };
+      // opt- left and right move playhead from where it is to nearest clip edge on hovered track
+      if (((key == 16777236) or: (key == 16777234)) and: (mods.isAlt)) {
+        timelineController.moveToClipEdge(key == 16777236, hoverTrack);
       };
       // s - split clip
       // opt-s = toggle snapping
