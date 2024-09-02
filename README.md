@@ -2,7 +2,7 @@
 
 The distant goal is that anything you can do in SuperCollider could be sequenced on a visual and editable timeline...
 
-Note that this is a work in progress and all is subject to revision.
+Note that this is a work in progress and all is subject to revision. I am trying if at all possible to keep the saved timeline files valid.
 
 Also note that because timelines are built to execute user-supplied code they are inherently insecure. Before opening timeline files from another source, open them in a text editor to make sure they don't have malicious code. (i.e. treat them just like any other random SC code you are executing for the first time)
 <br />
