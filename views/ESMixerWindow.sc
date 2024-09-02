@@ -157,13 +157,13 @@ ESMixerWindow {
     if (window.notNil) { window.close };
     window = Window("Mixer", Rect(left, 0, width, height)).background_(Color.gray(0.55)).front.onClose_({
       this.freeOSCFunc;
+      timeline.removeDependant(this);
       CmdPeriod.remove(this);
     });
 
     // OSC func for channel metering
     this.initOSCFunc;
     CmdPeriod.add(this); // so oscFunc is restored on cmd-.
-
     timeline.addDependant(this);
 
     this.buildMixer;
