@@ -46,8 +46,8 @@ ESTimelineClip : ESClip {
     }.fork(clock);
   }
 
-  prStop {
-    timeline.stop;
+  prStop { |hard = false|
+    timeline.stop(hard);
   }
 
   prStart { |startOffset = 0.0, clock|
