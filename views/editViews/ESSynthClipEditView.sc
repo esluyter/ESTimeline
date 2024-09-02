@@ -6,15 +6,14 @@ ESSynthClipEditView : ESClipEditView {
 
     this.prNew(clip, timeline, {
       clip.name = nameField.string.asSymbol;
-      //clip.args = ("{" ++ codeView.string ++ "}").interpret;
+
       clip.args = argsView.value;
       clip.defName = ("{" ++ defNameView.string ++ "}").interpret;
       clip.target = ("{" ++ targetView.string ++ "}").interpret;
       clip.addAction = ("{" ++ addActionView.string ++ "}").interpret;
       clip.color = colorView.background;
-      clip.startTime = startTimeView.value;
-      clip.duration =  durationView.value;
-      //clip.offset = offsetView.value; no offset for synth
+      clip.startTime = startTimeView.string.interpret;
+      clip.duration =  durationView.string.interpret;
 
       timeline.addUndoPoint;
     });

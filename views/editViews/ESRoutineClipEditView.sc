@@ -11,9 +11,9 @@ ESRoutineClipEditView : ESClipEditView {
       clip.isSeeded = isSeededBox.value;
       clip.addLatency = addLatencyBox.value;
       clip.color = colorView.background;
-      clip.startTime = startTimeView.value;
-      clip.duration =  durationView.value;
-      clip.offset = offsetView.value;
+      clip.startTime = startTimeView.string.interpret;
+      clip.duration =  durationView.string.interpret;
+      clip.offset = offsetView.string.interpret;
       clip.fastForward = fastForwardMenu.value;
 
       timeline.addUndoPoint;

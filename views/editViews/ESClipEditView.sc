@@ -1,6 +1,8 @@
 ESClipEditView {
   classvar <>editorWindow;
-  classvar sidePanel, nameField, startTimeView, durationView, offsetView, colorView;
+  classvar sidePanel, nameField, <startTimeView, <durationView, <offsetView, colorView;
+
+  classvar <thisClip;
 
   *closeWindow {
     if (editorWindow.notNil) {
@@ -14,10 +16,16 @@ ESClipEditView {
   *prNew { |clip, timeline, saveAction|
     var panelFont = Font.sansSerif(16);
 
-    if (editorWindow.notNil) { editorWindow.close };
-    editorWindow = Window(this.title, Rect(0, 0, 1000, 600))
+    thisClip = clip;
+
+    if (editorWindow.notNil) {
+      editorWindow.onClose_({});
+      editorWindow.close;
+    };
+    editorWindow = Window(this.title, Rect(Window.availableBounds.width - 1100, 0, 1000, 600))
     .background_(Color.gray(0.9))
-    .front;
+    .front
+    .onClose_{ thisClip = nil };
 
     sidePanel = View(editorWindow, Rect(810, 10, 180, 570));
 
@@ -27,13 +35,13 @@ ESClipEditView {
     };
 
     StaticText(sidePanel, Rect(0, 45, 180, 20)).string_("startTime").font_(panelFont);
-    startTimeView = NumberBox(sidePanel, Rect(0, 65, 180, 20)).font_(Font.monospace(16)).value_(clip.startTime);
+    startTimeView = TextField(sidePanel, Rect(0, 65, 180, 20)).font_(Font.monospace(16)).string_(clip.startTime.asString);
     StaticText(sidePanel, Rect(0, 90, 180, 20)).string_("duration").font_(panelFont);
-    durationView = NumberBox(sidePanel, Rect(0, 110, 180, 20)).font_(Font.monospace(16)).value_(clip.duration);
+    durationView = TextField(sidePanel, Rect(0, 110, 180, 20)).font_(Font.monospace(16)).string_(clip.duration.asString);
 
     if (clip.prHasOffset) {
       StaticText(sidePanel, Rect(0, 135, 180, 20)).string_("offset").font_(panelFont);
-      offsetView = NumberBox(sidePanel, Rect(0, 155, 180, 20)).font_(Font.monospace(16)).value_(clip.offset);
+      offsetView = TextField(sidePanel, Rect(0, 155, 180, 20)).font_(Font.monospace(16)).string_(clip.offset.asString);
     };
 
     StaticText(sidePanel, Rect(0, 180, 180, 20)).string_("color").font_(panelFont);
@@ -102,8 +110,8 @@ ESClipEditView {
       clip.comment = lines[1..].join($\n);
 
       clip.color = colorView.background;
-      clip.startTime = startTimeView.value;
-      clip.duration =  durationView.value;
+      clip.startTime = startTimeView.string.interpret;
+      clip.duration =  durationView.string.interpret;
 
       timeline.addUndoPoint;
     });
