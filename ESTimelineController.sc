@@ -185,7 +185,7 @@ ESTimelineController {
     var envClip;
     var name = argument.asSymbol;
     var arr = clips.asArray;
-    var i = 0, envName, min = 0, max = 1, isExponential = false;
+    var i = 0, envName, min = 0, max = 1, curve = 0, isExponential = false;
     var thisTrackIndex;
     thisTrack = thisTrack ? arr[0].track;
     thisTrackIndex = thisTrack.index;
@@ -193,6 +193,13 @@ ESTimelineController {
       var spec = name.asSpec;
       min = spec.minval;
       max = spec.maxval;
+      if (name == \freq) {
+        min = 0.midicps;
+        max = 127.midicps;
+      };
+      if (name == \amp) {
+        curve = 4;
+      };
       isExponential = (spec.warp.class == ExponentialWarp);
     };
     if (addTrack) {
@@ -211,6 +218,7 @@ ESTimelineController {
         target: thisClip.target,
         min: min(min, value),
         max: max(max, value),
+        curve: curve,
         isExponential: isExponential
       ); // dont prep here anymore because it needs to know its track
       envClip.env = Env(envClip.prValueUnscale(value).dup(2), [thisClip.duration], [0]);

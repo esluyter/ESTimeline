@@ -63,5 +63,7 @@ ESMidiListener {
 
   free {
     ccFuncs.do(_.free);
+    bendFuncs.do(_.free);
+    noteFuncs.do(_.free);
   }
 }
