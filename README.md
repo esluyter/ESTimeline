@@ -304,6 +304,7 @@ Automating mixer levels, send levels, and fx parameters left as an exercise, for
 ```
 ~thisTimeline.goto(\next)
 ```
+  - you can use a comment clip (shift-C) for this dummy "next" clip -- the first line of the comment is its name
 - it's important to use `s.bind` for server operations inside of routines, otherwise the timing is off.
 ```
 var syn;
@@ -325,8 +326,6 @@ loop {
   1.wait;
 };
 ```
-- you can use a comment clip (shift-C) for this dummy "next" clip -- the first line of the comment is its name
-- you can also goto a number, which will be interpreted as beat number.
 
 
 ### Environment variables -- adding reverb:
