@@ -6,6 +6,7 @@ ESTrack {
   var dependantFunc;
 
   envs {
+    if (timeline.isNil) { ^[] };
     if (useMixerChannel and: timeline.useMixerChannel) {
       var envs = this.mixerChannelTemplate.envs;
       var ret = [];
