@@ -279,12 +279,18 @@ ESEnvClip : ESClip {
         level = thisEnv.levels[i + 1];
         if (inserted.not) {
           if ((time + timeDiff) > thisTime) {
+            var ratio = (thisTime - time) / timeDiff;
             levels = levels.add(thisLevel);
             times = times.add(thisTime - time);
-            curves = curves.add(curve);
+            if (curve.isNumber) {
+              curves = curves.add(curve * ratio);
+              curves = curves.add(curve * (1 - ratio));
+            } {
+              curves = curves.add(curve);
+              curves = curves.add(curve);
+            };
             levels = levels.add(level);
             times = times.add(time + timeDiff - thisTime);
-            curves = curves.add(curve);
             inserted = true;
           } {
             levels = levels.add(level);
