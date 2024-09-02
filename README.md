@@ -114,11 +114,11 @@ Platform.userExtensionDir
 ## Tutorial: basic workflow examples
 ```
 (
-~timeline = ESTimeline();
+~timeline = ESTimeline(bootOnPrep: true);
 ~window = ESTimelineWindow(timeline: ~timeline);
 )
 ```
-- by default, this boots the default server. You can make it not do this by going into "Prep / Cleanup funcs" and unchecking `bootOnPrep`.
+- this boots the default server. You can make it not do this by setting `bootOnPrep` to false or going into "Prep / Cleanup funcs" and unchecking `bootOnPrep`.
 
 ### SynthDefs:
 - put your SynthDef in the timeline's prep function (click the "edit prep/cleanup funcs" button) e.g.
