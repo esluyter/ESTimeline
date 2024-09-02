@@ -80,7 +80,9 @@ ESTimelineClip : ESClip {
   }
 
   prStop { |hard = false|
+    //hard.postln; //debug
     timeline.stop(hard);
+    //"clip prStop: timeline stopped".postln;
     stopRout.stop; // playRout has already been stopped
   }
 
