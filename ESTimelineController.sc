@@ -1,12 +1,21 @@
 ESTimelineController {
   var <timeline, <timelineView;
   var <lastPath;
+  var <>playParent = true;
 
   *new { |timeline, timelineView|
     ^super.newCopyArgs(timeline, timelineView);
   }
 
-  togglePlay { timeline.togglePlay }
+  togglePlay {
+    if (playParent.not) {
+      timeline.togglePlay;
+    } {
+      var thisTimeline = timeline;
+      while { thisTimeline.parentClip.notNil } { thisTimeline = thisTimeline.parentClip.track.timeline };
+      thisTimeline.togglePlay;
+    };
+  }
   goto { |val| timeline.goto(val) }
   toggleSnap { timeline.snapToGrid = timeline.snapToGrid.not }
 

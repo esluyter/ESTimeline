@@ -15,6 +15,15 @@ ESTimelineWindow : Window {
 
     timeline = argTimeline;
 
+    scrollView = ScrollView(this, Rect(0, 60, this.bounds.width, this.bounds.height - 60)).hasHorizontalScroller_(false).hasBorder_(false).background_(Color.gray(0.93)).resize_(5).onResize_{ |view|
+      timelineView.bounds = Rect(leftPanelWidth, 0, view.bounds.width - leftPanelWidth, view.bounds.height * timelineView.heightRatio);
+      timelineView.makeTrackViews;
+    };
+    timelineView = ESTimelineView(scrollView, Rect(leftPanelWidth, 0, rightPanelWidth, this.bounds.height - 60), timeline, duration: max(timeline.duration + 5, 15));
+    timelineView.postln;
+    trackPanelView = ESTrackPanelView(scrollView, Rect(0, 0, leftPanelWidth, this.bounds.height - 60), timelineView);
+    rulerView = ESRulerView(this, Rect(leftPanelWidth, 40, rightPanelWidth, 20), timeline, timelineView).background_(Color.gray(0.97)).resize_(2);
+
     topPanel = UserView(this, Rect(0, 0, this.bounds.width, 40)).background_(Color.gray(0.8)).drawFunc_({ |view|
       Pen.addRect(Rect(0, 39, view.bounds.width, 1));
       Pen.color = Color.gray(0.5);
@@ -64,8 +73,11 @@ ESTimelineWindow : Window {
       });
       StaticText(this, Rect(805, 10, 120, 20)).string_("useParentClock").font_(Font.sansSerif(13));
 
-      CheckBox(this, Rect(915, 10, 20, 20)).value_(true);
-      StaticText(this, Rect(935, 10, 100, 20)).string_("play parent").font_(Font.sansSerif(13));
+      CheckBox(this, Rect(915, 10, 20, 20)).value_(timelineView.timelineController.playParent).action_({ |view|
+        timelineView.timelineController.playParent = view.value;
+        timelineView.focus;
+      });
+      StaticText(this, Rect(935, 10, 100, 20)).string_("playParent").font_(Font.sansSerif(13));
     } {  //925
       newTimelineClipButt = Button(this, Rect(790, 5, 205, 30)).states_([["Open as clip in new timeline"]]).action_({
         if (timelineView.selectedClips.size > 0) {
@@ -113,16 +125,6 @@ ESTimelineWindow : Window {
         timelineView.keyDownAction.(*args);
       });
     };
-
-
-    scrollView = ScrollView(this, Rect(0, 60, this.bounds.width, this.bounds.height - 60)).hasHorizontalScroller_(false).hasBorder_(false).background_(Color.gray(0.93)).resize_(5).onResize_{ |view|
-      timelineView.bounds = Rect(leftPanelWidth, 0, view.bounds.width - leftPanelWidth, view.bounds.height * timelineView.heightRatio);
-      timelineView.makeTrackViews;
-    };
-    timelineView = ESTimelineView(scrollView, Rect(leftPanelWidth, 0, rightPanelWidth, this.bounds.height - 60), timeline, duration: max(timeline.duration + 5, 15));
-    timelineView.postln;
-    trackPanelView = ESTrackPanelView(scrollView, Rect(0, 0, leftPanelWidth, this.bounds.height - 60), timelineView);
-    rulerView = ESRulerView(this, Rect(leftPanelWidth, 40, rightPanelWidth, 20), timeline, timelineView).background_(Color.gray(0.97)).resize_(2);
 
     this.view.minHeight_(100);
     this.onClose_({ timelineView.release; });
