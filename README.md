@@ -46,7 +46,7 @@ The distant goal is that anything you can do in SuperCollider could be sequenced
   - to avoid this I have extremely pixelated the envelope drawing when zoomed in. Still looking for a good solution for this.
 
 ## Installing
-Download or clone this repository into your SuperCollider Extensions directory. To see where this is, evaluate:
+Download or clone this repository into your SuperCollider Extensions directory. To see where this is, go to `File > Open user support directory` and find the `Extensions` directory, or evaluate:
 ```
 Platform.userExtensionDir
 ```
