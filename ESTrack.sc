@@ -1,13 +1,14 @@
 ESTrack {
-  var <clips;
+  var <clips, <mute, <solo = false;
+  var <>timeline;
   var <isPlaying = false;
   var playRout;
   var dependantFunc;
 
-  storeArgs { ^[clips] }
+  storeArgs { ^[clips, mute] }
 
-  *new { |clips|
-    ^super.newCopyArgs(clips).init;
+  *new { |clips, mute = false|
+    ^super.newCopyArgs(clips, mute).init;
   }
 
   init {
@@ -16,6 +17,7 @@ ESTrack {
       this.changed(\clip, [clips.indexOf(theClip), theClip, what, value].flat);
     };
     clips.do { |clip, i|
+      clip.track = this;
       clip.addDependant(dependantFunc);
     };
   }
@@ -62,7 +64,9 @@ ESTrack {
           // wait the appropriate amount of time
           (startTime - t).wait;
           // ...and play the clip
-          clip.play(offset, clock);
+          if (this.shouldPlay) {
+            clip.play(offset, clock);
+          };
           // adjust t to the current time
           t = startTime;
         };
@@ -97,5 +101,26 @@ ESTrack {
   free {
     clips.do(_.release);
     this.release;
+  }
+
+  mute_ { |val|
+    mute = val;
+    this.changed(\mute);
+  }
+
+  solo_ { |val|
+    solo = val;
+    this.changed(\solo);
+  }
+
+  shouldPlay {
+    if (timeline.hasSolo) {
+      if (solo) {
+        ^true;
+      } {
+        ^false;
+      };
+    };
+    ^mute.not;
   }
 }

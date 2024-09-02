@@ -1,5 +1,6 @@
 ESClip {
   var <startTime, <duration, >color, <offset, <comment;
+  var <>track;
   var <isPlaying = false;
   var playRout;
 
@@ -75,7 +76,11 @@ ESClip {
 
   // draw this clip on a UserView using Pen
   draw { |left, top, width, height|
-    Pen.color = this.color;
+    if (track.shouldPlay) {
+      Pen.color = this.color;
+    } {
+      Pen.color = Color.white.lighten(this.color, 0.5);
+    };
     Pen.addRect(Rect(left, top, width, height));
     Pen.fill;
 
@@ -98,7 +103,7 @@ ESClip {
           title = title[0..title.size-2];
         };
       };
-      Pen.stringAtPoint(title, (left + 3.5)@(top + 2), font, Color.gray(1, 0.5));
+      Pen.stringAtPoint(title, (left + 3.5)@(top + 2), font, Color.gray(1, 0.6));
     };
   }
 

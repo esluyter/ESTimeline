@@ -22,7 +22,12 @@ ESTrackView : UserView {
             clip.draw(left, 3, width, this.bounds.height - 4);
           };
         };
-      }
+        if (track.shouldPlay.not) {
+          Pen.addRect(Rect(0, 0, this.bounds.width, this.bounds.height));
+          Pen.color_(Color.gray(0.5, 0.25));
+          Pen.fill;
+        };
+      };
     });
 
     this.acceptsMouse_(false);

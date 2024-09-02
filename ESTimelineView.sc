@@ -9,6 +9,8 @@ ESTimelineView : UserView {
   var hoverTime = 0, hoverTrack = 0, hoverClipIndex = 0;
   var duplicatedClip;
 
+  var <leftPanelWidth = 65;
+
 
   *new { |parent, bounds, timeline, startTime = -2.0, duration = 50.0|
     ^super.new(parent, bounds).init(timeline, startTime, duration);
@@ -260,6 +262,8 @@ ESTimelineView : UserView {
     dragView = View(this, Rect(0, 0, 2, trackHeight)).visible_(false).background_(Color.red).acceptsMouse_(false);
     leftGuideView = View(this, Rect(0, 0, 1, height)).visible_(false).background_(Color.gray(0.6)).acceptsMouse_(false);
     rightGuideView = View(this, Rect(0, 0, 1, height)).visible_(false).background_(Color.gray(0.6)).acceptsMouse_(false);
+
+    this.changed(\makeTrackViews);
   }
 
   // called when the timeline is changed
@@ -292,8 +296,8 @@ ESTimelineView : UserView {
             var width = this.relativeTimeToPixels(clip.duration);
             // if our point is within the clip's bounds...
             if (point.x.inRange(left, left + width)) {
-              if ((point.x - left) < 2) { ^[clip, i, j, 1] }; // code for mouse over left edge
-              if (((left + width) - point.x) < 2) { ^[clip, i, j, 2] }; // code for mouse over right edge
+              if ((point.x - left) < 3) { ^[clip, i, j, 1] }; // code for mouse over left edge
+              if (((left + width) - point.x) < 3) { ^[clip, i, j, 2] }; // code for mouse over right edge
               ^[clip, i, j, 0];
             };
           };
