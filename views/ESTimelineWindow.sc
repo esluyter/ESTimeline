@@ -290,6 +290,9 @@ ESTimelineWindow : Window {
           { \env } {
             timelineView.refresh;
           }
+          { \hoverIndex } {
+            timelineView.refresh;
+          }
           { \template } {
             if (args[0] == \envs) {
               timelineView.makeTrackViews;

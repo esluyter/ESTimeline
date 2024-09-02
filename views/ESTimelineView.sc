@@ -134,6 +134,8 @@ ESTimelineView : UserView {
     };
 
     this.mouseDownAction = { |view, x, y, mods, buttNum, clickCount|
+      var envOffset = if (timeline.tempoEnv.notNil) { 1 } { 0 };
+
       clickPoint = x@y;
       clickTime = this.pixelsToAbsoluteTime(x);
       originalDuration = duration;
@@ -186,19 +188,23 @@ ESTimelineView : UserView {
 
       if (hoverClip.notNil and: editingMode) {
         var trackHeights = this.trackHeights;
-        var top = 0;
+        var top = timeline.envHeightMultiplier * trackHeight * envOffset;
         var i = hoverClip.track.index;
-        i.do { |j| top = top + trackHeights[j] };
+        i.do { |j| top = top + trackHeights[j + envOffset] };
         // again, not the best:
         hoverClip.drawClip.prMouseDown(x, y - top, mods, buttNum, clickCount, *this.clipBounds(hoverClip))
       };
 
       if (hoverEnv.notNil) {
         var trackHeights = this.trackHeights;
-        var top = 0;
+        var top = timeline.envHeightMultiplier * trackHeight * envOffset;
         var i = hoverTrack.index;
-        i.do { |j| top = top + trackHeights[j] };
+        i.do { |j| top = top + trackHeights[j + envOffset] };
         hoverEnv.prMouseDown(x, y - top, mods, buttNum, clickCount, this.timeSelection);
+      };
+
+      if (y < (timeline.envHeightMultiplier * trackHeight * envOffset)) {
+        timeline.tempoEnv.prMouseDown(x, y, mods, buttNum, clickCount, this.timeSelection);
       };
     };
 
@@ -239,7 +245,8 @@ ESTimelineView : UserView {
     this.mouseMoveAction = { |view, x, y, mods|
       var yDelta = y - clickPoint.y;
       var xDelta = x - clickPoint.x;
-      var doTimeSelectionOverEnv, doTimeSelectionOverEnvClip;
+      var doTimeSelectionOverEnv, doTimeSelectionOverEnvClip, mouseOverTempoEnv = false;
+      var envOffset = if (timeline.tempoEnv.notNil) { 1 } { 0 };
 
       if (editingMode.not) {
         switch (hoverCode)
@@ -367,9 +374,9 @@ ESTimelineView : UserView {
       } {  // if editingMode
         if (hoverClip.notNil) {
           var trackHeights = this.trackHeights;
-          var top = 0;
+          var top = timeline.envHeightMultiplier * trackHeight * envOffset;
           var i = hoverClip.track.index;
-          i.do { |j| top = top + trackHeights[j] };
+          i.do { |j| top = top + trackHeights[j + envOffset] };
           //                        not the best
           doTimeSelectionOverEnvClip = hoverClip.drawClip.prMouseMove(x, y - top, xDelta, yDelta, mods, *this.clipBounds(hoverClip));
         };
@@ -377,14 +384,19 @@ ESTimelineView : UserView {
 
       if (hoverEnv.notNil) {
         var trackHeights = this.trackHeights;
-        var top = 0;
+        var top = timeline.envHeightMultiplier * trackHeight * envOffset;
         var i = hoverTrack.index;
-        i.do { |j| top = top + trackHeights[j] };
+        i.do { |j| top = top + trackHeights[j + envOffset] };
         doTimeSelectionOverEnv = hoverEnv.prMouseMove(x, y - top, xDelta, yDelta, mods, this.timeSelection);
       };
 
+      if (y < (timeline.envHeightMultiplier * trackHeight * envOffset)) {
+        mouseOverTempoEnv = true;
+        doTimeSelectionOverEnv = timeline.tempoEnv.prMouseMove(x, y, xDelta, yDelta, mods, this.timeSelection);
+      };
+
       // select time/clips if start dragging from empty area
-      if ((hoverClip.isNil or: { doTimeSelectionOverEnvClip ? false }) and: (hoverEnv.isNil or: { doTimeSelectionOverEnv ? false })) {
+      if ((hoverClip.isNil or: { doTimeSelectionOverEnvClip ? false }) and: ((hoverEnv.isNil and: mouseOverTempoEnv.not) or: { doTimeSelectionOverEnv ? false })) {
         if (xDelta.abs > 1) {
           var timeA = this.pixelsToAbsoluteTime(clickPoint.x);
           var timeB = this.pixelsToAbsoluteTime(x);
@@ -452,6 +464,10 @@ ESTimelineView : UserView {
       };
       if (oldHoverEnv.notNil and: (oldHoverEnv != hoverEnv)) {
         oldHoverEnv.prHoverLeave;
+      };
+
+      if (y < top) {
+        timeline.tempoEnv.prHover(x, y, hoverTime);
       };
     };
 
