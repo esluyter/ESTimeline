@@ -2,7 +2,7 @@ ESEnvClipEditView : ESClipEditView {
 
   *new { |clip, timeline|
     var panelFont = Font("Helvetica", 16);
-    var busView, makeBusBox, makeBusRateMenu, targetView, addActionView, codeView, minView, maxView, curveView, isExponentialBox;
+    var busView, makeBusBox, makeBusRateMenu, targetView, addActionView, codeView, minView, maxView, curveView, isExponentialBox, keepBreakpointValuesBox;
     var adjustBg = {
       busView.background_(if (makeBusBox.value) { Color.gray(0.8) } { Color.white });
     };
@@ -19,10 +19,56 @@ ESEnvClipEditView : ESClipEditView {
         clip.startTime = startTimeView.string.interpret;
         clip.duration =  durationView.string.interpret;
         clip.offset = offsetView.string.interpret;
-        clip.min = minView.value;
-        clip.max = maxView.value;
-        clip.curve = curveView.value;
-        clip.isExponential = isExponentialBox.value;
+
+        /*
+        { |min, max, isExponential, curve|
+          min = min.interpret;
+          max = max.interpret;
+          curve = curve.interpret;
+          if ((isExponential and: ((min.sign != max.sign))).not) {
+            arr.do { |clip|
+              if (clip.class == ESEnvClip) {
+                var oldLevels = clip.env.levels;
+                var values = oldLevels.collect(clip.prValueScale(_));
+                var newLevels;
+                clip.min = min;
+                clip.max = max;
+                clip.curve = curve;
+                clip.isExponential = isExponential;
+                newLevels = values.collect(clip.prValueUnscale(_));
+                clip.env = Env(newLevels, clip.env.times, clip.env.curves);
+              };
+            };
+          };
+        }
+        */
+        if (keepBreakpointValuesBox.value.not) {
+          // keep Env the same but change breakpoint values bc of range adjustment.
+          clip.min = minView.value;
+          clip.max = maxView.value;
+          clip.curve = curveView.value;
+          clip.isExponential = isExponentialBox.value;
+        } {
+          // adjust Env to keep breakpoint values
+          var min = minView.value;
+          var max = maxView.value;
+          var curve = curveView.value;
+          var isExponential = isExponentialBox.value;
+
+          if ((isExponential and: ((min.sign != max.sign))).not) {
+            var thisEnv = env.value;
+            var oldLevels = thisEnv.levels;
+            var values = oldLevels.collect(clip.prValueScale(_));
+            var newLevels;
+            clip.min = min;
+            clip.max = max;
+            clip.curve = curve;
+            clip.isExponential = isExponential;
+            newLevels = values.collect(clip.prValueUnscale(_));
+            clip.env = Env(newLevels, thisEnv.times, thisEnv.curves);
+            codeView.string_(clip.env.asESDisplayString);
+          };
+        };
 
         clip.makeBusRate = makeBusRateMenu.item.asSymbol;
         clip.makeBus = makeBusBox.value;
@@ -64,6 +110,8 @@ ESEnvClipEditView : ESClipEditView {
     curveView = NumberBox(sidePanel, Rect(0, 420, 180, 20)).font_(Font.monospace(16)).value_(clip.curve);
     isExponentialBox = CheckBox(sidePanel, Rect(0, 450, 20, 20)).value_(clip.isExponential);
     StaticText(sidePanel, Rect(20, 450, 150, 20)).string_("isExponential").font_(panelFont);
+    keepBreakpointValuesBox = CheckBox(sidePanel, Rect(0, 480, 20, 20)).value_(true);
+    StaticText(sidePanel, Rect(20, 475, 150, 30)).string_("keep breakpoint values when adjusting range").font_(panelFont.copy.size_(12));
 
     adjustBg.()
   }
