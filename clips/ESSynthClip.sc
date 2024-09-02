@@ -71,7 +71,7 @@ ESSynthClip : ESClip {
     args.pairsDo { |key, val|
       val = val.value;
       if (val.class == Symbol) { val = track.timeline[val]; };
-      if (val.class == ESEnvClip) { val = val.bus.asMap; };
+      if (val.class == ESEnvClip) { val = if (val.bus.notNil) { val.bus.asMap } { 0 }; };
       //if (val.class == Bus) { val = val.asMap; };
       ret = ret.add(key).add(val);
     };
