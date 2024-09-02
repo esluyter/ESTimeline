@@ -7,7 +7,7 @@ ESTimelineView : UserView {
   var clickPoint, clickTime, scrolling = false, originalDuration;
   var <hoverClip, <hoverCode, hoverClipStartTime, hoverClipEndTime, hoverClipOffset;
   var <hoverEnv;
-  var hoverTime = 0, hoverTrack;
+  var hoverTime = 0, <>hoverTrack;
   var duplicatedClips, <timeSelection, clipSelection, stagedClipSelection;
 
   var <editingMode = false;

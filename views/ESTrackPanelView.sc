@@ -9,6 +9,30 @@ ESTrackPanelView : UserView {
   init { |argtimelineView|
     timelineView = argtimelineView;
     timeline = timelineView.timeline;
+    this.mouseOverAction = { |view, x, y|
+      timelineView.hoverTrack = timelineView.trackAtY(y);
+      timelineView.hoverTrack.index.postln;
+    };
+    this.keyDownAction = { |view, char, mods, unicode, keycode, key|
+      // cmd-delete - remove track
+      if ((key == 16777219) and: mods.isCmd) {
+        if (timelineView.hoverTrack.notNil and: timelineView.hoverTrack.index.notNil) {
+          var index = timelineView.hoverTrack.index;
+          timeline.removeTrack(index);
+          timelineView.hoverTrack = timeline.tracks[min(index, timeline.tracks.size - 1)];
+        };
+      };
+      // cmd-t new track (shift before, default after)
+      if (mods.isCmd and: (key == 84)) {
+        if (timelineView.hoverTrack.notNil) {
+          if (mods.isShift) {
+            timeline.addTrack(timelineView.hoverTrack.index);
+          } {
+            timeline.addTrack(timelineView.hoverTrack.index + 1);
+          };
+        };
+      };
+    };
     this.makeTrackViews;
   }
 
@@ -63,6 +87,7 @@ ESTrackPanelView : UserView {
       .mouseMoveAction_({
         view.beginDrag;
       })
+      .mouseOverAction_(false)
       .beginDragAction_({
         track;
       })
@@ -84,7 +109,8 @@ ESTrackPanelView : UserView {
             var nextName = track.name ?? "";
             ev[\nameField].string_(nextName).select(nextName.asString.size, 0).visible_(true).focus;
           };
-        }),
+        })
+        .mouseOverAction_(false),
         nameField: TextView(view, Rect(2, 35, width - 4, timelineView.trackHeight - 40)).keyDownAction_({ |...args| this.handleKey(track, *args) }).focusLostAction_({ |view|
           // if you click somewhere else, accept changes
           //try { // why?
@@ -93,7 +119,7 @@ ESTrackPanelView : UserView {
             };
             view.visible = false;
           //};
-        }).visible_(false).font_(Font.sansSerif(14)),
+        }).mouseOverAction_(false).visible_(false).font_(Font.sansSerif(14)),
         mix: Button(view, Rect(21, 4, 25, 25)).states_([
           ["mix", Color.gray(0.5), Color.gray(0.8)],
           ["mix", Color.gray(0.85), Color.gray(0.45)]])
