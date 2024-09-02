@@ -453,10 +453,13 @@ ESEnvClip : ESClip {
         runningtime = runningtime + times[i];
         i = i + 1;
       };
-      i = i - 1;
+      if (i > 0) {
+        i = i - 1;
+      };
       levels = levels[0..i+1];
       times = times[0..i];
       curves = if (curves.isArray) { curves[0..i] } { curves };
+
       times[i] = thisDuration - prevTime;
       levels[i+1] = endLevel;
     };
