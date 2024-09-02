@@ -319,20 +319,27 @@ ESTimelineView : UserView {
     playheadView = UserView(this, this.bounds.copy.origin_(0@0))
     .acceptsMouse_(false)
     .drawFunc_({
-      var left;
+      var left = this.absoluteTimeToPixels(timeline.soundingNow);
       Pen.use {
-        // sounding playhead in black
-        left = this.absoluteTimeToPixels(timeline.soundingNow);
-        Pen.addRect(Rect(left, 0, 2, height));
-        Pen.color = Color.black;
-        Pen.fill;
+        timeline.tracks.do { |track, i|
+          var clip = this.clipAtX(track, left)[0];
+          if ((clip.class == ESTimelineClip) and: { clip.useParentClock.not } and: { timeline.isPlaying }) {
 
-        if (timeline.isPlaying) {
-          // "scheduling playhead" in gray
-          Pen.color = Color.gray(0.5, 0.5);
-          left = this.absoluteTimeToPixels(timeline.now);
-          Pen.addRect(Rect(left, 0, 2, height));
-          Pen.fill;
+          } {
+            // sounding playhead in black
+            left = this.absoluteTimeToPixels(timeline.soundingNow);
+            Pen.addRect(Rect(left, i * trackHeight, 2, trackHeight));
+            Pen.color = Color.black;
+            Pen.fill;
+
+            if (timeline.isPlaying) {
+              // "scheduling playhead" in gray
+              Pen.color = Color.gray(0.5, 0.5);
+              left = this.absoluteTimeToPixels(timeline.now);
+              Pen.addRect(Rect(left, i * trackHeight, 2, trackHeight));
+              Pen.fill;
+            };
+          };
         };
       };
     });
@@ -343,24 +350,28 @@ ESTimelineView : UserView {
     this.changed(\makeTrackViews);
   }
 
+  clipAtX { |track, x, i|
+    track.clips.do { |clip, j|
+      // if clip within bounds...
+      if ((clip.startTime < this.endTime) and: (clip.endTime > this.startTime)) {
+        var left = this.absoluteTimeToPixels(clip.startTime);
+        var width = this.relativeTimeToPixels(clip.duration);
+        // if our point is within the clip's bounds...
+        if (x.inRange(left, left + width)) {
+          if ((x - left) < 3) { ^[clip, i, j, 1] }; // code for mouse over left edge
+          if (((left + width) - x) < 3) { ^[clip, i, j, 2] }; // code for mouse over right edge
+          ^[clip, i, j, 0];
+        };
+      };
+    };
+    ^[nil, i, nil, nil];
+  }
+
   clipAtPoint { |point|
     timeline.tracks.do { |track, i|
       var top = i * trackHeight;
       if (point.y.inRange(top, top + trackHeight)) {
-        track.clips.do { |clip, j|
-          // if clip within bounds...
-          if ((clip.startTime < this.endTime) and: (clip.endTime > this.startTime)) {
-            var left = this.absoluteTimeToPixels(clip.startTime);
-            var width = this.relativeTimeToPixels(clip.duration);
-            // if our point is within the clip's bounds...
-            if (point.x.inRange(left, left + width)) {
-              if ((point.x - left) < 3) { ^[clip, i, j, 1] }; // code for mouse over left edge
-              if (((left + width) - point.x) < 3) { ^[clip, i, j, 2] }; // code for mouse over right edge
-              ^[clip, i, j, 0];
-            };
-          };
-        };
-        ^[nil, i, nil, nil];
+        ^this.clipAtX(track, point.x, i);
       };
     };
     ^[nil, 0, nil, nil];
