@@ -85,7 +85,7 @@ ESTimelineWindow : Window {
     gridDivisionBox = NumberBox(this, Rect(1220, 10, 70, 20)).value_(timeline.gridDivision).action_({ |view|
       timeline.gridDivision = view.value;
       timelineView.focus;
-    }).clipLo_(1);
+    }).clipLo_(1).decimals_(0);
 
     //Button(this, Rect(1200, 5, 100, 30)).states_([["Load legacy"]]).action_({timeline.restoreUndoPoint(Document.current.string, false, true); timelineView.focus;});
 
