@@ -252,8 +252,11 @@ ESTimeline {
       tracks.do { |track|
         var name = track.mixerChannelName;
         //var template = this.defaultMixerChannelTemplate ++ (mixerChannelTemplates[name] ?? ());
-        var template = mixerChannelTemplates[name] ?? ESMixerChannelTemplate();
-        newTemplates[name] = template;
+        var template = mixerChannelTemplates[name];
+        if (track.useMixerChannel or: template.notNil) {
+          template = template ?? ESMixerChannelTemplate();
+          newTemplates[name] = template;
+        };
         if (track.useMixerChannel and: mixerChannels[name].isNil) {
           mixerChannels[name] = MixerChannel(name.asSymbol, Server.default, template.inChannels, template.outChannels, template.level, template.pan, outbus: mixerChannels[\master] ?? defaultOutbus);
         };
