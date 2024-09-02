@@ -180,7 +180,7 @@ The first part of this tutorial does not require the mixing interface, or the dd
 - opt-scroll to zoom in and out vertically
 
 ### SynthDefs:
-- put your SynthDef in the timeline's prep function (click the "edit prep/cleanup funcs" button) e.g.
+- put your SynthDef in the timeline's prep function (click the "Prep / Cleanup funcs" button) e.g.
 ```
 SynthDef(\sin, { |out, freq = 440, gate = 1, amp = 0.1, preamp = 1.5, attack = 0.001, release = 0.01, pan, verbbus, verbamt, vibrato = 0.2|
   var env, sig;
@@ -200,7 +200,7 @@ SynthDef(\sin, { |out, freq = 440, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
 
 ### Bulk edit def name:
 - click in an empty area and drag to select all the Synth clips (they will be highlighted in cyan when selected)
-- right click, "clip actions > bulk actions > Bulk edit Synth defName"
+- right click, "Clip actions > Synth actions > Bulk edit Synth defName"
   - and set them to `'sin'` and hit ok
 
 <img src="img/tutorial/5.png" />
@@ -210,7 +210,7 @@ SynthDef(\sin, { |out, freq = 440, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
   - double-click on a clip now and you will see all the new parameters you can control.
 
 ### Envelopes for Synth parameters:
-- right click a Synth clip, "clip actions > synth actions > add env for synth argument"
+- right click a Synth clip, "Clip actions > Synth actions > Add Env for Synth argument"
 
 <img src="img/tutorial/6.png" />
 
@@ -234,7 +234,7 @@ SynthDef(\sin, { |out, freq = 440, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
 
 ### Bulk edit Synths -- To make this envelope affect all your Synths:
 - click and drag to select all the Synth clips (your envelope clip can also be selected, it doesn't matter)
-- right click, "clip actions > bulk actions > Bulk edit (change) Synth arguments"
+- right click, "Clip actions > Synth actions > Bulk edit (change) Synth arguments"
 - assign the `freq` of all the clips to (the single quotes are important!) 
 `'freq0'`
 (or whatever the name of the envelope clip is)
@@ -251,7 +251,7 @@ SynthDef(\sin, { |out, freq = 440, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
 ### Bulk adjust Synths -- Random panning:
 - set one of your clips to pan hard left by double-clicking and setting its pan to -1
 - Select all your Synth clips
-- right click > clip actions > bulk actions > Bulk adjust (modify) Synth arguments
+- right click > Clip actions > Synth actions > Bulk adjust (modify) Synth arguments
 - for `pan` put in `+ 0.5.rand2` and check the "hard coded" box
   - this will generate a random pan per clip that is within 0.5 of its original panning. (if you want it to be newly random every time you play it, uncheck the "hard-coded" box)
 
