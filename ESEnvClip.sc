@@ -470,8 +470,25 @@ ESEnvClip : ESClip {
     ^this.asMap.embedInStream(inval);
   }
   */
+  asStream {
+    ^Routine({ arg inval;
+      loop {
+        this.track.timeline[this.name].embedInStream(inval)
+      }
+    })
+  }
+  embedInStream { arg inval;
+    //loop {
+      { this.asMap }.value(inval).embedInStream(inval);
+    //};
+    ^inval;
+	}
 
-  asStream { ^Routine { loop { this.asMap.yield } } }
+  /*
+  asStream { /*^Routine { loop { this.asMap.yield } }*/
+    ^Pn(Plazy { this.asMap }, inf).asStream; // so it will update with new envelopes/buses as they become current
+  }
+  */
 
   + { ^this }
 }
