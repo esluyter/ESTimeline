@@ -388,7 +388,7 @@ ESTimelineView : UserView {
     };
 
     this.mouseOverAction = { |view, x, y|
-      try {
+      //try {
         var i, j;
         var oldHoverClip = hoverClip;
         var oldHoverEnv = hoverEnv;
@@ -430,7 +430,7 @@ ESTimelineView : UserView {
         if (oldHoverEnv.notNil and: (oldHoverEnv != hoverEnv)) {
           oldHoverEnv.prHoverLeave;
         };
-      };
+      //};
     };
 
     this.keyDownAction = { |view, char, mods, unicode, keycode, key|

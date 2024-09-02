@@ -57,7 +57,7 @@ ESDrawClip {
       // if it's more than 5 pixels wide and high, call the prDraw function
       if ((width > 5) and: (height > 10)) {
         var title;
-        try {
+        //try {
           if (clip.track.timeline.useEnvir) {
             clip.track.timeline.envir.use {
               ~thisTimeline = clip.track.timeline;
@@ -67,9 +67,11 @@ ESDrawClip {
             ~thisTimeline = clip.track.timeline;
             title = this.prDraw(left, top, width, height, editingMode, clipLeft, clipWidth, selected, drawBorder);
           };
+        /*
         } {
           title = ""
         };
+        */
 
         if (clip.name.notNil and: (clip.class != ESClip)) { title = clip.name.asCompileString ++ " (" ++ title ++ ")" };
 

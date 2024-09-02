@@ -101,6 +101,7 @@ ESClipEditView {
 
     Button(sidePanel, Rect(0, 505, 180, 30)).string_("Cancel").font_(panelFont.copy.size_(14)).action_({ editorWindow.close });
     Button(sidePanel, Rect(0, 540, 180, 30)).string_("Save").font_(panelFont.copy.size_(14)).action_({
+      // this try is necessary, to catch saveAction errors (i.e. bad user code)
       try {
         saveAction.value;
       } {

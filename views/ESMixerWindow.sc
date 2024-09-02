@@ -15,6 +15,7 @@ ESMixerWindow {
   classvar <panSpec, <faderSpec;
 
   *initClass {
+    // this try is necessary in case MixerChannelDef is not installed
     try {
       Class.initClassTree(MixerChannelDef);
       StartUp.add {
@@ -324,7 +325,7 @@ ESMixerWindow {
     mixerChannelsFlat.do { |arr, i| var mc = arr[0]; /*if (mc.notNil) { */channelIndexMap[mc.inbus.index] = i /*}*/ };
 
     // in case of problem just don't throw infinite error messages..
-    try {
+    //try {
 
       top = height;
 
@@ -684,6 +685,6 @@ ESMixerWindow {
       mixerChannelsFlat.do { |arr| var mc = arr[0];
         mc.addDependant(dependantFunc);
       };
-    }; // end try
+    //}; // end try
   }
 }

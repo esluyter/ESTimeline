@@ -65,7 +65,7 @@ ESFxArgsView : ScrollView {
     argControls = argargControls ?? argControls;
     defaultArgs = [];
     argControls.do { |cn|
-      if (args.indexOf(cn.name).isNil and: { try { template.envs.fx[index][cn.name].isNil } { true } }) {
+      if (args.indexOf(cn.name).isNil and: { if (template.isNil) { true } { if (template.envs.fx[index].isNil) { true } { template.envs.fx[index][cn.name].isNil } } }) {
         var thisIndex = defaultArgs.size;
         var action = { |view, x, y, mods, buttNum, clickCount|
           if (clickCount > 1) {
@@ -119,7 +119,8 @@ ESFxArgsView : ScrollView {
       };
     };
     args.pairsDo { |key, val, thisIndex|
-      if (try { template.envs.fx[index][key].isNil } { true }) {
+      //if (try { template.envs.fx[index][key].isNil } { true }) {
+      if (if (template.isNil) { true } { if (template.envs.fx[index].isNil) { true } { template.envs.fx[index][key].isNil } } ) {
         var action = { |view, x, y, mods, buttNum, clickCount|
           if (clickCount > 1) {
             args.removeAt(thisIndex);

@@ -128,7 +128,6 @@ ESMixerChannelEnv {
     if (mods.isShift) {
       var thisTime = ((x - left) * pratio) + startTime;
       hoverIndex = this.addBreakPoint(thisTime) + 1;
-      hoverIndex.postln;
     };
 
     if (mods.isAlt and: hoverIndex.notNil) {
@@ -160,7 +159,7 @@ ESMixerChannelEnv {
   }
 
   prMouseMove { |x, y, xDelta, yDelta, mods|
-    try {
+    //try {
       var thisEnv = env;
       var points;
       if (hoverIndex == 0) {
@@ -194,7 +193,7 @@ ESMixerChannelEnv {
         };
       };
       template.changed(\env);
-    };
+    //};
   }
 
   envBreakPoints {

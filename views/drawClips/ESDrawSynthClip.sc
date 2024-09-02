@@ -7,7 +7,9 @@ ESDrawSynthClip : ESDrawClip {
     var strTop;
     var displayFreq;
 
-    displayFreq = SynthDescLib.at(clip.defName.value).controlDict[\freq];
+    if (SynthDescLib.at(clip.defName.value).notNil) {
+      displayFreq = SynthDescLib.at(clip.defName.value).controlDict[\freq];
+    };
     if (displayFreq.notNil) {
       displayFreq = displayFreq.defaultValue;
     };

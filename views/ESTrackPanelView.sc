@@ -87,12 +87,12 @@ ESTrackPanelView : UserView {
         }),
         nameField: TextView(view, Rect(2, 35, width - 4, timelineView.trackHeight - 40)).keyDownAction_({ |...args| this.handleKey(track, *args) }).focusLostAction_({ |view|
           // if you click somewhere else, accept changes
-          try { // why?
+          //try { // why?
             if (view.visible) {
               track.name = if (view.string == "") { nil } { view.string.asSymbol };
             };
             view.visible = false;
-          };
+          //};
         }).visible_(false).font_(Font.sansSerif(14)),
         mix: Button(view, Rect(21, 4, 25, 25)).states_([
           ["mix", Color.gray(0.5), Color.gray(0.8)],

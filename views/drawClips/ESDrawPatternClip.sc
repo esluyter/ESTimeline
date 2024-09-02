@@ -56,7 +56,7 @@ ESDrawPatternClip : ESDrawClip {
     };
     */
 
-    try {
+    //try {
       this.drawData.do { |event|
         if (event.isRest.not) {
           var x = left + (t * width / clip.duration);
@@ -78,8 +78,10 @@ ESDrawPatternClip : ESDrawClip {
       };
       // return the title of the clip
       ^clip.prTitle(instrument.asArray.join(" / ") ++ ": " ++ clip.pattern.class);
+    /*
     } {
       ^clip.prTitle;
     };
+    */
   }
 }
