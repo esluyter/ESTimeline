@@ -147,15 +147,17 @@ SynthDef(\sin, { |out, freq = 200, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
 
 ### Synth Clips:
 - create a bunch of Synth clips (point the mouse where you want it and press shift-S, or use right click menu)
-  - drag them around to move them
+- drag them around to move them
+  - check the `snapToGrid` box or press opt-s to align your edits with the tempo grid
   - drag their edges to resize them (a red bar appears when you are within the resize zone)
   - option-drag to copy a clip
-  - check the `snapToGrid` box or press opt-s to align your edits with the tempo grid
-  - double-click on a clip to edit it
-    - double-click on the grayed out `freq` parameter to activate it, then you can set it to any valid SuperCollider expression, like `220`
-    - press save when you're done
-  - if you play now by clicking to place the playhead and pressing space, you will hear they play the default synth
-    - press space again to stop playback
+- double-click on a clip to edit it
+  - double-click on the grayed out `freq` parameter to activate it, then you can set it to any valid SuperCollider expression, like `220` or `60.midicps`
+  - press save when you're done
+- if you play now by clicking to place the playhead and pressing space, you will hear they play the default synth with your parameters at the appropriate time
+  - the gray playhead is the "scheduling playhead" -- this is when the code is executed
+  - the black playhead is the "sounding playhead" -- because of server latency, this is when the events actually sound. this is generally the one you want to watch
+  - press space again to stop playback
 
 ### Bulk edit synth clips:
 - click in an empty area and drag to select all the Synth clips (they will be highlighted in cyan when selected)
