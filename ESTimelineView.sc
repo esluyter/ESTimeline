@@ -37,11 +37,11 @@ ESTimelineView : UserView {
     this.setContextMenuActions(
       Menu(
         MenuAction("Add Comment (C)", { timeline.tracks[hoverTrack].addClip(ESClip(hoverTime, 5)) }),
-        MenuAction("Add Synth Clip (S)", { timeline.tracks[hoverTrack].addClip(ESSynthClip(hoverTime, 0.5, \default)) }),
-        MenuAction("Add Pattern Clip (P)", { timeline.tracks[hoverTrack].addClip(ESPatternClip(hoverTime, 5, {Pbind()})) }),
-        MenuAction("Add Routine Clip (R)", { timeline.tracks[hoverTrack].addClip(ESRoutineClip(hoverTime, 5, {})) }),
-        MenuAction("Add Env Clip (E)", { timeline.tracks[hoverTrack].addClip(ESEnvClip(hoverTime, 5, Env([0, 1, 0], [2.5, 2.5], \sin))); }),
-        MenuAction("Add Timeline Clip (T)", { timeline.tracks[hoverTrack].addClip(ESTimelineClip(hoverTime, 10, ESTimeline())); })
+        MenuAction("Add Synth Clip (S)", { timeline.tracks[hoverTrack].addClip(ESSynthClip(hoverTime, 0.5, defName: \default)) }),
+        MenuAction("Add Pattern Clip (P)", { timeline.tracks[hoverTrack].addClip(ESPatternClip(hoverTime, 5, pattern: {Pbind()})) }),
+        MenuAction("Add Routine Clip (R)", { timeline.tracks[hoverTrack].addClip(ESRoutineClip(hoverTime, 5, func: {})) }),
+        MenuAction("Add Env Clip (E)", { timeline.tracks[hoverTrack].addClip(ESEnvClip(hoverTime, 5, env: Env([0, 1, 0], [2.5, 2.5], \sin))); }),
+        MenuAction("Add Timeline Clip (T)", { timeline.tracks[hoverTrack].addClip(ESTimelineClip(hoverTime, 10, timeline: ESTimeline())); })
       ).title_("Add Clip"),
       MenuAction("Edit Clip (e)", { hoverClip.guiClass.new(hoverClip, timeline) }),
       Menu(
@@ -313,22 +313,22 @@ ESTimelineView : UserView {
       // s - split clip
       if (char == $s) { if (hoverClip.notNil) { timeline.tracks[hoverTrack].splitClip(hoverClipIndex, hoverTime) } };
       if (char == $S) {
-        timeline.tracks[hoverTrack].addClip(ESSynthClip(hoverTime, 0.5, \default));
+        timeline.tracks[hoverTrack].addClip(ESSynthClip(hoverTime, 0.5, defName: \default));
       };
       if (char == $T) {
-        timeline.tracks[hoverTrack].addClip(ESTimelineClip(hoverTime, 10, ESTimeline()));
+        timeline.tracks[hoverTrack].addClip(ESTimelineClip(hoverTime, 10, timeline: ESTimeline()));
       };
       if (char == $C) {
         timeline.tracks[hoverTrack].addClip(ESClip(hoverTime, 5));
       };
       if (char == $P) {
-        timeline.tracks[hoverTrack].addClip(ESPatternClip(hoverTime, 5, {Pbind()}));
+        timeline.tracks[hoverTrack].addClip(ESPatternClip(hoverTime, 5, pattern: {Pbind()}));
       };
       if (char == $R) {
-        timeline.tracks[hoverTrack].addClip(ESRoutineClip(hoverTime, 5, {}));
+        timeline.tracks[hoverTrack].addClip(ESRoutineClip(hoverTime, 5, func: {}));
       };
       if (char == $E) {
-        timeline.tracks[hoverTrack].addClip(ESEnvClip(hoverTime, 5, Env([0, 1, 0], [2.5, 2.5], \sin)));
+        timeline.tracks[hoverTrack].addClip(ESEnvClip(hoverTime, 5, env: Env([0, 1, 0], [2.5, 2.5], \sin)));
       };
       if (char == $e) {
         if (hoverClip.class == ESTimelineClip) {

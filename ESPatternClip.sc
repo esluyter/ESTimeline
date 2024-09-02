@@ -3,10 +3,10 @@ ESPatternClip : ESClip {
   var player;
   var drawData;
 
-  storeArgs { ^[startTime, duration, pattern, randSeed, isSeeded, offset, color]; }
+  storeArgs { ^[startTime, duration, offset, color, name, pattern, randSeed, isSeeded]; }
 
-  *new { |startTime, duration, pattern, randSeed, isSeeded = true, offset = 0, color|
-    ^super.new(startTime, duration, color, offset).init(pattern, randSeed, isSeeded);
+  *new { |startTime, duration, offset = 0, color, name, pattern, randSeed, isSeeded = true|
+    ^super.new(startTime, duration, offset, color, name).init(pattern, randSeed, isSeeded);
   }
 
   init { |argPattern, argRandSeed, argIsSeeded|

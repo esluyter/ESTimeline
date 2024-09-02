@@ -1,7 +1,7 @@
 ESPatternClipEditView : ESClipEditView {
   *new { |clip, timeline|
     var panelFont = Font("Helvetica", 16);
-    var codeView, sidePanel, startTimeView, durationView, offsetView, colorView, randSeedField, isSeededBox;
+    var codeView, sidePanel, nameField, startTimeView, durationView, offsetView, colorView, randSeedField, isSeededBox;
 
     if (editorWindow.notNil) { editorWindow.close };
     editorWindow = Window("Pattern Clip Editor", Rect(0, 0, 1000, 600))
@@ -15,14 +15,17 @@ ESPatternClipEditView : ESClipEditView {
     };
 
     sidePanel = View(editorWindow, Rect(810, 30, 180, 550));
-    StaticText(sidePanel, Rect(0, 0, 180, 20)).string_("startTime").font_(panelFont);
-    startTimeView = NumberBox(sidePanel, Rect(0, 20, 180, 20)).font_(Font.monospace(16)).value_(clip.startTime);
-    StaticText(sidePanel, Rect(0, 50, 180, 20)).string_("duration").font_(panelFont);
-    durationView = NumberBox(sidePanel, Rect(0, 70, 180, 20)).font_(Font.monospace(16)).value_(clip.duration);
-    StaticText(sidePanel, Rect(0, 100, 180, 20)).string_("offset").font_(panelFont);
-    offsetView = NumberBox(sidePanel, Rect(0, 120, 180, 20)).font_(Font.monospace(16)).value_(clip.offset);
-    StaticText(sidePanel, Rect(0, 150, 180, 20)).string_("color").font_(panelFont);
-    colorView = UserView(sidePanel, Rect(0, 170, 180, 20)).drawFunc_({ |view|
+
+    StaticText(sidePanel, Rect(0, 0, 180, 20)).string_("name").font_(panelFont);
+    nameField = TextField(sidePanel, Rect(0, 20, 180, 20)).font_(Font.monospace(16)).string_(clip.name);
+    StaticText(sidePanel, Rect(0, 50, 180, 20)).string_("startTime").font_(panelFont);
+    startTimeView = NumberBox(sidePanel, Rect(0, 70, 180, 20)).font_(Font.monospace(16)).value_(clip.startTime);
+    StaticText(sidePanel, Rect(0, 100, 180, 20)).string_("duration").font_(panelFont);
+    durationView = NumberBox(sidePanel, Rect(0, 120, 180, 20)).font_(Font.monospace(16)).value_(clip.duration);
+    StaticText(sidePanel, Rect(0, 150, 180, 20)).string_("offset").font_(panelFont);
+    offsetView = NumberBox(sidePanel, Rect(0, 170, 180, 20)).font_(Font.monospace(16)).value_(clip.offset);
+    StaticText(sidePanel, Rect(0, 200, 180, 20)).string_("color").font_(panelFont);
+    colorView = UserView(sidePanel, Rect(0, 220, 180, 20)).drawFunc_({ |view|
       Pen.use {
         Pen.addRect(Rect(0, 0, view.bounds.width, view.bounds.height));
         Pen.color = Color.gray(0.6);
@@ -62,6 +65,7 @@ ESPatternClipEditView : ESClipEditView {
 
     Button(sidePanel, Rect(0, 485, 180, 30)).string_("Cancel").font_(panelFont.copy.size_(14)).action_({ editorWindow.close });
     Button(sidePanel, Rect(0, 520, 180, 30)).string_("Save").font_(panelFont.copy.size_(14)).action_({
+      clip.name = nameField.string.asSymbol;
       clip.pattern = ("{" ++ codeView.string ++ "}").interpret;
       clip.randSeed = randSeedField.string.asInteger;
       clip.isSeeded = isSeededBox.value;

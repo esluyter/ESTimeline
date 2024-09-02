@@ -4,13 +4,13 @@ ESRoutineClip : ESClip {
   <>cleanupFunc, <func;
   var player;
 
-  storeArgs { ^[startTime, duration, func, randSeed, isSeeded, addLatency, fastForward, cleanupFunc, color, offset] }
+  storeArgs { ^[startTime, duration, offset, color, name, func, randSeed, isSeeded, addLatency, fastForward, cleanupFunc] }
 
-  *new { |startTime, duration, func, randSeed, isSeeded = true, addLatency = false, fastForward = 1, cleanupFunc, color, offset = 0|
-    ^super.new(startTime, duration, color).init(func, randSeed, isSeeded, addLatency, fastForward, cleanupFunc, offset);
+  *new { |startTime, duration, offset = 0, color, name, func, randSeed, isSeeded = true, addLatency = false, fastForward = 1, cleanupFunc|
+    ^super.new(startTime, duration, offset, color, name).init(func, randSeed, isSeeded, addLatency, fastForward, cleanupFunc);
   }
 
-  init { |argFunc, argRandSeed, argIsSeeded, argAddLatency, argFastForward, argCleanupFunc, argOffset|
+  init { |argFunc, argRandSeed, argIsSeeded, argAddLatency, argFastForward, argCleanupFunc|
     //routine = ESRoutine(argFunc);
     func = argFunc;
     randSeed = argRandSeed ?? rand(2000000000);
@@ -18,7 +18,6 @@ ESRoutineClip : ESClip {
     addLatency = argAddLatency;
     fastForward = argFastForward;
     cleanupFunc = argCleanupFunc;
-    offset = argOffset;
   }
 
   prStop {

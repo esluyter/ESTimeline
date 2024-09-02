@@ -14,7 +14,7 @@ ESEnvClip : ESClip {
     };
   }
 
-  storeArgs { ^[startTime, duration, env, bus, target, addAction, min, max, curve, isExponential, color, offset] }
+  storeArgs { ^[startTime, duration, offset, color, name, env, bus, target, addAction, min, max, curve, isExponential] }
 
   *initClass {
     ServerBoot.add {
@@ -46,14 +46,13 @@ ESEnvClip : ESClip {
     };
   }
 
-  *new { |startTime, duration, env, bus, target, addAction = 'addToHead', min = 0, max = 1, curve = 0, isExponential = false, color, offset = 0|
-    ^super.new(startTime, duration, color).init(env, bus, offset, target, addAction, min, max, curve, isExponential);
+  *new { |startTime, duration, offset = 0, color, name, env, bus, target, addAction = 'addToHead', min = 0, max = 1, curve = 0, isExponential = false|
+    ^super.new(startTime, duration, offset, color, name).init(env, bus, target, addAction, min, max, curve, isExponential);
   }
 
-  init { |argEnv, argBus, argOffset, argTarget, argAddAction, argMin, argMax, argCurve, argExp|
+  init { |argEnv, argBus, argTarget, argAddAction, argMin, argMax, argCurve, argExp|
     env = argEnv;
     bus = argBus;
-    offset = argOffset;
     target = argTarget;
     addAction = argAddAction;
     min = argMin;
@@ -393,5 +392,14 @@ ESEnvClip : ESClip {
       };
     };
     ^nearestIndex;
+  }
+
+  valueNow {
+    var val = env.at(track.timeline.now - startTime);
+    if (isExponential) {
+      ^val.linexp(0.0, 1.0, min, max);
+    } {
+      ^val.lincurve(0.0, 1.0, min, max, curve);
+    };
   }
 }

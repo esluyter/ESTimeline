@@ -2,7 +2,7 @@ ESSynthClipEditView : ESClipEditView {
 
   *new { |clip, timeline|
     var panelFont = Font("Helvetica", 16);
-    var defNameView, targetView, addActionView, argsView, sidePanel, startTimeView, durationView, offsetView, colorView, randSeedField;
+    var defNameView, targetView, addActionView, argsView, sidePanel, nameField, startTimeView, durationView, offsetView, colorView, randSeedField;
 
     if (editorWindow.notNil) { editorWindow.close };
     editorWindow = Window("Synth Clip Editor", Rect(0, 0, 800, 600))
@@ -26,10 +26,13 @@ ESSynthClipEditView : ESClipEditView {
     argsView = ESArgsView(editorWindow, Rect(10, 200, 590, 400), clip);
 
     sidePanel = View(editorWindow, Rect(610, 30, 180, 550));
-    StaticText(sidePanel, Rect(0, 0, 180, 20)).string_("startTime").font_(panelFont);
-    startTimeView = NumberBox(sidePanel, Rect(0, 20, 180, 20)).font_(Font.monospace(16)).value_(clip.startTime);
-    StaticText(sidePanel, Rect(0, 50, 180, 20)).string_("duration").font_(panelFont);
-    durationView = NumberBox(sidePanel, Rect(0, 70, 180, 20)).font_(Font.monospace(16)).value_(clip.duration);
+
+    StaticText(sidePanel, Rect(0, 0, 180, 20)).string_("name").font_(panelFont);
+    nameField = TextField(sidePanel, Rect(0, 20, 180, 20)).font_(Font.monospace(16)).string_(clip.name);
+    StaticText(sidePanel, Rect(0, 50, 180, 20)).string_("startTime").font_(panelFont);
+    startTimeView = NumberBox(sidePanel, Rect(0, 70, 180, 20)).font_(Font.monospace(16)).value_(clip.startTime);
+    StaticText(sidePanel, Rect(0, 100, 180, 20)).string_("duration").font_(panelFont);
+    durationView = NumberBox(sidePanel, Rect(0, 120, 180, 20)).font_(Font.monospace(16)).value_(clip.duration);
     /* not yet relevant for synth clips
     StaticText(sidePanel, Rect(0, 100, 180, 20)).string_("offset").font_(panelFont);
     offsetView = NumberBox(sidePanel, Rect(0, 120, 180, 20)).font_(Font.monospace(16)).value_(clip.offset);
@@ -63,6 +66,7 @@ ESSynthClipEditView : ESClipEditView {
 
     Button(sidePanel, Rect(0, 485, 180, 30)).string_("Cancel").font_(panelFont.copy.size_(14)).action_({ editorWindow.close });
     Button(sidePanel, Rect(0, 520, 180, 30)).string_("Save").font_(panelFont.copy.size_(14)).action_({
+      clip.name = nameField.string.asSymbol;
       //clip.args = ("{" ++ codeView.string ++ "}").interpret;
       clip.args = argsView.value;
       clip.defName = ("{" ++ defNameView.string ++ "}").interpret;

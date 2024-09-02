@@ -1,13 +1,13 @@
 ESClip {
-  var <startTime, <duration, >color, <offset, <comment;
+  var <startTime, <duration, <offset, >color, <name, <comment;
   var <>track;
   var <isPlaying = false;
   var playRout;
 
-  storeArgs { ^[startTime, duration, color, offset, comment] }
+  storeArgs { ^[startTime, duration, offset, color, name, comment] }
 
-  *new { |startTime, duration, color, offset = 0, comment = ""|
-    ^super.newCopyArgs(startTime, duration, color, offset, comment);
+  *new { |startTime, duration, offset = 0, color, name, comment = ""|
+    ^super.newCopyArgs(startTime, duration, offset, color, name, comment);
   }
 
   startTime_ { |val, adjustOffset = false|
@@ -38,6 +38,15 @@ ESClip {
     this.changed(\offset, val);
   }
 
+  name_ { |val|
+    if (val.asString.size > 0) {
+      name = val;
+    } {
+      name = nil;
+    };
+    this.changed(\name, val);
+  }
+
   comment_ { |val|
     comment = val;
     this.changed(\comment, val);
@@ -65,6 +74,9 @@ ESClip {
 
     // play the clip on a new Routine on this clock
     playRout = {
+      // set "thisTimeline" environment var
+      ~thisTimeline = track.timeline;
+
       // start the clip from specified start offset
       this.prStart(startOffset, clock);
 
@@ -105,6 +117,8 @@ ESClip {
       } {
         title = ""
       };
+
+      if (name.notNil) { title = name.asCompileString ++ " (" ++ title ++ ")" };
 
       if (left < 0) {
         width = width + left;
