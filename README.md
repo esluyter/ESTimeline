@@ -36,7 +36,7 @@ Note that this is a work in progress and all is subject to revision.
   - Snap to grid optional
   - Gray playhead is "scheduling playhead" and black playhead is "sounding playhead" -- to take into account server latency.
     - Routines can be played with additional latency so non-sounding events line up with the sounding playhead. The goal is an accurate visual representation of what you are hearing / when the code is executed.
-- **Non-linear:** "goto" command to jump to a clip or a point in time enabling complex and real-time behaviors (looping, conditional branching...)
+- **Non-linear:** "goto" command to jump to a clip or a point in time enabling complex real-time behaviors (variable-length looping, conditional branching...)
 - **Tracks** can contain all clip types
   - tracks can be muted/soloed and rearranged
   - individual clips can be muted
