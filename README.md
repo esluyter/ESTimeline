@@ -27,6 +27,7 @@ The distant goal is that anything you can do in SuperCollider could be sequenced
 - Higher dimensional envelopes - e.g. movement through x/y space
 - Playback and record audio files
 - Non-linearity: loop points, wait points, etc.
+- Indeterminacy: chance for clip not to play?
 - ddwPlug integration -- simplify bus routing for modulation
 - clothesline integration -- put whole .scd files on the timeline
 
