@@ -109,7 +109,7 @@ ESPatternClip : ESClip {
     ^prTitle ?? { this.pattern.class.asString };
   }
 
-  defaultColor { ^Color.hsv(0.4, 0.5, 0.45) }
+  defaultColor { ^Color.hsv(0.4, 0.4, 0.4) }
 
   guiClass { ^ESPatternClipEditView }
   drawClass { ^ESDrawPatternClip }
