@@ -2,12 +2,15 @@ ESSynthClip : ESClip {
   var <defName, <args, <>target, <>addAction;
   var <synth;
 
+  // changed: args is now required to be array
+
   defName_ { |val| defName = val; this.changed(\defName, val); }
   args_ { |val| args = val; this.changed(\args, val); }
 
   storeArgs { ^[startTime, duration, defName, args, target, addAction, color] }
 
   *new { |startTime, duration, defName, args, target, addAction = 'addToHead', color|
+    args = args ?? [];
     ^super.new(startTime, duration, color).init(defName, args, target, addAction);
   }
 
@@ -31,10 +34,11 @@ ESSynthClip : ESClip {
 
   prDraw { |left, top, width, height|
     var font = Font.monospace(10);
-    var argsValue = args.value.asArray;
+    var argsValue = this.prArgsValue;
     var freqIndex = argsValue.indexOf(\freq);
     var ampIndex = argsValue.indexOf(\amp);
     var strTop;
+    var displayFreq;
 
     if (left < 0) {
       width = width + left;
@@ -43,7 +47,7 @@ ESSynthClip : ESClip {
 
     if ((height > 30) and: (width > 15)) {
       argsValue.pairsDo { |key, val, i|
-        var line = "" ++ key ++ ":  " ++ val;
+        var line = "" ++ key ++ ":  " ++ val.value;
         while { max(0, width - 5) < (QtGUI.stringBounds(line, font).width) } {
           if (line.size == 1) {
             line = "";
@@ -58,10 +62,19 @@ ESSynthClip : ESClip {
       };
     };
 
-    if (freqIndex.notNil and: { argsValue[freqIndex + 1].isNumber }) {
-      var freq = argsValue[freqIndex + 1];
+    displayFreq = SynthDescLib.at(defName.value).controlDict[\freq];
+    if (displayFreq.notNil) {
+      displayFreq = displayFreq.defaultValue;
+    };
+    if (freqIndex.notNil) {
+      displayFreq = argsValue[freqIndex + 1];
+    };
+
+    if (displayFreq.isNumber) {
+      var freq = displayFreq;
       var y = freq.explin(20, 20000, top + height, top);
-      var amp = 0.2;
+      var amp = SynthDescLib.at(defName.value).controlDict[\amp];
+      if (amp.notNil) { amp = amp.defaultValue };
       if (ampIndex.notNil) {
         amp = argsValue[ampIndex + 1];
       };
@@ -76,60 +89,18 @@ ESSynthClip : ESClip {
 
   guiClass { ^ESSynthClipEditView }
 
-  defNameString {
-    if (defName.isFunction) {
-      var cs = defName.asCompileString;
-      if (cs.size == 2) { ^"" };
-      ^cs[1..cs.size-2];
-    };
-    ^defName.asCompileString;
-  }
-
-  targetString {
-    if (target.isFunction) {
-      var cs = target.asCompileString;
-      if (cs.size == 2) { ^"" };
-      ^cs[1..cs.size-2];
-    };
-    if (target.isNil) {
-      ^"";
-    };
-    ^target.asCompileString;
-  }
-
-  addActionString {
-    if (addAction.isFunction) {
-      var cs = addAction.asCompileString;
-      if (cs.size == 2) { ^"" };
-      ^cs[1..cs.size-2];
-    };
-    ^addAction.asCompileString;
+  argControls {
+    ^SynthDescLib.at(defName.value).controls;
   }
 
   prArgsValue { |clock|
-    var ret = args.value.asArray;
-    if (ret.indexOf(\sustain).isNil) {
+    var ret = [];
+    args.pairsDo { |key, val|
+      ret = ret.add(key).add(val.value);
+    };
+    if (ret.indexOf(\sustain).isNil and: clock.notNil) {
       ret = ret ++ [sustain: this.duration * clock.tempo.reciprocal];
     };
     ^ret;
-  }
-
-  argsString {
-    var str;
-    if (args.isFunction) {
-      var cs = args.asCompileString;
-      if (cs.size == 2) { ^"" };
-      ^cs[1..cs.size-2];
-    };
-    if (args.asArray.size == 0) {
-      ^"[\n  \n]";
-    };
-    //^args.asArray.asCompileString;
-    str = "[\n";
-    args.pairsDo { |key, val|
-      str = str ++ "  " ++ key ++ ": " ++ val.asCompileString ++ ",\n";
-    };
-    str = str ++ "]";
-    ^str;
   }
 }

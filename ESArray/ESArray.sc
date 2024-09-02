@@ -1,4 +1,23 @@
++ Function {
+  asESDisplayString {
+    var cs = this.asCompileString;
+    if (cs.size == 2) { ^"" };
+    ^cs[1..cs.size-2];
+  }
+}
+
++ Nil {
+  asESDisplayString {
+    ^""
+  }
+}
+
+
 + Object {
+  asESDisplayString {
+    ^this.asCompileString;
+  }
+
   asESArray {
     ^this.asCompileString;
   }

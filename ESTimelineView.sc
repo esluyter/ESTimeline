@@ -33,10 +33,7 @@ ESTimelineView : UserView {
     this.setContextMenuActions(
       Menu(
         MenuAction("Add Comment (C)", { timeline.tracks[hoverTrack].addClip(ESClip(hoverTime, 5)) }),
-        MenuAction("Add Synth Clip (S)", { timeline.tracks[hoverTrack].addClip(ESSynthClip(hoverTime, 0.5, \default, {[
-  freq: 220,
-  amp: 0.2
-]})) }),
+        MenuAction("Add Synth Clip (S)", { timeline.tracks[hoverTrack].addClip(ESSynthClip(hoverTime, 0.5, \default)) }),
         MenuAction("Add Pattern Clip (P)", { timeline.tracks[hoverTrack].addClip(ESPatternClip(hoverTime, 5, {Pbind()})) }),
         MenuAction("Add Routine Clip (R)", { timeline.tracks[hoverTrack].addClip(ESRoutineClip(hoverTime, 5, {})) }),
         MenuAction("Add Env Clip (E)", { timeline.tracks[hoverTrack].addClip(ESEnvClip(hoverTime, 5, Env([0, 1, 0], [2.5, 2.5], \sin))); }),
@@ -236,10 +233,7 @@ ESTimelineView : UserView {
       // s - split clip
       if (char == $s) { if (hoverClip.notNil) { timeline.tracks[hoverTrack].splitClip(hoverClipIndex, hoverTime) } };
       if (char == $S) {
-        timeline.tracks[hoverTrack].addClip(ESSynthClip(hoverTime, 0.5, \default, {[
-  freq: 220,
-  amp: 0.2
-]}));
+        timeline.tracks[hoverTrack].addClip(ESSynthClip(hoverTime, 0.5, \default));
       };
       if (char == $T) {
         timeline.tracks[hoverTrack].addClip(ESTimelineClip(hoverTime, 10, ESTimeline()));
