@@ -16,9 +16,11 @@ ESTrackView : UserView {
         Pen.color_(Color.gray(0.7));
         Pen.fill;
         track.clips.reverse.do { |clip, j|
-          if ((clip.startTime < timelineView.endTime) and: (clip.endTime > timelineView.startTime)) {
-            // only draw clips in the timeline view bounds
-            clip.draw(*timelineView.clipBounds(clip));
+          try {
+            if ((clip.startTime < timelineView.endTime) and: (clip.endTime > timelineView.startTime)) {
+              // only draw clips in the timeline view bounds
+              clip.draw(*timelineView.clipBounds(clip));
+            };
           };
         };
         if (track.shouldPlay.not) {

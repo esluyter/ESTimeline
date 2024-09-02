@@ -6,8 +6,8 @@ ESTimelineView : UserView {
   var <trackHeight, <heightRatio = 1;
   var clickPoint, clickTime, scrolling = false, originalDuration;
   var <hoverClip, <hoverCode, hoverClipStartTime, hoverClipEndTime, hoverClipOffset;
-  var hoverTime = 0, hoverTrack = 0, hoverClipIndex = 0;
-  var duplicatedClip, <timeSelection, clipSelection, stagedClipSelection;
+  var hoverTime = 0, hoverTrack = 0;
+  var duplicatedClips, <timeSelection, clipSelection, stagedClipSelection;
 
   var <editingMode = false;
   var <drawClipGuides = false;
@@ -143,8 +143,8 @@ ESTimelineView : UserView {
         }),
         MenuAction.separator(""),
         MenuAction("Edit Clip (e)", { hoverClip.guiClass.new(hoverClip, timeline) }),
-        MenuAction("Split Clip (s)", { if (hoverClip.notNil) { timeline.tracks[hoverTrack].splitClip(hoverClipIndex, hoverTime) } }),
-        MenuAction("Delete Clip (⌫)", { if (hoverClipIndex.notNil) { timeline.tracks[hoverTrack].removeClip(hoverClipIndex) } }),
+        MenuAction("Split Clip (s)", { if (hoverClip.notNil) { timeline.tracks[hoverTrack].splitClip(hoverClip.index, hoverTime) } }),
+        MenuAction("Delete Clip (⌫)", { if (hoverClip.notNil) { timeline.tracks[hoverTrack].removeClip(hoverClip.index) } }),
       ).title_("Clip actions"),
       MenuAction.separator(""),
       Menu(
@@ -230,7 +230,15 @@ ESTimelineView : UserView {
 
       // alt to duplicate clip
       if (mods.isAlt and: hoverClip.notNil) {
-        duplicatedClip = hoverClip.duplicate;
+        if (this.selectedClips.includes(hoverClip)) {
+          duplicatedClips = this.selectedClips.asArray.collect { |clip|
+            var duplicatedClip = clip.duplicate;
+            if (clip == hoverClip) { hoverClip = duplicatedClip };
+            duplicatedClip;
+          };
+        } {
+          duplicatedClips = [hoverClip.duplicate];
+        };
       };
 
       if (hoverClip.notNil and: editingMode) {
@@ -251,10 +259,10 @@ ESTimelineView : UserView {
         this.changed(\selectedClips);
       };
 
-      if (duplicatedClip.notNil) {
+      if (duplicatedClips.notNil) {
         // this means alt was pressed but mouse did not move
-        duplicatedClip.free;
-        duplicatedClip = nil;
+        duplicatedClips.do(_.free);
+        duplicatedClips = nil;
       };
 
       [leftGuideView, rightGuideView].do(_.visible_(false));
@@ -323,11 +331,15 @@ ESTimelineView : UserView {
           } {
             var currentHoverTrack = this.trackAtY(y);
 
-            if (duplicatedClip.notNil) {
-              timeline.tracks[hoverTrack].addClip(duplicatedClip);
-              hoverClip = duplicatedClip;
-              hoverClipIndex = timeline.tracks[hoverTrack].clips.indexOf(duplicatedClip);
-              duplicatedClip = nil;
+            if (duplicatedClips.notNil) {
+              duplicatedClips.do { |duplicatedClip|
+                duplicatedClip.track.addClip(duplicatedClip);
+              };
+              if (duplicatedClips.size > 1) {
+                clipSelection = duplicatedClips.asSet;
+                hoverClipStartTime = this.selectedClips.asArray.collect(_.startTime);
+              };
+              duplicatedClips = nil;
             };
 
             if (this.selectedClips.includes(hoverClip)) {
@@ -352,7 +364,6 @@ ESTimelineView : UserView {
                 timeline.tracks[newTrack].addClip(clip);
               };
               hoverTrack = currentHoverTrack;
-              hoverClipIndex = timeline.tracks[hoverTrack].clips.indexOf(hoverClip);
             };
           };
         };
@@ -380,7 +391,6 @@ ESTimelineView : UserView {
       var oldHoverClip = hoverClip;
       # hoverClip, i, j, hoverCode = this.clipAtPoint(x@y);
       hoverTrack = i;
-      hoverClipIndex = j;
       hoverTime = this.pixelsToAbsoluteTime(x);
 
       if (editingMode.not) {
@@ -410,7 +420,7 @@ ESTimelineView : UserView {
       // space is play
       if (char == $ ) { timeline.togglePlay };
       // s - split clip
-      if (char == $s) { if (hoverClip.notNil) { timeline.tracks[hoverTrack].splitClip(hoverClipIndex, hoverTime) } };
+      if (char == $s) { if (hoverClip.notNil) { timeline.tracks[hoverTrack].splitClip(hoverClip.index, hoverTime) } };
       if (char == $S) {
         timeline.tracks[hoverTrack].addClip(ESSynthClip(hoverTime, 0.5, defName: \default));
       };
@@ -462,10 +472,9 @@ ESTimelineView : UserView {
             timeline.removeTrack(hoverTrack);
           };
         } {
-          if (hoverClipIndex.notNil and: this.selectedClips.includes(hoverClip).not) {
-            timeline.tracks[hoverTrack].removeClip(hoverClipIndex);
+          if (hoverClip.notNil and: this.selectedClips.includes(hoverClip).not) {
+            timeline.tracks[hoverTrack].removeClip(hoverClip.index);
             hoverClip = nil;
-            hoverClipIndex = nil;
           } {
             this.selectedClips.do { |clip|
               clip.track.removeClip(clip.index);
