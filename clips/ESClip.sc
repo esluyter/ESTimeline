@@ -5,6 +5,9 @@ ESClip {
   var playRout;
   var <drawClip; // handles drawing on TimelineView
 
+  var <id;
+  classvar nextId = 0;
+
   storeArgs { ^[startTime, duration, offset, color, name, comment, mute] }
 
   *new { |startTime, duration, offset = 0, color, name, comment = "", mute = false|
@@ -13,6 +16,8 @@ ESClip {
 
   makeDrawClip {
     drawClip = this.drawClass.new(this);
+    id = nextId;
+    nextId = nextId + 1;
   }
 
   mute_ { |val| mute = val; this.changed(\mute, val) }

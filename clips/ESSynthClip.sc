@@ -1,24 +1,39 @@
 ESSynthClip : ESClip {
   var <defName, <args, <>target, <>addAction;
+  var <func, <doPlayFunc;
   var <synth;
 
   // changed: args is now required to be array
 
+  autoDefName { ^("ESSynthClip_temp" ++ id).asSymbol }
+  playDefName { ^if (doPlayFunc) { this.autoDefName } { defName.value }}
+
   defName_ { |val| defName = val; this.changed(\defName, val); }
   args_ { |val| args = val; this.changed(\args, val); }
+  doPlayFunc_ { |val| doPlayFunc = val; this.prep; this.changed(\doPlayFunc, val); }
+  func_ { |val| func = val; this.prep; this.changed(\func, val); }
 
-  storeArgs { ^[startTime, duration, offset, color, name, defName, args, target, addAction, mute] }
+  storeArgs { ^[startTime, duration, offset, color, name, defName, args, target, addAction, mute, func, doPlayFunc] }
 
-  *new { |startTime, duration, offset = 0, color, name, defName, args, target, addAction = 'addToHead', mute = false|
+  *new { |startTime, duration, offset = 0, color, name, defName, args, target, addAction = 'addToHead', mute = false, func, doPlayFunc = false|
     args = args ?? [];
-    ^super.new(startTime, duration, offset, color, name, mute: mute).init(defName, args, target, addAction);
+    func = func ? "{ |freq = 440, amp = 0.1, pan|\n  \n}".interpret;
+    ^super.new(startTime, duration, offset, color, name, mute: mute).init(defName, args, target, addAction, func, doPlayFunc);
   }
 
-  init { |argDefName, argArgs, argTarget, argAddAction|
+  init { |argDefName, argArgs, argTarget, argAddAction, argFunc, argDoPlayFunc, argBus|
     defName = argDefName;
     args = argArgs;
     target = argTarget;
     addAction = argAddAction;
+    func = argFunc;
+    doPlayFunc = argDoPlayFunc;
+  }
+
+  prep {
+    if (doPlayFunc) {
+      func.asSynthDef(fadeTime: 0.001, name: this.autoDefName).add;
+    };
   }
 
   prStop {
@@ -28,12 +43,12 @@ ESSynthClip : ESClip {
 
   prStart { |startOffset = 0.0, clock|
     Server.default.bind {
-      synth = Synth(defName.value, this.prArgsValue(clock), target.value, addAction.value)
+      synth = Synth(this.playDefName, this.prArgsValue(clock), target.value, addAction.value)
     };
   }
 
   prTitle {
-    ^defName.value.asString ++ ": Synth"
+    ^if (doPlayFunc) { "Synth" } { defName.value.asString ++ ": Synth" }
   }
 
   prHasOffset { ^false } // whether to show offset parameter for editing
@@ -44,7 +59,7 @@ ESSynthClip : ESClip {
   drawClass { ^ESDrawSynthClip }
 
   argControls {
-    ^SynthDescLib.at(defName.value).controls;
+    ^SynthDescLib.at(this.playDefName).controls;
   }
 
   prArgsValue { |clock|
