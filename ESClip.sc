@@ -119,9 +119,11 @@ ESClip {
       try {
         if (track.timeline.useEnvir) {
           track.timeline.envir.use {
+            ~thisTimeline = this.track.timeline;
             title = this.prDraw(left, top, width, height, editingMode, clipLeft, clipWidth, selected, drawBorder);
           }
         } {
+          ~thisTimeline = this.track.timeline;
           title = this.prDraw(left, top, width, height, editingMode, clipLeft, clipWidth, selected, drawBorder);
         };
       } {

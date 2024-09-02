@@ -160,27 +160,31 @@ ESPatternClip : ESClip {
     };
     */
 
-    this.drawData.do { |event|
-      if (event.isRest.not) {
-        var x = left + (t * width / duration);
-        var eventHeight = 2;
-        event.freq.asArray.do { |freq, i|
-          var eventWidth, y, amp;
-          amp = event.amp.asArray.wrapAt(i);
-          if (amp.isNumber.not) { amp = 0.1 };
-          if (freq.isNumber.not) { freq = 500 };
-          eventWidth = event.sustain.asArray.wrapAt(i) * width / duration;
-          y = freq.explin(20, 20000, top + height, top);
-          Pen.color = Color.gray(1, amp.ampdb.linexp(-60.0, 0.0, 0.05, 1.0));
-          Pen.addRect(Rect(x, y, eventWidth, eventHeight));
-          Pen.fill;
+    try {
+      this.drawData.do { |event|
+        if (event.isRest.not) {
+          var x = left + (t * width / duration);
+          var eventHeight = 2;
+          event.freq.asArray.do { |freq, i|
+            var eventWidth, y, amp;
+            amp = event.amp.asArray.wrapAt(i);
+            if (amp.isNumber.not) { amp = 0.1 };
+            if (freq.isNumber.not) { freq = 500 };
+            eventWidth = event.sustain.asArray.wrapAt(i) * width / duration;
+            y = freq.explin(20, 20000, top + height, top);
+            Pen.color = Color.gray(1, amp.ampdb.linexp(-60.0, 0.0, 0.05, 1.0));
+            Pen.addRect(Rect(x, y, eventWidth, eventHeight));
+            Pen.fill;
+          };
+          instrument.add(event.instrument.asString);
         };
-        instrument.add(event.instrument.asString);
+        t = t + event.dur;
       };
-      t = t + event.dur;
+      // return the title of the clip
+      ^instrument.asArray.join(" / ") ++ ": " ++ this.pattern.class;
+    } {
+      ^this.pattern.class.asString;
     };
-    // return the title of the clip
-    ^instrument.asArray.join(" / ") ++ ": " ++ this.pattern.class;
   }
 
   defaultColor { ^Color.hsv(0.4, 0.55, 0.5) }
