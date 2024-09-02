@@ -420,7 +420,7 @@ OSCdef(\test, { |msg|
   var width = 1500, height = 600;
   var left = Window.availableBounds.width - width;
   if (~mixerWindow.notNil) { ~mixerWindow.close };
-  ~mixerWindow = Window("Mixer", Rect(left, 0, width, height)).background_(Color.gray(0.8)).front;
+  ~mixerWindow = Window("Mixer", Rect(left, 0, width, height)).background_(Color.gray(0.55)).front;
 }.value;
 
 ~winFunc = {
@@ -448,17 +448,23 @@ OSCdef(\test, { |msg|
   // in case of problem just don't throw infinite error messages..
   try {
 
+    var leftOffset = if (mixerChannelsFlat.size * trackWidth + 25 < width) {
+      width - (mixerChannelsFlat.size * trackWidth + 25)
+    } { 0 };
+
     ~channelIndexMap = ();
     mixerChannelsFlat.do { |arr, i| var mc = arr[0]; if (mc.notNil) { ~channelIndexMap[mc.inbus.index] = i } }; //ugh why
 
     ~scrollView.remove;
-    ~scrollView = ScrollView(~mixerWindow, Rect(0, 0, width, height)).hasBorder_(false).background_(Color.gray(0.8));
+    ~scrollView = ScrollView(~mixerWindow, Rect(leftOffset, 0, width - leftOffset, height)).hasBorder_(false).background_(Color.gray(0.725));
 
     top = height;
 
     mixerChannelsFlat.do { |arr, i| var mc = arr[0]; var level = arr[1];
-      var bounds = Rect(i * trackWidth + 14, 0, trackWidth - 3, height - 3 - (level * levelAdjust));
-      UserView(~scrollView, bounds).background_(Color.gray(0.85));
+      var bounds = Rect(i * trackWidth + 14, level * 7.5, trackWidth - 3, height - 3 - (level * levelAdjust) - (level * 7.5));
+      var name = mixerChannelNamesFlat[i][0];
+      var color = Color.gray(0.88 - (level * 0.015));
+      UserView(~scrollView, bounds).background_(color);
     };
 
     //make sure right side margin is drawn
@@ -468,7 +474,8 @@ OSCdef(\test, { |msg|
     top = top - nameHeight - 5;
     mixerChannelsFlat.do { |arr, i| var mc = arr[0]; var level = arr[1];
       var bounds = Rect(i * trackWidth + 15, top - (level * levelAdjust), trackWidth - 5, 40);
-      StaticText(~scrollView, bounds).align_(\center).string_(mc.name).font_(Font.sansSerif(12, true)).stringColor_(Color.gray(0.5)).background_(Color.gray(0.9));
+      var color = Color.gray(0.9 - (level * 0.015));
+      StaticText(~scrollView, bounds).align_(\center).string_(mc.name).font_(Font.sansSerif(12, true)).stringColor_(Color.gray(0.5)).background_(color);
       // draw folder indicators
       if ((i > 0) and: { mixerChannelsFlat[i - 1][1] > level }) {
         UserView(~scrollView, Rect(i * trackWidth + 7 - levelAdjust, top + nameHeight - (mixerChannelsFlat[i - 1][1] * levelAdjust), levelAdjust + 3, levelAdjust)).drawFunc_({ |view|
@@ -477,7 +484,7 @@ OSCdef(\test, { |msg|
           Pen.lineTo(view.bounds.width@levelAdjust);
           Pen.lineTo(view.bounds.width@0);
           Pen.lineTo(0@0);
-          Pen.color = Color.gray(0.9);
+          Pen.color = color;
           Pen.fill;
         })//.background_(Color.red);
       };
@@ -613,7 +620,9 @@ OSCdef(\test, { |msg|
     ~insertScrollViews = [];
     ~insertUserViews = [];
     mixerChannelNamesFlat.do { |arr, i| var name = arr[0]; var id = arr[1];
-      var insertView = ScrollView(~scrollView, Rect(i * trackWidth + 20, 5, trackWidth - 15, top - 15)).hasBorder_(false);
+      var level = mixerChannelsFlat[i][1];
+      var color = Color.gray(0.88 - (level * 0.015));
+      var insertView = ScrollView(~scrollView, Rect(i * trackWidth + 20, level * 7.5, trackWidth - 15, top - 10 - (level * 7.5))).hasBorder_(false).background_(color);
       var timeline = ESTimeline.at(id);
       var template = timeline.mixerChannelTemplates[name];
       var funcViewFactory = { |bounds, index|
@@ -751,8 +760,7 @@ OSCdef(\test, { |msg|
 
     // this is leaky when MC's are freed
     // FIXED I think
-    // always call .release.free on a mixerChannel
-    // e.g. mixerChannels.do(_.release.free)
+    // always call .releaseDependants before .free on a mc
 
     // and settings reset...
     // make wrapper class for this
@@ -785,8 +793,6 @@ OSCdef(\test, { |msg|
 
 ~timeline.removeDependant(~timelineDependantFunc);
 ~timelineDependantFunc = { |self, what, args|
-  //[self, what, args].postln;
-  
   var updateAutomatedLevels = {
     var mixerChannelNamesFlat = mcnFunc.(~timeline.orderedMixerChannelNames);
     mixerChannelNamesFlat.do { |arr, i| var name = arr[0]; var id = arr[1];
@@ -808,20 +814,36 @@ OSCdef(\test, { |msg|
       };
     };
   };
-  
+
+  //[self, what, args].postln;
+
   defer {
     switch (what)
-    { \initMixerChannels } {
+    { \free } {
+      ~mixerWindow.close;
+    }
+    { \beginInitMixerChannels } {
+      if (~waitWin.isNil) {
+        var bounds = ~window.bounds;
+        ~waitWin = Window("please wait", bounds).front;
+        StaticText(~waitWin, bounds.copy.origin_(0@0)).string_("loading MixerChannels").align_(\center).font_(Font.monospace.size_(40));
+      };
+    }
+    { \endInitMixerChannels } {
       ~winFunc.value;
+      ~waitWin.close;
+      ~waitWin = nil;
     }
     { \playbar } {
       ~winFunc.value;
     }
     { \track } {
-      if (args.indexOf(\initMixerChannels).notNil) {
+      if (args.indexOf(\endInitMixerChannels).notNil) {
         ~winFunc.value;
-      }
-    } 
+        ~waitWin.close;
+        ~waitWin = nil;
+      };
+    }
     { \template } {
       if ((args[0] == \envs) or: (args[0] == \env)) {
         updateAutomatedLevels.();
