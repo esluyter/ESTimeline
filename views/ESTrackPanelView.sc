@@ -49,7 +49,7 @@ ESTrackPanelView : UserView {
         Pen.fill;
         if (track.name.notNil) {
           Pen.color = Color.gray(1, 0.3);
-          Pen.addRect(Rect(0, 33, width, trackHeights[i] - 36));
+          Pen.addRect(Rect(0, 33, width, timelineView.trackHeight - 36));
           Pen.fill;
         };
         track.envs.do { |val, i|
@@ -85,7 +85,7 @@ ESTrackPanelView : UserView {
             ev[\nameField].string_(nextName).select(nextName.asString.size, 0).visible_(true).focus;
           };
         }),
-        nameField: TextView(view, Rect(2, 35, width - 4, trackHeights[i] - 40)).keyDownAction_({ |...args| this.handleKey(track, *args) }).focusLostAction_({ |view|
+        nameField: TextView(view, Rect(2, 35, width - 4, timelineView.trackHeight - 40)).keyDownAction_({ |...args| this.handleKey(track, *args) }).focusLostAction_({ |view|
           // if you click somewhere else, accept changes
           try { // why?
             if (view.visible) {
