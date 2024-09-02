@@ -1,7 +1,7 @@
 ESEnvClip : ESClip {
   var <env, <bus, <>target, <>addAction, <min, <max, <>curve, <>isExponential, <makeBus = false, <makeBusRate, <useLiveInput, <>liveInput, <>ccNum, <armed, <>midiChannel;
   var <synth, envPlayRout;
-  var <recordedLevels, <recordedTimes, <oscFunc, <recordedOffset, <midiFunc;
+  var <recordedLevels, <recordedTimes, <oscFunc, <recordedOffset, <midiFunc, <midiRout;
 
   //classvar <buses;  // event format name -> [bus, nClips] -- when nClips becomes 0 bus should be freed.
 
@@ -223,25 +223,26 @@ ESEnvClip : ESClip {
   prStop {
     if (envPlayRout.notNil) { envPlayRout.stop; envPlayRout = nil; };
     Server.default.bind { synth.release };
-    { Server.default.latency.wait; synth = nil; midiFunc.free; midiFunc = nil; }.fork(SystemClock);
+    {
+      Server.default.latency.wait;
+      synth = nil;
+      midiFunc.free; midiFunc = nil;
+      midiRout.stop; midiRout = nil;
+    }.fork(SystemClock);
 
     if (useLiveInput and: armed) {
-      if (liveInput < 2) { // mouse input
-        {
-          (Server.default.latency * 2).wait; // make sure all OSC messages have been recieved
-          oscFunc.free;
-          if (recordedLevels.size == 1) {
-            recordedLevels = recordedLevels.add(recordedLevels[0]);
-            recordedTimes = [duration];
-          };
-          this.env = Env(recordedLevels, recordedTimes, 0);
-          this.armed = false;
-          this.useLiveInput = false;
-          this.offset = recordedOffset;
-        }.fork(SystemClock);
-      } { // midi input
-
-      };
+      {
+        (Server.default.latency * 2).wait; // make sure all OSC messages have been recieved
+        oscFunc.free; oscFunc = nil;
+        if (recordedLevels.size == 1) {
+          recordedLevels = recordedLevels.add(recordedLevels[0]);
+          recordedTimes = [duration];
+        };
+        this.env = Env(recordedLevels, recordedTimes, 0);
+        this.armed = false;
+        this.useLiveInput = false;
+        this.offset = recordedOffset;
+      }.fork(SystemClock);
     };
   }
 
@@ -324,24 +325,55 @@ ESEnvClip : ESClip {
           };
         } { // midi input
           var chan = if (midiChannel == 16) { nil } { midiChannel };
+          var val = switch (liveInput)
+          { 2 } { track.timeline.listener.ccValue(ccNum, midiChannel) }
+          { 0 };
 
           defName = (defName ++ "midi").asSymbol;
           Server.default.bind {
-            var lastVal = switch (liveInput)
-            { 2 } { track.timeline.listener.ccValue(ccNum, midiChannel) }
-            { 0 };
-            synth = Synth(defName, [out: bus.value, min: min, max: max, curve: curve, val: lastVal], target.value, addAction.value);
+            synth = Synth(defName, [out: bus.value, min: min, max: max, curve: curve, val: val], target.value, addAction.value);
           };
 
           {
             Server.default.latency.wait;
             switch (liveInput)
             { 2 } { // cc
-              midiFunc = MIDIFunc.cc({ |val|
-                synth.set(\val, val.linlin(0, 127, 0.0, 1.0))
+              midiFunc = MIDIFunc.cc({ |midiVal|
+                val = midiVal.linlin(0, 127, 0.0, 1.0);
+                synth.set(\val, val)
               }, ccNum, chan);
             }
             { "This MIDI input not yet implemented".warn; };
+
+            if (armed) {
+              var prevLevel = val;
+              var prevTime = track.timeline.soundingNow;
+              var prevPointTime = prevTime;
+              recordedLevels = [val];
+              recordedTimes = [];
+              recordedOffset = startOffset * -1;
+
+              midiRout = {
+                var time, level;
+
+                loop {
+                  level = val;
+                  time = track.timeline.soundingNow;
+                  if (level != prevLevel) {
+                    if (prevTime > prevPointTime) {
+                      recordedLevels = recordedLevels.add(prevLevel);
+                      recordedTimes = recordedTimes.add(prevTime - prevPointTime);
+                    };
+                    recordedLevels = recordedLevels.add(level);
+                    recordedTimes = recordedTimes.add(time - prevTime);
+                    prevPointTime = time;
+                  };
+                  prevTime = time;
+                  prevLevel = level;
+                  0.005.wait;
+                };
+              }.fork(SystemClock);
+            };
           }.fork(SystemClock);
         };
       };
