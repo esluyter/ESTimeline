@@ -45,6 +45,13 @@ ESFxSynthEditView : ESClipEditView {
     });
     argsView = ESFxArgsView(editorWindow, Rect(10, 130, 350, 460), clip, template, index);
 
+    Button(sidePanel, Rect(0, 410, 180, 25)).string_("Open in IDE").action_({
+      Document.new("Edit Insert FX", funcView.string).promptToSave_(false).front;
+    });
+    Button(sidePanel, Rect(0, 440, 180, 25)).string_("Copy from IDE").action_({
+      funcView.string_(Document.current.string);
+    });
+
     adjustBg.value;
   }
 }

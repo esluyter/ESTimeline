@@ -3,8 +3,11 @@ ESSynthClipEditView : ESClipEditView {
   *new { |clip, timeline|
     var panelFont = Font.sansSerif(16);
     var defNameView, targetView, addActionView, argsView, funcView, doPlayFuncBox;
+    var openIDE, loadIDE;
     var adjustBg = {
       funcView.visible_(doPlayFuncBox.value);
+      openIDE.visible_(doPlayFuncBox.value);
+      loadIDE.visible_(doPlayFuncBox.value);
       defNameView.background_(if (doPlayFuncBox.value) { Color.gray(0.8) } { Color.white });
       targetView.background_(if (timeline.useMixerChannel and: clip.track.useMixerChannel) { Color.gray(0.8) } { Color.white });
       addActionView.background_(if (timeline.useMixerChannel and: clip.track.useMixerChannel) { Color.gray(0.8) } { Color.white });
@@ -54,6 +57,13 @@ ESSynthClipEditView : ESClipEditView {
       argsView.initArgControls(SynthDescLib.at(if (doPlayFuncBox.value) { clip.autoDefName } { defNameView.string.interpret }).controls);
     });
     argsView = ESArgsView(editorWindow, Rect(10, 190, 350, 410), clip);
+
+    openIDE = Button(sidePanel, Rect(0, 410, 180, 25)).string_("Open in IDE").action_({
+      Document.new("Edit Synth Clip", funcView.string).promptToSave_(false).front;
+    });
+    loadIDE = Button(sidePanel, Rect(0, 440, 180, 25)).string_("Copy from IDE").action_({
+      funcView.string_(Document.current.string);
+    });
 
     adjustBg.value;
   }
