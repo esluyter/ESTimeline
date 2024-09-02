@@ -1,6 +1,6 @@
 ESTimelineWindow : Window {
   var <timeline;
-  var <topPanel, <topPlug, <tempoKnob, <saveIDEButt, <loadIDEButt, <undoButt, <redoButt, <funcEditButt, <useParentClockBox;
+  var <topPanel, <topPlug, <tempoKnob, <newButt, <saveIDEButt, <loadIDEButt, <undoButt, <redoButt, <funcEditButt, <useParentClockBox, <snapToGridBox, <gridDivisionBox;
   var <scrollView, <timelineView, <trackPanelView, <rulerView;
   var playheadRout;
 
@@ -26,7 +26,7 @@ ESTimelineWindow : Window {
       Pen.fill;
     });
 
-    tempoKnob = EZKnob(topPanel, Rect(20, 2.5, 140, 35),
+    tempoKnob = EZKnob(topPanel, Rect(20, 2.5, 110, 35),
       label: "tempoBPM",
       controlSpec: ControlSpec(10, 500, 2, 0.0, 60.0),
       action: { |knob|
@@ -37,20 +37,16 @@ ESTimelineWindow : Window {
     );
     tempoKnob.knobView.mode_(\vert).step_(0.001).shift_scale_(5);
 
-    funcEditButt = Button(this, Rect(210, 5, 150, 30)).states_([["Edit prep/cleanup funcs"]]).action_({ ESFuncEditView(timeline); timelineView.focus });
+    funcEditButt = Button(this, Rect(160, 5, 150, 30)).states_([["Prep / Cleanup funcs"]]).action_({ ESFuncEditView(timeline); timelineView.focus });
 
-    /*
-    newButt = Button(this, Rect(50, 5, 70, 30)).states_([["New"]]);
-    openButt = Button(this, Rect(125, 5, 70, 30)).states_([["Open"]]);
-    saveButt = Button(this, Rect(200, 5, 70, 30)).states_([["Save"]]);
-    saveAsButt = Button(this, Rect(275, 5, 70, 30)).states_([["Save As"]]);
-    */
 
-    saveIDEButt = Button(this, Rect(430, 5, 100, 30)).states_([["Open in IDE"]]).action_({
+    newButt = Button(this, Rect(350, 5, 65, 30)).states_([["New"]]);
+
+    saveIDEButt = Button(this, Rect(420, 5, 100, 30)).states_([["Open in IDE"]]).action_({
       Document.new("Timeline Score", timeline.currentState.asCompileString).front;
       timelineView.focus;
     });
-    loadIDEButt = Button(this, Rect(535, 5, 100, 30)).states_([["Load from IDE"]]).action_({
+    loadIDEButt = Button(this, Rect(525, 5, 100, 30)).states_([["Load from IDE"]]).action_({
       var func = { |obj, what|
         if (what == \restoreUndoPoint) {
           timelineView.startTime = -2;
@@ -63,23 +59,33 @@ ESTimelineWindow : Window {
       timelineView.focus;
     });
 
-    undoButt = Button(this, Rect(705, 5, 70, 30)).states_([["Undo"]]).action_({ timeline.undo; timelineView.focus; });
-    redoButt = Button(this, Rect(780, 5, 70, 30)).states_([["Redo"]]).action_({ timeline.redo; timelineView.focus; });
+    undoButt = Button(this, Rect(665, 5, 70, 30)).states_([["Undo"]]).action_({ timeline.undo; timelineView.focus; });
+    redoButt = Button(this, Rect(740, 5, 70, 30)).states_([["Redo"]]).action_({ timeline.redo; timelineView.focus; });
 
     if (timeline.parentClip.notNil) {
-      useParentClockBox = CheckBox(this, Rect(900, 10, 20, 20)).value_(timeline.parentClip.useParentClock).action_({ |view|
+      useParentClockBox = CheckBox(this, Rect(855, 10, 20, 20)).value_(timeline.parentClip.useParentClock).action_({ |view|
         timeline.parentClip.useParentClock = view.value;
         timelineView.focus;
       });
-      StaticText(this, Rect(920, 10, 120, 20)).string_("useParentClock").font_(Font.sansSerif(16));
-    } {
-      Button(this, Rect(925, 5, 200, 30)).states_([["Open as clip in new timeline"]]).action_({
+      StaticText(this, Rect(875, 10, 120, 20)).string_("useParentClock").font_(Font.sansSerif(16));
+    } {  //925
+      Button(this, Rect(855, 5, 200, 30)).states_([["Open as clip in new timeline"]]).action_({
         //ESTimelineWindow(bounds: this.bounds, timeline: ESTimeline([ESTrack([ESTimelineClip(0, if (timeline.duration == 0) { 10 } { timeline.duration }, timeline)])], timeline.tempo));
         //this.close;
         timeline.encapsulateSelf;
         timelineView.editingMode = false;
       })
     };
+
+    snapToGridBox = CheckBox(this, Rect(1080, 10, 20, 20)).value_(timeline.snapToGrid).action_({ |view|
+      timeline.snapToGrid = view.value;
+      timelineView.focus;
+    });
+    StaticText(this, Rect(1100, 10, 120, 20)).string_("snapToGrid:  1 / ").font_(Font.sansSerif(16));
+    gridDivisionBox = NumberBox(this, Rect(1220, 10, 70, 20)).value_(timeline.gridDivision).action_({ |view|
+      timeline.gridDivision = view.value;
+      timelineView.focus;
+    }).clipLo_(1);
 
     //Button(this, Rect(1200, 5, 100, 30)).states_([["Load legacy"]]).action_({timeline.restoreUndoPoint(Document.current.string, false, true); timelineView.focus;});
 
@@ -170,6 +176,14 @@ ESTimelineWindow : Window {
             timelineView.makeTrackViews;
             ESClipEditView.closeWindow;
           }.fork(AppClock);
+        }
+        { \gridDivision } {
+          gridDivisionBox.value = timeline.gridDivision;
+          timelineView.refresh;
+        }
+        { \snapToGrid } {
+          snapToGridBox.value = timeline.snapToGrid;
+          timelineView.refresh;
         };
       };
     };

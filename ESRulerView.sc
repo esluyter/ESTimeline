@@ -15,7 +15,7 @@ ESRulerView : UserView {
     timeline = argtimeline;
 
     this.drawFunc_({
-      var division = (60 / (this.bounds.width / this.duration)).ceil;
+      var division = (60 / (this.bounds.width / this.duration)).ceil.nextPowerOfTwo;
       var timeSelection = timelineView.timeSelection;
 
       if (timeSelection.notNil) {
@@ -32,7 +32,7 @@ ESRulerView : UserView {
 
       Pen.use {
         Pen.color = Color.black;
-        (this.startTime + this.duration + 1).asInteger.do { |i|
+        (this.startTime.asInteger.max(0)..(this.startTime + this.duration + 1).asInteger).do { |i|
           if (i % division == 0) {
             var left = this.absoluteTimeToPixels(i);
             Pen.addRect(Rect(left, 0, 1, 20));
