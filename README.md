@@ -369,6 +369,33 @@ loop {
 Everything works, and everything saves with timeline except mixer channel output bus (will reset to default)
 ```
 (
+// for flattening mixer channel names and timeline ids
+var mcnFunc = { |arr|
+  var index = arr[0];
+  var ret = [];
+  arr[1..].do { |item|
+    if (item.isArray.not) {
+      ret = ret.add([item, index])
+    } {
+      ret = ret ++ mcnFunc.(item);
+    };
+  };
+  ret;
+};
+var mcfFunc = { |arr, level = 0|
+  var ret = [];
+  arr.do { |item|
+    if (item.isArray.not) {
+      ret = ret.add([item, level])
+    } {
+      ret = ret ++ mcfFunc.(item, level + 1);
+    };
+  };
+  ret;
+};
+var faderSpec = ControlSpec(0.0, 4.0, 4);//ControlSpec(0.0, 2, \amp);
+var panSpec = \pan.asSpec;
+
 OSCdef(\test, { |msg|
   var oscMsg, synthId, busIndex, peaks, powers;
   var index;
@@ -408,38 +435,13 @@ OSCdef(\test, { |msg|
   var muteHeight = 22;
   var insertHeight = 15;
   var trackWidth = 80;
-  var faderSpec = ControlSpec(0.0, 4.0, 4);//ControlSpec(0.0, 2, \amp);
-  var panSpec = \pan.asSpec;
 
   var mixerChannels = ~timeline./*tracks[0].clips[0].timeline.*/orderedMixerChannels; //.postcs;
   var mixerChannelNames = ~timeline.orderedMixerChannelNames;
   // [1, \melody, \harmony, [2, \bass, \kik, \sn, \master], \drums, \fx]
   // mixerChannelNames[i]
-  var mcnFunc = { |arr|
-    var index = arr[0];
-    var ret = [];
-    arr[1..].do { |item|
-      if (item.isArray.not) {
-        ret = ret.add([item, index])
-      } {
-        ret = ret ++ mcnFunc.(item);
-      };
-    };
-    ret;
-  };
-  var mixerChannelNamesFlat = mcnFunc.(mixerChannelNames);
 
-  var mcfFunc = { |arr, level = 0|
-    var ret = [];
-    arr.do { |item|
-      if (item.isArray.not) {
-        ret = ret.add([item, level])
-      } {
-        ret = ret ++ mcfFunc.(item, level + 1);
-      };
-    };
-    ret;
-  };
+  var mixerChannelNamesFlat = mcnFunc.(mixerChannelNames);
   var mixerChannelsFlat = mcfFunc.(mixerChannels);
 
   // in case of problem just don't throw infinite error messages..
@@ -530,18 +532,28 @@ OSCdef(\test, { |msg|
       };
     };
 
-    ~sliders = mixerChannelsFlat.collect { |arr, i| var mc = arr[0]; var level = arr[1];
+    ~sliders = mixerChannelNamesFlat.collect { |arr, i| var name = arr[0]; var id = arr[1];
+      var timeline = ESTimeline.at(id);
+      var mc = timeline.mixerChannels[name];
+      var template = timeline.mixerChannelTemplates[name];
+      var level = mixerChannelsFlat[i][1];
       var thisMeterHeight = meterHeight - (level * levelAdjust);
       var bounds = Rect((i * trackWidth) + 55, top - 1, 30, thisMeterHeight + 2);
-      var slider = Slider(~scrollView, bounds).background_(Color.gray(0.8)).value_(faderSpec.unmap(mc.level)).action_({ |view|
-        //mc.level = faderSpec.map(view.value);
-        ESTimeline.at(mixerChannelNamesFlat[i][1]).setMixerChannel(mixerChannelNamesFlat[i][0], \level, faderSpec.map(view.value));
+      var thisLevel = if (template.envs.level.notNil) { template.envs.level.valueAtTime(timeline.soundingNow) } { mc.level };
+      var slider = Slider(~scrollView, bounds).background_(Color.gray(0.8)).value_(faderSpec.unmap(thisLevel)).action_({ |view|
+        timeline.setMixerChannel(name, \level, faderSpec.map(view.value));
       }).mouseDownAction_({ |view, x, y, mods, buttNum, clickCount|
         if (clickCount > 1) {
-          ESTimeline.at(mixerChannelNamesFlat[i][1]).setMixerChannel(mixerChannelNamesFlat[i][0], \level, 1);
+          timeline.setMixerChannel(name, \level, 1);
           true;
         } { false }
-      });
+      }).enabled_(template.envs.level.isNil);
+      slider.setContextMenuActions(
+        MenuAction("Add automation envelope", {
+          var unmappedLevel = faderSpec.unmap(mc.level);
+          template.envs.level = ESMixerChannelEnv(Env(unmappedLevel.dup(2), [0], [0]), faderSpec.minval, faderSpec.maxval, 4); // <- this curve could be issue, assumes faderSpec will always have curve 4...
+        });
+      );
 
       UserView(~scrollView, bounds).drawFunc_({
         var color = Color.gray(0.5);
@@ -557,26 +569,39 @@ OSCdef(\test, { |msg|
     };
 
     top = top - dbHeight - 2;
-    ~dbViews = mixerChannelsFlat.collect { |arr, i| var mc = arr[0];
+    ~dbViews = mixerChannelNamesFlat.collect { |arr, i| var name = arr[0]; var id = arr[1];
+      var timeline = ESTimeline.at(id);
+      var mc = timeline.mixerChannels[name];
+      var template = timeline.mixerChannelTemplates[name];
       var bounds = Rect(i * trackWidth + 20, top, trackWidth - 15, dbHeight);
-      NumberBox(~scrollView, bounds).background_(Color.gray(0.85)).normalColor_(Color.gray(0.4)).font_(Font.sansSerif(11)).value_(mc.level.ampdb).align_(\center).action_({ |view|
+      var thisLevel = if (template.envs.level.notNil) { template.envs.level.valueAtTime(timeline.soundingNow) } { mc.level };
+      NumberBox(~scrollView, bounds).background_(Color.gray(0.85)).normalColor_(Color.gray(0.4)).font_(Font.sansSerif(11)).value_(thisLevel.ampdb).align_(\center).action_({ |view|
         //mc.level = view.value.dbamp
-        ESTimeline.at(mixerChannelNamesFlat[i][1]).setMixerChannel(mixerChannelNamesFlat[i][0], \level, view.value.dbamp);
-      }).scroll_step_(0.05).shift_scale_(5).ctrl_scale_(2.5);
+        timeline.setMixerChannel(name, \level, view.value.dbamp);
+      }).scroll_step_(0.05).shift_scale_(5).ctrl_scale_(2.5).enabled_(template.envs.level.isNil);
     };
 
     top = top - panHeight - 5;
-    ~panViews = mixerChannelsFlat.collect { |arr, i| var mc = arr[0];
+    //~panViews = mixerChannelsFlat.collect { |arr, i| var mc = arr[0];
+    ~panViews = mixerChannelNamesFlat.collect { |arr, i| var name = arr[0]; var id = arr[1];
+      var timeline = ESTimeline.at(id);
+      var mc = timeline.mixerChannels[name];
+      var template = timeline.mixerChannelTemplates[name];
       var bounds = Rect(i * trackWidth + 55, top, panHeight, panHeight);
-      var panString = (mc.pan.abs * 100).asInteger.asString ++ " " ++ if (mc.pan.isPositive) { "R" } { "L" };
-      if (mc.pan == 0) { panString = "C" };
+      var pan = if (template.envs.pan.notNil) { template.envs.pan.valueAtTime(timeline.soundingNow) } { mc.pan };
+      var panString = (pan.abs * 100).asInteger.asString ++ " " ++ if (pan.isPositive) { "R" } { "L" };
+      if (pan == 0) { panString = "C" };
       [
-        Knob(~scrollView, bounds).value_(panSpec.unmap(mc.pan)).centered_(true).mode_(\vert).step_(0.0025).action_({ |view|
-          //mc.pan = panSpec.map(view.value);
-          ESTimeline.at(mixerChannelNamesFlat[i][1]).setMixerChannel(mixerChannelNamesFlat[i][0], \pan, panSpec.map(view.value));
+        Knob(~scrollView, bounds).value_(panSpec.unmap(pan)).centered_(true).mode_(\vert).step_(0.0025).action_({ |view|
+          timeline.setMixerChannel(name, \pan, panSpec.map(view.value));
         }).mouseDownAction_({ |view, x, y, mods, buttNum, clickCount|
-          if (clickCount > 1) { ESTimeline.at(mixerChannelNamesFlat[i][1]).setMixerChannel(mixerChannelNamesFlat[i][0], \pan, 0); true } { nil };
-        }),
+          if (clickCount > 1) { timeline.setMixerChannel(name, \pan, 0); true } { nil };
+        }).enabled_(template.envs.pan.isNil).setContextMenuActions(
+          MenuAction("Add automation envelope", {
+            var unmappedLevel = panSpec.unmap(mc.pan);
+            template.envs.pan = ESMixerChannelEnv(Env(unmappedLevel.dup(2), [0], [0]), panSpec.minval, panSpec.maxval); // <- this curve could be issue, assumes faderSpec will always have curve 4...
+          });
+        ),
         StaticText(~scrollView, bounds.copy.left_(i * trackWidth + 20, top, 30, panHeight)).align_(\right).string_(panString).font_(Font.sansSerif(10, true)).stringColor_(Color.gray(0.5));
       ];
     };
@@ -759,8 +784,30 @@ OSCdef(\test, { |msg|
 
 ~timeline.removeDependant(~timelineDependantFunc);
 ~timelineDependantFunc = { |self, what, args|
-  //[what, args].postln;
-  //timelineView.refresh;
+  //[self, what, args].postln;
+  
+  var updateAutomatedLevels = {
+    var mixerChannelNamesFlat = mcnFunc.(~timeline.orderedMixerChannelNames);
+    mixerChannelNamesFlat.do { |arr, i| var name = arr[0]; var id = arr[1];
+      var timeline = ESTimeline.at(id);
+      var template = timeline.mixerChannelTemplates[name];
+      ~panViews[i][0].enabled_(template.envs.pan.isNil);
+      if (template.envs.pan.notNil) {
+        var pan = template.envs.pan.valueAtTime(timeline.soundingNow);
+        var panString = (pan.abs * 100).asInteger.asString ++ " " ++ if (pan.isPositive) { "R" } { "L" };
+        if (pan == 0) { panString = "C" };
+        ~panViews[i][0].value = panSpec.unmap(pan);
+        ~panViews[i][1].string = panString;
+      };
+      ~sliders[i].enabled_(template.envs.level.isNil);
+      if (template.envs.level.notNil) {
+        var level = template.envs.level.valueAtTime(timeline.soundingNow);
+        ~sliders[i].value = faderSpec.unmap(level);
+        ~dbViews[i].value = level.ampdb;
+      };
+    };
+  };
+  
   defer {
     switch (what)
     { \initMixerChannels } {
@@ -773,20 +820,28 @@ OSCdef(\test, { |msg|
       if (args.indexOf(\initMixerChannels).notNil) {
         ~winFunc.value;
       }
+    } 
+    { \template } {
+      if ((args[0] == \envs) or: (args[0] == \env)) {
+        updateAutomatedLevels.();
+      };
     }
     { \isPlaying } {
       var names;
 
       if (~timeline.isPlaying) {
-        var waitTime = 5.reciprocal; // 5 fps refresh mixer
+        var waitTime = 20.reciprocal; // 5 fps refresh mixer
         names = ~timeline.orderedMixerChannelNames;
         ~mixerRout.stop; // just to make sure
         ~mixerRout = {
-          inf.do { |i|
+          inf.do {
             var nowNames = ~timeline.orderedMixerChannelNames;
             if (nowNames != names) {
               names = nowNames;
               ~winFunc.value;
+            } {
+              // update automated levels here
+              updateAutomatedLevels.();
             };
             waitTime.wait;
           };
