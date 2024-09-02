@@ -164,6 +164,9 @@ ESTimelineWindow : Window {
           }
           { \playbar } {
             timelineView.timelineController.findPlayhead;
+            if (timeline.tempoEnv.notNil) {
+              tempoKnob.valueAction_(timeline.tempoEnv.valueAtTime(timeline.now));
+            };
             timelineView.refresh;
             rulerView.refresh;
           }
@@ -289,6 +292,9 @@ ESTimelineWindow : Window {
           }
           { \env } {
             timelineView.refresh;
+            if (timeline.tempoEnv.notNil) {
+              tempoKnob.valueAction_(timeline.tempoEnv.valueAtTime(timeline.now));
+            };
           }
           { \hoverIndex } {
             timelineView.refresh;

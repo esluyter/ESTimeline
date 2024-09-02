@@ -124,10 +124,10 @@ ESTimeline {
     this.changed(\useMixerChannel);
   }
 
-  storeArgs { ^[tracks, this.tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames] }
+  storeArgs { ^[tracks, this.tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames, tempoEnv] }
   defaultUndoPoint { ^[[ESTrack([])], 1, nil, nil, bootOnPrep, useEnvir, optimizeView, 4, false, useMixerChannel, (), [\master]].asESArray }
 
-  *newInitMixerChannels { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = true, gridDivision = 4, snapToGrid = false, useMixerChannel = true, mixerChannelTemplates, globalMixerChannelNames, initMidi = true|
+  *newInitMixerChannels { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = true, gridDivision = 4, snapToGrid = false, useMixerChannel = true, mixerChannelTemplates, globalMixerChannelNames, tempoEnv, initMidi = true|
     tracks = tracks ?? [ESTrack()];
 
     mixerChannelTemplates = mixerChannelTemplates ?? ();
@@ -135,10 +135,10 @@ ESTimeline {
 
     globalMixerChannelNames = globalMixerChannelNames ?? [\master];
 
-    ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames).initId.initEnvir.initDependantFunc.init(true, initMidi: initMidi);
+    ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames).tempoEnv_(tempoEnv).initId.initEnvir.initDependantFunc.init(true, initMidi: initMidi);
   }
 
-  *new { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = false, gridDivision = 4, snapToGrid = false, useMixerChannel = false, mixerChannelTemplates, globalMixerChannelNames, initMidi = true|
+  *new { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = false, gridDivision = 4, snapToGrid = false, useMixerChannel = false, mixerChannelTemplates, globalMixerChannelNames, tempoEnv, initMidi = true|
     tracks = tracks ?? [ESTrack()];
 
     mixerChannelTemplates = mixerChannelTemplates ?? ();
@@ -146,7 +146,7 @@ ESTimeline {
 
     globalMixerChannelNames = globalMixerChannelNames ?? [\master];
 
-    ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames).initId.initEnvir.initDependantFunc.init(true, initMixerChannels: false, initMidi: initMidi);
+    ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames).tempoEnv_(tempoEnv).initId.initEnvir.initDependantFunc.init(true, initMixerChannels: false, initMidi: initMidi);
   }
 
   initId {
@@ -734,7 +734,7 @@ ESTimeline {
     var arr;
     var thisTempo;
     // leave gridDivision, snapToGrid, and useMixerChannel as they were
-    var dummyGD, dummySTG, dummyUMC;
+    var dummyGD, dummySTG, dummyUMC, dummyTempoEnv;
     if (legacy) {
       currentState = undoPoint.interpret.asESArray;
     };
@@ -761,7 +761,7 @@ ESTimeline {
       template.releaseDependants;
     };
 
-    #tracks, thisTempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, dummyGD, dummySTG, dummyUMC, mixerChannelTemplates, globalMixerChannelNames = arr;
+    #tracks, thisTempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, dummyGD, dummySTG, dummyUMC, mixerChannelTemplates, globalMixerChannelNames, dummyTempoEnv = arr;
 
     mixerChannelTemplates = ESEvent.newFrom(mixerChannelTemplates);
 
@@ -794,6 +794,8 @@ ESTimeline {
     };
 
     this.init;
+
+    this.tempoEnv = dummyTempoEnv;
 
     currentState = this.asUndoPoint;
     this.changed(\restoreUndoPoint);
