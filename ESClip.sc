@@ -75,16 +75,16 @@ ESClip {
   }
 
   // draw this clip on a UserView using Pen
-  draw { |left, top, width, height, editingMode = false, clipLeft, clipWidth, selected = false| // these last two are for ESTimelineClips
+  draw { |left, top, width, height, editingMode = false, clipLeft, clipWidth, selected = false, drawBorder = true| // these last two are for ESTimelineClips
     if (track.shouldPlay) {
-      Pen.color = this.color;
+      Pen.color = this.color(selected);
     } {
-      Pen.color = Color.white.lighten(this.color, 0.5);
+      Pen.color = Color.white.lighten(this.color(selected), 0.5);
     };
     Pen.strokeColor = Color.cyan;
     Pen.width = 2;
     Pen.addRect(Rect(left, top, width, height));
-    if (selected) { Pen.fillStroke } { Pen.fill };
+    if (selected and: drawBorder) { Pen.fillStroke } { Pen.fill };
 
     Pen.color = Color.gray(0.8, 0.5);
     Pen.addRect(Rect(left + width - 1, top, 1, height));
@@ -97,10 +97,10 @@ ESClip {
       try {
         if (track.timeline.useEnvir) {
           track.timeline.envir.use {
-            title = this.prDraw(left, top, width, height, editingMode, clipLeft, clipWidth);
+            title = this.prDraw(left, top, width, height, editingMode, clipLeft, clipWidth, selected);
           }
         } {
-          title = this.prDraw(left, top, width, height, editingMode, clipLeft, clipWidth);
+          title = this.prDraw(left, top, width, height, editingMode, clipLeft, clipWidth, selected);
         };
       } {
         title = ""
@@ -166,8 +166,12 @@ ESClip {
   endTime { ^startTime + duration }
 
   // getters
-  color {
-    ^color ?? { this.defaultColor }
+  color { |selected = false|
+    var ret = color ?? { this.defaultColor };
+    if (selected) {
+      ret = Color.white.lighten(ret, 0.5);
+    };
+    ^ret;
   }
 
   rawColor {

@@ -56,7 +56,7 @@ ESTimelineClip : ESClip {
     timeline.play(startOffset, makeClock: false);
   }
 
-  prDraw { |left, top, width, height, editingMode, clipLeft, clipWidth|
+  prDraw { |left, top, width, height, editingMode, clipLeft, clipWidth, selected|
     var tracks = timeline.tracks;
     var tratio = width / duration;
     var pratio = tratio.reciprocal;
@@ -125,7 +125,7 @@ ESTimelineClip : ESClip {
               thisClipWidth = (clipLeft + clipWidth) - thisClipLeft;
             };
 
-            clip.draw(thisLeft, thisTop, thisWidth, thisHeight, false, thisClipLeft, thisClipWidth);
+            clip.draw(thisLeft, thisTop, thisWidth, thisHeight, false, thisClipLeft, thisClipWidth, selected, false);
           };
         };
       };
