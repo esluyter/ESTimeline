@@ -133,6 +133,8 @@ ESClip {
   prStop { }
   prTitle { ^"" } // title to display (not including name)
   prHasOffset { ^false } // whether to show offset parameter for editing
+  prHasTime { ^true } // all timeline clips should have true, fx clips are false
+  prHasColor { ^true } // currently fx clips are false
   prTempoChanged { |tempo| } // so far this is just so env clips follow tempo changes
   defaultColor { ^Color.gray(1); }
   guiClass { ^ESClipEditView }
