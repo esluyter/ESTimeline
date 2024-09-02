@@ -2,12 +2,12 @@ ESTimeline {
   var <tracks, <tempo, <>initFunc, <>cleanupFunc, <>bootOnInit, <>useEnvir, <>optimizeView;
   var <isPlaying = false;
   var <playbar = 0.0;
-  var playBeats, playStartTime, playClock;
+  var playBeats, playStartTime, <playClock;
   var dependantFunc;
   var <>undoStack, <>redoStack, <>currentState;
   var <envir;
   var <>parentClip;
-  var <clock;
+  var clock; // this specifically refers to the internal clock to this specific timeline
 
   //tempo { ^clock.tempo; }
   tempo_ { |val| tempo = val; if (clock.notNil) { clock.tempo_(val) }; this.changed(\tempo, val); }
@@ -106,12 +106,12 @@ ESTimeline {
     if (clock.notNil) { clock.stop; clock = nil };
 
     if (parentClip.notNil and: { parentClip.useParentClock }) {
-      playClock = parentClip.track.timeline.clock;
+      playClock = parentClip.track.timeline.playClock;
     } {
       playClock = altClock ?? { clock = TempoClock(tempo); };
     };
 
-    ^playClock;
+    ^playClock.postln;
   }
 
   play { |startTime, altClock, makeClock = true|
