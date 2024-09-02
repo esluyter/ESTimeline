@@ -137,6 +137,7 @@ ESDrawEnvClip : ESDrawClip {
       var level;
       thisEnv.times.do { |timeDiff, i|
         curve = if (thisEnv.curves.isArray) { thisEnv.curves[i] } { thisEnv.curves };
+        if (curve.isNil) { curve = 0 };
         level = thisEnv.levels[i + 1];
         if (inserted.not) {
           if ((time + timeDiff) > thisTime) {
