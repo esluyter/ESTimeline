@@ -29,6 +29,28 @@ ESMixerChannelEnvs {
     template.changed(\envs);
   }
 
+  preSends_ { |arr|
+    preSends = arr;
+    arr.do { |env, i|
+      if (env.notNil) {
+        env.template = template;
+        env.name = "pre_" ++ i;
+      };
+      template.changed(\envs);
+    };
+  }
+
+  postSends_ { |arr|
+    postSends = arr;
+    arr.do { |env, i|
+      if (env.notNil) {
+        env.template = template;
+        env.name = "post_" ++ i;
+      };
+      template.changed(\envs);
+    };
+  }
+
   storeArgs { ^[level, pan, fx, preSends, postSends]; }
 
   *new { |level, pan, fx, preSends, postSends|
@@ -77,6 +99,11 @@ ESMixerChannelEnvs {
     };
     if (level.notNil) {
       level.playLevel(startTime, clock, mc, duration);
+    };
+    (preSends ++ postSends).do { |env|
+      if (env.notNil) {
+        env.playSend(startTime, clock, mc, duration);
+      };
     };
   }
 
