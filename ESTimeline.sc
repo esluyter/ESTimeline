@@ -163,7 +163,7 @@ ESTimeline {
     this.changed(\tracks);
   }
 
-  asUndoPoint { ^this.storeArgs.asCompileString }
+  asUndoPoint { ^this.storeArgs.asESArray }
 
   addUndoPoint {
     var undoPoint = this.asUndoPoint;
@@ -174,13 +174,16 @@ ESTimeline {
     };
   }
 
-  restoreUndoPoint { |undoPoint, clearUndoStack = false|
+  restoreUndoPoint { |undoPoint, clearUndoStack = false, legacy = false|
     var thisTempo;
+    if (legacy) {
+      currentState = undoPoint.interpret.asESArray;
+    };
     currentState = undoPoint;
     {
       this.prFree;
       Server.default.sync;
-      #tracks, thisTempo, initFunc, cleanupFunc, bootOnInit, useEnvir, optimizeView = currentState.interpret;
+      #tracks, thisTempo, initFunc, cleanupFunc, bootOnInit, useEnvir, optimizeView = Object.fromESArray(currentState);
       this.tempo = thisTempo;
       if (clearUndoStack) {
         undoStack = [];
