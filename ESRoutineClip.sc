@@ -72,7 +72,7 @@ ESRoutineClip : ESClip {
     };
 
     if ((height > 30) and: (width > 15)) {
-      var string = this.funcString;
+      var string = this.func.asESDisplayString;
       var lines = string.split($\n);
       var font = Font.monospace(10);
       var funcHeight = lines.size * 10;
@@ -95,7 +95,7 @@ ESRoutineClip : ESClip {
         Pen.color = Color.gray(1.0, 0.15);
         Pen.fill;
       };
-      string = this.cleanupFuncString;
+      string = this.cleanupFunc.asESDisplayString;
       lines = string.split($\n);
       lines.do { |line, i|
         while { max(0, width - 5) < (QtGUI.stringBounds(line, font).width) } {
