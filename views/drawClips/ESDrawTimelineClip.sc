@@ -58,7 +58,7 @@ ESDrawTimelineClip : ESDrawClip {
       tracks.do { |track, i|
         track.clips.do { |thisClip|
           if ((thisClip.endTime > clip.offset) and: (thisClip.startTime < (clip.offset + clip.duration))) {
-            var thisLeft = ((thisClip.startTime - thisClip.offset) * tratio) + left;
+            var thisLeft = ((thisClip.startTime - clip.offset) * tratio) + left;
             var thisWidth = (thisClip.duration * tratio);
             var thisTop = top + rulerHeight + (trackHeight * i) + 2;
             var thisHeight = trackHeight - 3;
