@@ -105,7 +105,7 @@ ESTimeline {
     if (useMixerChannel) {
       var func = {
         mixerChannels.do { |mc|
-          mc.release;
+          mc.releaseDependants;
           mc.free;
         };
         callback.value;
@@ -181,7 +181,7 @@ ESTimeline {
         };
       };
 
-      mixerChannelTemplates.do(_.removeDependant(templateDependantFunc));
+      mixerChannelTemplates.do({ |template| template.releaseDependants });
       mixerChannelTemplates = newTemplates;
       mixerChannelTemplates.do(_.addDependant(templateDependantFunc));
 
@@ -585,6 +585,10 @@ ESTimeline {
 
     this.prFree(false); // don't free mixer channels yet, this will happen in this.init -> this.initMixerChannels
 
+    mixerChannelTemplates.do { |template|
+      template.releaseDependants;
+    };
+
     #tracks, thisTempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, dummyGD, dummySTG, dummyUMC, mixerChannelTemplates, globalMixerChannelNames = Object.fromESArray(currentState);
 
     // legacy support
@@ -667,7 +671,8 @@ ESTimeline {
   free {
     this.prFree;
     this.changed(\free);
-    this.release;
+    this.releaseDependants;
+    mixerChannelTemplates.do({ |template| template.releaseDependants });
     timelines[id] = nil;
   }
 
@@ -679,6 +684,7 @@ ESTimeline {
       tracks = [ESTrack([ESTimelineClip(0, duration, timeline: newTimeline)])];
       prepFunc = {};
       cleanupFunc = {};
+      mixerChannelTemplates.do({ |template| template.releaseDependants });
       mixerChannelTemplates = (master: mixerChannelTemplates[\master]);
       this.init;
       newTimeline.restoreUndoPoint(currentState, keepMaster: false);
