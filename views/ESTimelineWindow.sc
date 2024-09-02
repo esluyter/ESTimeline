@@ -162,7 +162,10 @@ ESTimelineWindow : Window {
             rulerView.refresh;
           }
           { \track } {
-            if (args[2] == \clip) {
+            // weirdly, was crashing if I didn't assign args[2] to a variable
+            var thisThing = args[2];
+
+            if (thisThing == \clip) {
               if (ESClipEditView.thisClip == args[4]) {
                 if (args[5] == \startTime) {
                   ESClipEditView.startTimeView.string_(args[6].asString);
@@ -180,7 +183,7 @@ ESTimelineWindow : Window {
               };
             };
 
-            if ((args[2] == \mute) or: (args[2] == \solo) or: (args[2] == \name) or: (args[2] == \useMixerChannel)) {
+            if ((thisThing == \mute) or: (thisThing == \solo) or: (thisThing == \name) or: (thisThing == \useMixerChannel)) {
               trackPanelView.refresh;
               timelineView.refresh;
             } {
