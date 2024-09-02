@@ -28,7 +28,7 @@ ESSynthClip : ESClip {
 
   prStart { |startOffset = 0.0, clock|
     Server.default.bind {
-      synth = Synth(defName.value, this.prArgsValue(clock).postcs, target.value, addAction.value)
+      synth = Synth(defName.value, this.prArgsValue(clock), target.value, addAction.value)
     };
   }
 

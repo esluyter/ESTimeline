@@ -201,6 +201,7 @@ ESTimelineWindow : Window {
 
   makeViewDependant {
     timelineView.addDependant({ |view, what, val|
+      //[what, val].postln;
       switch (what)
       { \startTime } { rulerView.refresh }
       { \duration } { rulerView.refresh }
