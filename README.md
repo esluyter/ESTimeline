@@ -268,7 +268,7 @@ If you don't have ddwMixerChannel quark installed, make sure you have saved your
 ```
 Quarks.install("ddwMixerChannel")
 ```
-and reload your class library (cmd-L). Then run the code from earlier to start the timeline GUI, and open the file you have saved.
+and reload your class library (shift-cmd-L). Then run the code from earlier to start the timeline GUI, and open the file you have saved.
 - check the `useMixerChannel` box
 - show the mixer window: evaluate this in the IDE
 ```
