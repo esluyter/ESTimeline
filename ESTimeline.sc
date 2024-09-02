@@ -1,5 +1,5 @@
 ESTimeline {
-  var <tracks, tempo, <>prepFunc, <>cleanupFunc, <>bootOnPrep, <>useEnvir, <>optimizeView, <gridDivision, <snapToGrid, <useMixerChannel, <mixerChannelTemplates, <globalMixerChannelNames;
+  var <tracks, tempo, <>prepFunc, <>cleanupFunc, <>bootOnPrep, <>useEnvir, <>optimizeView, <gridDivision, <snapToGrid, <useMixerChannel, <mixerChannelTemplates, <globalMixerChannelNames, <envHeightMultiplier = 0.5;
   var <isPlaying = false;
   var <playbar = 0.0;
   var playBeats, playStartTime, <playClock;
@@ -90,6 +90,11 @@ ESTimeline {
     mixerChannels = ();
   }
 
+  // for emergencies...
+  emptyFreeQueue {
+    freeQueue = [];
+  }
+
   prFreeMixerChannels { |callback|
     if (useMixerChannel) {
       var func = {
@@ -112,6 +117,10 @@ ESTimeline {
         };
       }.fork(SystemClock);
     }
+  }
+
+  defaultMixerChannelTemplate {
+    ^(inChannels: 2, outChannels: 2, level: 1, pan: 0, fx: [], preSends: [], postSends: [], envelopes: (level: Env([1, 1], [1]), pan: nil, fx: (), preSends: (), postSends: ()));
   }
 
   initMixerChannels {
@@ -137,7 +146,7 @@ ESTimeline {
 
       // put \master at the end of the global mixer channels for best results
       globalMixerChannelNames.reverse.do { |name|
-        var template = mixerChannelTemplates[name] ?? (inChannels: 2, outChannels: 2, level: 1, pan: 0, fx: [], preSends: [], postSends: []);
+        var template = mixerChannelTemplates[name] ?? this.defaultMixerChannelTemplate;
         newTemplates[name] = template;
         if (mixerChannels[name].isNil) {
           var outbus = if (name == \master) { defaultOutbus } { mixerChannels[\master] ?? defaultOutbus };
@@ -147,7 +156,7 @@ ESTimeline {
 
       tracks.do { |track|
         var name = track.mixerChannelName;
-        var template = mixerChannelTemplates[name] ?? (inChannels: 2, outChannels: 2, level: 1, pan: 0, fx: [], preSends: [], postSends: []);
+        var template = mixerChannelTemplates[name] ?? this.defaultMixerChannelTemplate;
         newTemplates[name] = template;
         if (track.useMixerChannel and: mixerChannels[name].isNil) {
           mixerChannels[name] = MixerChannel(name.asSymbol, Server.default, template.inChannels, template.outChannels, template.level, template.pan, outbus: mixerChannels[\master] ?? defaultOutbus);

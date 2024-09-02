@@ -1,9 +1,16 @@
 ESTrack {
-  var <clips, <mute, <name, <useMixerChannel, <solo = false;
+  var <clips, <mute, <name, <useMixerChannel, <solo = false, <heightMultiplier = 1;
   var <>timeline;
   var <isPlaying = false;
   var playRout;
   var dependantFunc;
+
+  totalHeightMultiplier {
+    var template = this.mixerChannelTemplate;
+    // note: this isn't right, but just doing this to have something to test with
+    var envHeight = (template.fx.size + template.preSends.size + template.postSends.size) * timeline.envHeightMultiplier;
+    ^heightMultiplier + envHeight;
+  }
 
   storeArgs { ^[clips, mute, name, useMixerChannel] }
 
@@ -122,6 +129,10 @@ ESTrack {
 
   mixerChannel {
     ^timeline.mixerChannels[this.mixerChannelName];
+  }
+
+  mixerChannelTemplate {
+    ^timeline.mixerChannelTemplates[this.mixerChannelName] ?? timeline.defaultMixerChannelTemplate;
   }
 
   /*
