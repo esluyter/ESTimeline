@@ -264,7 +264,7 @@ ESTimeline {
   }
 
   duration {
-    ^tracks.collect(_.clips).flat.collect(_.endTime).maxItem ?? 0
+    ^this.clips.collect(_.endTime).maxItem ?? 0
   }
 
   clipsInRange { |trackAIndex, trackBIndex, timeA, timeB|

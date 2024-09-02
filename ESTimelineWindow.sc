@@ -51,26 +51,16 @@ ESTimelineWindow : Window {
       timelineView.focus;
     });
     loadIDEButt = Button(this, Rect(535, 5, 100, 30)).states_([["Load from IDE"]]).action_({
+      var func = { |obj, what|
+        if (what == \restoreUndoPoint) {
+          timelineView.startTime = -2;
+          timelineView.duration = timeline.duration.postln + 5;
+          timeline.removeDependant(func);
+        };
+      };
       timeline.restoreUndoPoint(Document.current.string.interpret);
+      timeline.addDependant(func);
       timelineView.focus;
-      /*
-      var bounds = timelineView.bounds;
-      rulerView.release;
-      trackPanelView.release;
-      timelineView.release;
-      timelineView.remove;
-      timeline.free;
-      timeline = Document.current.string.interpret;
-      ESTimelineWindow(timeline: timeline);
-      * TODO: replace contents of same timeline
-      timelineView = ESTimelineView(scrollView, bounds, timeline, duration: max(timeline.duration + 5, 60));
-      rulerView.timelineView = timelineView;
-      rulerView.timeline = timeline;
-      trackPanelView.init(timelineView);
-      this.makeDependant;
-      this.makeViewDependant;
-      rulerView.refresh;
-      */
     });
 
     undoButt = Button(this, Rect(705, 5, 70, 30)).states_([["Undo"]]).action_({ timeline.undo; timelineView.focus; });
