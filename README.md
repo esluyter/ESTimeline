@@ -26,15 +26,25 @@ Note that this is a work in progress and all is subject to revision.
   <summary><strong>Features, hypothetical features, and issues</strong></summary>
   
 ## Features
-- **Non-prescriptive:** no server architecture is forced on you, possible to disable timeline-specific clock and environment so as to interact with the timeline as part of a larger project; the basic goal is only to "execute this code at this particular time"
-- **DAW-like GUI** for editing and playback (see below for mouse and key commands lists)
+- **Non-prescriptive:**
+  - as little architecture as possible is forced on you,
+    - possible to disable timeline-specific clock and environment so as to interact with the timeline as part of a larger project
+  - the basic goal is only to "execute this code at this particular time"
+    - although the competing goal is to make it easy to do the things you want to do, which is subjective
+- **DAW-like GUI** for editing and playback
+  - Keyboard and mouse interface to full extent of Timeline capabilities, with built-in code editing
   - Snap to grid optional
-  - Gray playhead is "scheduling playhead" and black playhead is "sounding playhead" -- to take into account server latency. Routines can be played with additional latency so non-sounding events line up with the sounding playhead. The goal is an accurate visual representation of what you are hearing / when the code is executed.
+  - Gray playhead is "scheduling playhead" and black playhead is "sounding playhead" -- to take into account server latency.
+    - Routines can be played with additional latency so non-sounding events line up with the sounding playhead. The goal is an accurate visual representation of what you are hearing / when the code is executed.
 - **Non-linear:** "goto" command to jump to a clip or a point in time enabling complex and real-time behaviors (looping, conditional branching...)
-- **Tracks** can contain all clip types, and can be muted/soloed
+- **Tracks** can contain all clip types
+  - tracks can be muted/soloed and rearranged
+  - individual clips can be muted
 - **Synth, Pattern, Routine, and Env** clip types
   - Bulk editing selected clip parameters
-  - Env clips can manage their own bus
+  - Env clips play on a bus and come with a shortcut to map to Synths and Patterns, and 
+    - can optionally manage their own bus
+      - all Env clips with the same name on a timeline share the same bus
   - Clips can reference other clips in the same timeline, to e.g. apply an Env to a Synth parameter
   - Pattern, Routine, Env, and Timeline clips can "fast forward" to start playing in the middle
     - (there is no way to fast forward a Synth, that I know of....)
@@ -307,6 +317,7 @@ loop {
   - enter goes to beginning of timeline
   - [ and ] go to next/previous clip edge on track under mouse
 - Editing clip
+  - m mutes clip at mouse pointer
   - s splits clip at mouse pointer
   - delete deletes clip at mouse pointer
   - e opens edit window for clip at mouse pointer, or init/cleanup func window for a timeline clip
