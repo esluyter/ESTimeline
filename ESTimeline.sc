@@ -132,7 +132,6 @@ ESTimeline {
         if (mixerChannels[name].isNil) {
           var outbus = if (name == \master) { defaultOutbus } { mixerChannels[\master] ?? defaultOutbus };
           mixerChannels[name] = MixerChannel(name.asSymbol, Server.default, template.inChannels, template.outChannels, template.level, template.pan, outbus: outbus);
-
         };
       };
 
@@ -140,8 +139,24 @@ ESTimeline {
         var name = track.mixerChannelName;
         var template = mixerChannelTemplates[name] ?? (inChannels: 2, outChannels: 2, level: 1, pan: 0, fx: [], preSends: [], postSends: []);
         newTemplates[name] = template;
-        if (track.useMixerChannel and: mixerChannels[track.mixerChannelName].isNil) {
+        if (track.useMixerChannel and: mixerChannels[name].isNil) {
           mixerChannels[name] = MixerChannel(name.asSymbol, Server.default, template.inChannels, template.outChannels, template.level, template.pan, outbus: mixerChannels[\master] ?? defaultOutbus);
+        };
+      };
+
+      // sends
+      newTemplates.keysValuesDo { |name, template|
+        template.preSends.do { |arr| var sendName = arr[0]; var level = arr[1];
+          var mc = this.mixerChannel(sendName);
+          if (mc.notNil and: mixerChannels[name].notNil) {
+            mixerChannels[name].newPreSend(mc, level);
+          };
+        };
+        template.postSends.do { |arr| var sendName = arr[0]; var level = arr[1];
+          var mc = this.mixerChannel(sendName).postln;
+          if (mc.notNil and: mixerChannels[name].notNil) {
+            mixerChannels[name].newPostSend(mc, level);
+          };
         };
       };
 
@@ -406,6 +421,7 @@ ESTimeline {
     // play effects
     mixerChannelTemplates.keysValuesDo { |name, template|
       var mc = mixerChannels[name];
+      //[name, template, mc].postln;
       template.fx.do { |fx|
         mc.playfx(fx);
       };
