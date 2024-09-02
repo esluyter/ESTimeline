@@ -1,5 +1,5 @@
 ESEnvClip : ESClip {
-  var <env, <bus, <>target, <>addAction, <min, <max, <>curve, <>isExponential, <makeBus = false, <>makeBusRate, <useLiveInput, <>liveInput, <>ccNum, <armed;
+  var <env, <bus, <>target, <>addAction, <min, <max, <>curve, <>isExponential, <makeBus = false, <makeBusRate, <useLiveInput, <>liveInput, <>ccNum, <armed;
   var <synth, envPlayRout;
   var <recordedLevels, <recordedTimes, <oscFunc, <recordedOffset;
 
@@ -18,6 +18,18 @@ ESEnvClip : ESClip {
       makeBus = val;
       this.prep;
       this.changed(\makeBus);
+    };
+  }
+  makeBusRate_ { |val|
+    if (val != makeBusRate) {
+      if (makeBus) {
+        this.cleanup;
+        makeBusRate = val;
+        this.prep;
+      } {
+        makeBusRate = val;
+      };
+      this.changed(\makeBusRate);
     };
   }
 
