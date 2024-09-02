@@ -112,6 +112,19 @@ ESSynthClip : ESClip {
     ^ret;
   }
 
+  getArg { |key|
+    var index = args.indexOf(key);
+    if (index.notNil) {
+      ^args[index + 1];
+    };
+    this.argControls.do { |control|
+      if (control.name == key) {
+        ^control.defaultValue;
+      };
+    };
+    ^0;
+  }
+
   setArg { |key, val|
     var index = args.indexOf(key);
     if (index.notNil) {
