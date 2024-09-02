@@ -263,7 +263,7 @@ Pbind(
   - you can also resize the clips, move the mouse cursor over the clip and use the s key to split it into two separate timeline clips, etc.
  
 ### Mixer channels:
-This will now assume you have ddwMixerChannel installed.
+This will now assume you have ddwMixerChannel installed. (`Quarks.install("ddwMixerChannel")`)
 - check the `useMixerChannel` box
 - show the mixer window: evaluate this in the IDE
 ```
