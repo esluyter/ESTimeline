@@ -30,23 +30,27 @@ Timelines inside of timelines with optionally separate play clocks:
 - Easy to export timeline to IDE as plain text and load it back again
 
 ## Hypothetical features
-- Set default params per track (e.g. pan: -1)
-- Name clips to access them from other clips - e.g. to set Synth params
-- Reference clips to create clones that all change together
-- Better GUI editing
-  - Selecting / bulk editing clips
-  - Insert / delete time
-  - Snap clips to each other and to grid
-- More live interaction - e.g. map a controller to a bus and record its movements to an envelope
-- Higher dimensional envelopes - e.g. movement through x/y space
-- Playback and record audio files; easily access this Buffer for further manipulation
-- Non-linearity: loop points, wait points, etc.
-- Indeterminacy: chance for clip not to play?
-- Clock follow: e.g. sync up with an Ableton timeline or midi show control
-- ddwPlug integration -- simplify bus routing for modulation
-- jitlib integration -- ditto
-- clothesline integration -- put whole .scd files on the timeline
-- VSTPlugin integration, somehow..... this could be a can of worms
+- GUI editing
+  - Bulk editing selected clip parameters
+  - Snap to clips and/or to grid
+- Time features
+  - Non-linearity: loop points, wait points, etc.
+  - Indeterminacy: probability for clips not to play?
+  - Clock follow: e.g. sync up with an Ableton timeline or midi show control
+- Track/clips
+  - Set default params per track (e.g. pan: -1)
+  - Name clips to access them from other clips - e.g. to set Synth params
+  - Reference clips to create clones that all change together
+- Envelopes
+  - More live interaction - e.g. map a controller to a bus and record its movements to an envelope
+  - Higher dimensional envelopes - e.g. movement through x/y space
+- Playback and record audio files
+  - easily access this Buffer for further manipulation
+- Library integration
+  - ddwPlug -- simplify bus routing for modulation
+  - jitlib -- ditto
+  - clothesline -- put whole .scd files on the timeline
+  - VSTPlugin, somehow..... this could be a can of worms
 
 ## Issues
 1. Although I've tried to make it pleasant, the GUI based code editing environment does not syntax highlight, autocomplete, etc -- for this reason I've added "Open in IDE" / "Copy from IDE" buttons as necessary.
@@ -71,6 +75,11 @@ Platform.userExtensionDir
   - click and drag to move breakpoints
   - shift-click to add breakpoint
   - opt-click to remvove breakpoint
+- Selecting
+  - click and drag to select both time and clips
+    - hold cmd to just select clips
+    - hold opt to just select time
+  - hold shift to add clips to existing selection
 
 ## Key commands
 - space toggles play
@@ -86,6 +95,9 @@ Platform.userExtensionDir
 - cmd-t inserts new track after track at mouse
 - cmd-T inserts new track before track at mouse
 - cmd-delete deletes track at mouse
+- cmd-a select all clips
+- cmd-i inserts selected time
+- shift-cmd-delete deletes selected time
 - cmd-z undo
 - cmd-Z redo
 
