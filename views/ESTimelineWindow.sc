@@ -287,10 +287,14 @@ ESTimelineWindow : Window {
             timelineView.makeTrackViews;
           }
           { \envs } {
+            rulerView.cacheTicks;
+            rulerView.refresh;
             timelineView.makeTrackViews;
             timelineView.refresh;
           }
           { \env } {
+            rulerView.cacheTicks;
+            rulerView.refresh;
             timelineView.refresh;
             if (timeline.tempoEnv.notNil) {
               tempoKnob.valueAction_(timeline.tempoEnv.valueAtTime(timeline.now));

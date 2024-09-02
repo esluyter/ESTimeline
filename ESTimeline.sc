@@ -888,7 +888,7 @@ ESTimeline {
 
   duration {
     var endOfLastClip = this.clips.collect(_.endTime).maxItem ?? 0;
-    var longestEnvelope = this.envs.collect({ |env| env.env.duration }).maxItem ?? 0;
+    var longestEnvelope = (this.envs ++ tempoEnv.asArray).collect({ |env| env.env.duration }).maxItem ?? 0;
     ^[endOfLastClip, longestEnvelope].maxItem;
   }
 

@@ -2,6 +2,29 @@ ESRulerView : UserView {
   var <>timeline, <>timelineView;
   var clickPoint, clickTime, originalDuration;
   var <playheadView, playheadRout;
+  var <ticks;
+
+  cacheTicks {
+    if (timeline.tempoEnv.notNil) {
+      var n = timeline.duration.ceil.asInteger;
+      var beats = 0;
+      var secs = 0;
+      var tempoBPM, tempo, intervalSecs = 0.1, intervalBeats;
+      ticks = Array(n);
+      while { beats <= n } {
+        tempoBPM = timeline.tempoEnv.valueAtTime(beats);
+        tempo = tempoBPM / 60;
+        intervalBeats = intervalSecs * tempo;
+        if (beats + intervalBeats >= ticks.size) {
+          ticks.add((secs + ((ticks.size - beats) / tempo)) / 60);
+        };
+        beats = beats + intervalBeats;
+        secs = secs + intervalSecs;
+      };
+    } {
+      ticks = nil;
+    };
+  }
 
   *new { |parent, bounds, timeline, timelineView|
     ^super.new(parent, bounds).init(timeline, timelineView);
@@ -40,11 +63,20 @@ ESRulerView : UserView {
           var i = ((j + startIndex) * division).asInteger;
           if (i >= 0) {
             var left = this.absoluteTimeToPixels(i);
-            var rawMinutes = (i / timeline.tempoBPM);
-            var hours = (rawMinutes / 60).asInteger;
-            var minutes = (rawMinutes - (hours * 60)).asInteger;
-            var seconds = (rawMinutes - minutes) * 60;
-            var string;
+            var rawMinutes, hours, minutes, seconds, string;
+
+            if (timeline.tempoEnv.isNil) {
+              rawMinutes = (i / timeline.tempoBPM);
+            } {
+              if (i < ticks.size) {
+                rawMinutes = ticks[i];
+              } {
+                rawMinutes = ticks.last + ((i - (ticks.size - 1)) / timeline.tempoEnv.valueAtTime(i));
+              }
+            };
+            hours = (rawMinutes / 60).asInteger;
+            minutes = (rawMinutes - (hours * 60)).asInteger;
+            seconds = (rawMinutes - minutes) * 60;
             seconds = seconds % 60;
             seconds = seconds.round(0.1);
             if (seconds.asInteger == seconds) { seconds = seconds.asInteger };
