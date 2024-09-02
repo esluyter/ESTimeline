@@ -72,6 +72,51 @@ ESEnvClip : ESClip {
             };
           };
         };
+        [\kr, \ar].do { |rate|
+          [\curve, \exp].do { |type|
+            SynthDef(('ESEnvClip_' ++ rate ++ '_' ++ type ++ '_mouseX').asSymbol, { |out, gate = 1, tempo = 1, min = 0, max = 1|
+              //var env = \env.kr(Env.newClear(n).asArray);
+              var index = Sweep.perform(rate, 0, tempo);
+              //var sig = IEnvGen.perform(rate, env/*Env.fromArray(env)*/, index);
+              var sig = MouseX.kr;
+              if (rate == \ar) {
+                sig = K2A.ar(sig);
+              };
+
+              switch (type)
+              {\curve} {
+                sig = sig.lincurve(0, 1, min, max, \curve.kr(0));
+              }
+              {\exp} {
+                sig = sig.linexp(0, 1, min, max);
+              };
+              FreeSelf.kr(gate <= 0);
+
+              Out.perform(rate, out, sig);
+            }).add;
+            SynthDef(('ESEnvClip_' ++ rate ++ '_' ++ type ++ '_mouseY').asSymbol, { |out, gate = 1, tempo = 1, min = 0, max = 1|
+              //var env = \env.kr(Env.newClear(n).asArray);
+              var index = Sweep.perform(rate, 0, tempo);
+              //var sig = IEnvGen.perform(rate, env/*Env.fromArray(env)*/, index);
+              var sig = MouseY.kr;
+              if (rate == \ar) {
+                sig = K2A.ar(sig);
+              };
+
+              switch (type)
+              {\curve} {
+                sig = sig.lincurve(0, 1, min, max, \curve.kr(0));
+              }
+              {\exp} {
+                sig = sig.linexp(0, 1, min, max);
+              };
+              FreeSelf.kr(gate <= 0);
+
+              Out.perform(rate, out, sig);
+            }).add;
+            0.1.wait;
+          };
+        };
       }.fork(SystemClock);
     };
   }
@@ -168,7 +213,7 @@ ESEnvClip : ESClip {
     };
     if (bus.value.notNil) {
       var defName = if (this.rate == 'control') { 'ESEnvClip_kr' } { 'ESEnvClip_ar' };
-      defName = (defName ++ if (this.isExponential) { "_exp_" } { "_curve_" } ++ size).asSymbol;
+      defName = (defName ++ if (this.isExponential) { "_exp_" } { "_curve_" } ++ if (useLiveInput) { ["mouseX", "mouseY"][liveInput] } { size }).asSymbol;
       Server.default.bind {
         synth = Synth(defName, [env: thisEnv.asArrayForInterpolation.collect(_.reference).unbubble, out: bus.value, tempo: clock.tempo, min: min, max: max, curve: curve], target.value, addAction.value);
       };
