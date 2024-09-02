@@ -20,7 +20,7 @@ ESDrawSynthClip : ESDrawClip {
     if (displayFreq.isNumber) {
       var freq = displayFreq;
       var y = freq.explin(20, 20000, top + height, top);
-      var amp = SynthDescLib.at(clip.defName.value).controlDict[\amp];
+      var amp = if (SynthDescLib.at(clip.defName.value).notNil) { SynthDescLib.at(clip.defName.value).controlDict[\amp] } { nil };
       if (amp.notNil) { amp = amp.defaultValue };
       if (ampIndex.notNil) {
         amp = argsValue[ampIndex + 1];
