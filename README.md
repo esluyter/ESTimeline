@@ -27,12 +27,12 @@ Note that this is a work in progress and all is subject to revision.
   
 ## Features
 - **Non-prescriptive:**
+  - the basic goal is only to "execute this code at this particular time"
+    - although the competing goal is to make it easy to do the things you want to do, which is subjective
   - as little architecture as possible is forced on you,
     - possible to disable timeline-specific clock and environment so as to interact with the timeline as part of a larger project
     - possible to play clips with any bus, target, addAction, etc. for full flexibility
       - although I will probably build in optional use of ddwMixerChannel
-  - the basic goal is only to "execute this code at this particular time"
-    - although the competing goal is to make it easy to do the things you want to do, which is subjective
 - **DAW-like GUI** for editing and playback
   - Keyboard and mouse interface to full extent of Timeline capabilities, with built-in code editing
   - Snap to grid optional
