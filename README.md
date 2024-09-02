@@ -3,8 +3,11 @@ A hypothetical general purpose SuperCollider timeline
 
 The distant goal is that anything you can do in SuperCollider could be sequenced on a timeline...
 
-![screenshot](img/ss1.png)
+![screenshot](img/ss2.png)
 <img src="img/sse.png" width="500" />
+
+Timelines inside of timelines with optionally separate play clocks:
+<img src="img/ss3.png" />
 <img src="img/ssee.png" width="400" /><img src="img/sss.png" width="400" /><img src="img/rss.png" width="400" /><img src="img/ssep.png" width="400" />
 <img src="img/fss.png" width="400" />
 
