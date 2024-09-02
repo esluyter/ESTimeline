@@ -38,11 +38,26 @@ ESRulerView : UserView {
 
         (this.duration / division + 1).asInteger.do { |j|
           var i = ((j + startIndex) * division).asInteger;
-          var left = this.absoluteTimeToPixels(i);
           if (i >= 0) {
+            var left = this.absoluteTimeToPixels(i);
+            var rawMinutes = (i / timeline.tempoBPM);
+            var hours = (rawMinutes / 60).asInteger;
+            var minutes = (rawMinutes - (hours * 60)).asInteger;
+            var seconds = (rawMinutes - minutes) * 60;
+            var string;
+            seconds = seconds % 60;
+            seconds = seconds.round(0.1);
+            if (seconds.asInteger == seconds) { seconds = seconds.asInteger };
+            if (seconds < 10) { seconds = "0" ++ seconds.asString } { seconds = seconds.asString };
+            string = if (hours > 0) {
+              "%:%:%".format(hours, minutes.asString.padLeft(2, "0"), seconds)
+            } {
+              "%:%".format(minutes, seconds);
+            };
             Pen.addRect(Rect(left, 0, 1, 20));
             Pen.fill;
-            Pen.stringAtPoint(i.asString, (left + 3)@0, Font("Courier New", 16));
+            Pen.stringAtPoint(i.asString, (left + 3)@(-1), Font("Courier New", 13));
+            Pen.stringAtPoint(string, (left + 4)@12, Font("Courier New", 9), Color.gray(0.5));
           };
         };
 
