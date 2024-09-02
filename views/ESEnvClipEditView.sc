@@ -79,7 +79,7 @@ ESEnvClipEditView : ESClipEditView {
 
     Button(sidePanel, Rect(0, 485, 180, 30)).string_("Cancel").font_(panelFont.copy.size_(14)).action_({ editorWindow.close });
     Button(sidePanel, Rect(0, 520, 180, 30)).string_("Save").font_(panelFont.copy.size_(14)).action_({
-      clip.name = nameField.string.asSymbol;
+
       clip.env = ("{" ++ codeView.string ++ "}").interpret;
       clip.target = ("{" ++ targetView.string ++ "}").interpret;
       clip.addAction = ("{" ++ addActionView.string ++ "}").interpret;
@@ -97,6 +97,7 @@ ESEnvClipEditView : ESClipEditView {
       if (clip.makeBus.not) {
         clip.bus = ("{" ++ busView.string ++ "}").interpret;
       };
+      clip.name = nameField.string.asSymbol;
 
       timeline.addUndoPoint;
     });
