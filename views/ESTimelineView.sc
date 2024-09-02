@@ -568,6 +568,13 @@ ESTimelineView : UserView {
                   Pen.fill;
                 };
               };
+              if (timeline.now > clip.endTime) {
+                // "scheduling playhead" in gray
+                Pen.color = Color.gray(0.5, 0.5);
+                left = this.absoluteTimeToPixels(timeline.now);
+                Pen.addRect(Rect(left, i * trackHeight, 2, trackHeight));
+                Pen.fill;
+              };
             } {
               // sounding playhead in black
               left = this.absoluteTimeToPixels(timeline.soundingNow);
