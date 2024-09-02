@@ -29,6 +29,7 @@ The distant goal is that anything you can do in SuperCollider could be sequenced
 - Non-linearity: loop points, wait points, etc.
 - Indeterminacy: chance for clip not to play?
 - ddwPlug integration -- simplify bus routing for modulation
+- jitlib integration -- ditto
 - clothesline integration -- put whole .scd files on the timeline
 
 ## Issues
