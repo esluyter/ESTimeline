@@ -470,7 +470,7 @@ ESTimeline {
 
       if (template.envs.pan.notNil) {
         var mcEnv = template.envs.pan;
-        #thisEnv, thisDefName = getEnvAndDefName.(mcEnv).postln;
+        #thisEnv, thisDefName = getEnvAndDefName.(mcEnv);
         Server.default.bind {
           mc.panAuto(thisDefName, [env: thisEnv, tempo: playClock.tempo, min: mcEnv.min, max: mcEnv.max, curve: mcEnv.curve]);
         };
