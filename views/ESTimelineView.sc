@@ -438,6 +438,9 @@ ESTimelineView : UserView {
       var newClipStartTime = if (timeSelection.notNil) { timeSelection[0] } { snappedHoverTime };
       var newClipDuration = if (timeSelection.notNil) { timeSelection[1] - timeSelection[0] } { nil }; // override with default later
       //key.postln;
+
+      hoverTrack = hoverTrack ?? timeline.tracks[0];
+
       // space is play
       if (char == $ ) { timelineController.togglePlay };
       // enter goes to beginning
