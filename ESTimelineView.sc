@@ -27,7 +27,7 @@ ESTimelineView : UserView {
 
     this.setContextMenuActions(
       Menu(
-        MenuAction("Add Empty Clip", { timeline.tracks[hoverTrack].addClip(ESClip(hoverTime, 5)) }),
+        MenuAction("Add Comment (C)", { timeline.tracks[hoverTrack].addClip(ESClip(hoverTime, 5)) }),
         MenuAction("Add Synth Clip (S)", { timeline.tracks[hoverTrack].addClip(ESSynthClip(hoverTime, 5, \default)) }),
         MenuAction("Add Pattern Clip (P)", { timeline.tracks[hoverTrack].addClip(ESPatternClip(hoverTime, 5, {Pbind()})) }),
         MenuAction("Add Routine Clip (R)", { timeline.tracks[hoverTrack].addClip(ESRoutineClip(hoverTime, 5, { })) }),
@@ -171,14 +171,17 @@ ESTimelineView : UserView {
       if (char == $ ) { timeline.togglePlay };
       // s - split clip
       if (char == $s) { if (hoverClip.notNil) { timeline.tracks[hoverTrack].splitClip(hoverClipIndex, hoverTime) } };
+      if (char == $C) {
+        timeline.tracks[hoverTrack].addClip(ESClip(hoverTime, 5));
+      };
       if (char == $S) {
-        timeline.tracks[hoverTrack].addClip(ESSynthClip(hoverTime, 5, \default))
+        timeline.tracks[hoverTrack].addClip(ESSynthClip(hoverTime, 5, \default));
       };
       if (char == $P) {
-        timeline.tracks[hoverTrack].addClip(ESPatternClip(hoverTime, 5, {Pbind()}))
+        timeline.tracks[hoverTrack].addClip(ESPatternClip(hoverTime, 5, {Pbind()}));
       };
       if (char == $R) {
-        timeline.tracks[hoverTrack].addClip(ESRoutineClip(hoverTime, 5, { }))
+        timeline.tracks[hoverTrack].addClip(ESRoutineClip(hoverTime, 5, { }));
       };
       if (char == $e) {
         hoverClip.guiClass.new(hoverClip, timeline);

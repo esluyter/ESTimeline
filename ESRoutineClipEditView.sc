@@ -62,11 +62,17 @@ ESRoutineClipEditView : ESClipEditView {
       MenuAction("Saturate", { colorView.background = Color.red.saturationBlend(colorView.background, 0.8) }),
       MenuAction("Desaturate", { colorView.background = Color.black.saturationBlend(colorView.background, 0.8) }),
     );
-    StaticText(sidePanel, Rect(0, 250, 180, 20)).string_("randSeed").font_(panelFont);
-    randSeedField = TextField(sidePanel, Rect(0, 270, 180, 20)).font_(Font.monospace(16)).value_(clip.randSeed);
-    isSeededBox = CheckBox(sidePanel, Rect(0, 300, 20, 20)).value_(clip.isSeeded);
-    StaticText(sidePanel, Rect(20, 300, 150, 20)).string_("isSeeded").font_(panelFont);
-    Button(sidePanel, Rect(100, 295, 80, 25)).string_("Re-roll").action_({ randSeedField.string_(rand(2000000000)) });
+    StaticText(sidePanel, Rect(0, 200, 180, 20)).string_("randSeed").font_(panelFont);
+    randSeedField = TextField(sidePanel, Rect(0, 220, 180, 20)).font_(Font.monospace(16)).value_(clip.randSeed);
+    isSeededBox = CheckBox(sidePanel, Rect(0, 250, 20, 20)).value_(clip.isSeeded);
+    StaticText(sidePanel, Rect(20, 250, 150, 20)).string_("isSeeded").font_(panelFont);
+    Button(sidePanel, Rect(100, 245, 80, 25)).string_("Re-roll").action_({ randSeedField.string_(rand(2000000000)) });
+
+    StaticText(sidePanel, Rect(0, 290, 180, 20)).string_("when playing from middle:").font_(panelFont.copy.size_(14));
+    fastForwardMenu = PopUpMenu(sidePanel, Rect(0, 310, 180, 30)).items_(["Don't play", "Fast forward", "Play from beginning"]).value_(clip.fastForward);
+
+    addLatencyBox = CheckBox(sidePanel, Rect(0, 360, 20, 20)).value_(clip.addLatency);
+    StaticText(sidePanel, Rect(20, 360, 150, 20)).string_("addLatency").font_(panelFont);
 
     Button(sidePanel, Rect(0, 410, 180, 25)).string_("Open in IDE").action_({
       // open / load whichever view is currently visible
@@ -91,10 +97,12 @@ ESRoutineClipEditView : ESClipEditView {
       clip.cleanupFunc = ("{" ++ cleanupFuncView.string ++ "}").interpret;
       clip.randSeed = randSeedField.string.asInteger;
       clip.isSeeded = isSeededBox.value;
+      clip.addLatency = addLatencyBox.value;
       clip.color = colorView.background;
       clip.startTime = startTimeView.value;
       clip.duration =  durationView.value;
       clip.offset = offsetView.value;
+      clip.fastForward = fastForwardMenu.value;
 
       timeline.addUndoPoint;
     });
