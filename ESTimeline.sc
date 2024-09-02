@@ -11,6 +11,8 @@ ESTimeline {
   var <buses;
   var <mixerChannels;
 
+  var <>timelineController;
+
   var <>notifyOnEndInitMixerChannels = false;
   classvar <freeQueue;
 

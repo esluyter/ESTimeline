@@ -38,6 +38,7 @@ ESTimelineView : UserView {
 
     timeline = argtimeline;
     timelineController = ESTimelineController(timeline, this);
+    timeline.timelineController = timelineController;
 
     this.makeTrackViews;
     this.makeContextMenu;

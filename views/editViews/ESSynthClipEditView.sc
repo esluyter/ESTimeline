@@ -32,7 +32,7 @@ ESSynthClipEditView : ESClipEditView {
       clip.duration =  durationView.string.interpret;
 
       argsView.free;
-      argsView.init(clip.args.copy, clip.argControls);
+      argsView.init(clip.args.copy, clip.argControls, clip);
 
       timeline.addUndoPoint;
     });
@@ -71,14 +71,14 @@ ESSynthClipEditView : ESClipEditView {
 
 
 ESArgsView : ScrollView {
-  var args, argControls;
+  var args, argControls, clip;
   var argPairs;
   var defaultArgs;
 
   var control_i;
 
   *new { |parent, bounds, clip|
-    ^super.new(parent, bounds).hasBorder_(false).init(clip.args.copy, clip.argControls);
+    ^super.new(parent, bounds).hasBorder_(false).init(clip.args.copy, clip.argControls, clip);
   }
 
   initArgControls { |argargControls|
@@ -92,7 +92,7 @@ ESArgsView : ScrollView {
           if (clickCount > 1) {
             args = args.add(cn.name).add(cn.defaultValue);
             this.free;
-            this.init(args, argControls);
+            this.init(args, argControls, clip);
           };
         };
         defaultArgs = defaultArgs.add([
@@ -104,9 +104,10 @@ ESArgsView : ScrollView {
     };
   }
 
-  init { |argargs, argargControls|
+  init { |argargs, argargControls, argclip|
     var i = 0;
     args = argargs;
+    clip = argclip;
     argPairs = [];
     args.pairsDo { |key, val, index|
       var action = { |view, x, y, mods, buttNum, clickCount|
@@ -114,11 +115,17 @@ ESArgsView : ScrollView {
           args.removeAt(index);
           args.removeAt(index);
           this.free;
-          this.init(args, argControls);
+          this.init(args, argControls, clip);
         };
       };
       argPairs = argPairs.add([
-        StaticText(this, Rect(10, 2.5 + (i * 30), 140, 25)).string_(key).align_(\right).mouseDownAction_(action),
+        StaticText(this, Rect(10, 2.5 + (i * 30), 140, 25)).string_(key).align_(\right).mouseDownAction_(action).setContextMenuActions(
+          MenuAction("Add Env for Synth argument", {
+            clip.track.timeline.timelineController.prAddEnvForSynth(clip, key);
+            this.free;
+            this.init(clip.args.copy, clip.argControls, clip);
+          })
+        ),
         TextField(this, Rect(160, 2.5 + (i * 30), this.bounds.width - 165, 25)).string_(val.asESDisplayString).font_(Font.monospace(14)).keyUpAction_({ |view|
           args[index + 1] = ("{" ++ view.string ++ "}").interpret;
         })
