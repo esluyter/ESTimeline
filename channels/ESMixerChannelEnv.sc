@@ -127,7 +127,8 @@ ESMixerChannelEnv {
 
     if (mods.isShift) {
       var thisTime = ((x - left) * pratio) + startTime;
-      this.addBreakPoint(thisTime);
+      hoverIndex = this.addBreakPoint(thisTime) + 1;
+      hoverIndex.postln;
     };
 
     if (mods.isAlt and: hoverIndex.notNil) {
@@ -505,6 +506,7 @@ ESMixerChannelEnv {
       }
     };
     if (inserted.not) {
+      ret = times.size;
       levels = levels.add(thisLevel);
       times = times.add(thisTime - time);
       curves = curves.add(curve);

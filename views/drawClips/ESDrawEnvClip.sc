@@ -154,6 +154,7 @@ ESDrawEnvClip : ESDrawClip {
             levels = levels.add(level);
             times = times.add(time + timeDiff - thisTime);
             inserted = true;
+            hoverIndex = i + 1;
           } {
             levels = levels.add(level);
             times = times.add(timeDiff);
