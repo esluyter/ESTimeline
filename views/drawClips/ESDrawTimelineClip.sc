@@ -49,7 +49,7 @@ ESDrawTimelineClip : ESDrawClip {
             thisLeft = ((i - clip.offset) * tratio) + left;
             Pen.addRect(Rect(thisLeft, top + 1, 1, rulerHeight));
             Pen.fill;
-            Pen.stringAtPoint(i.asString, (thisLeft + 3)@(top + 1), Font("Courier New", rulerHeight * (16/20)));
+            Pen.stringAtPoint(i.asString, (thisLeft + 3)@(top + 1), Font.monospace(rulerHeight * (15/20)));
           };
         };
       };
