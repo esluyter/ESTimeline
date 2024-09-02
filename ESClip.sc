@@ -92,14 +92,21 @@ ESClip {
   // draw this clip on a UserView using Pen
   draw { |left, top, width, height, editingMode = false, clipLeft, clipWidth, selected = false, drawBorder = true| // these last two are for ESTimelineClips
     if (track.shouldPlay) {
-      Pen.color = this.color(selected);
+      Pen.color = this.color(selected, editingMode);
     } {
-      Pen.color = Color.white.lighten(this.color(selected), 0.5);
+      Pen.color = Color.white.lighten(this.color(selected, editingMode), 0.5);
     };
     Pen.strokeColor = Color.cyan;
     Pen.width = 2;
     Pen.addRect(Rect(left, top, width, height));
     if (selected and: drawBorder) { Pen.fillStroke } { Pen.fill };
+
+    if (editingMode and: this.hasEditingMode) {
+      Pen.addRect(Rect(left, top, width, height));
+      Pen.strokeColor = Color.white;
+      Pen.width = 3;
+      Pen.stroke;
+    };
 
     Pen.color = Color.gray(0.8, 0.5);
     Pen.addRect(Rect(left + width - 1, top, 1, height));
@@ -185,10 +192,17 @@ ESClip {
   endTime { ^startTime + duration }
 
   // getters
-  color { |selected = false|
+  color { |selected = false, editingMode = false|
     var ret = color ?? { this.defaultColor };
     if (selected) {
       ret = Color.white.lighten(ret, 0.5);
+    };
+    if (editingMode) {
+      if (this.hasEditingMode) {
+        ret = Color.black.darken(ret, 0.5);
+      } {
+        ret = ret.alpha_(ret.alpha * 0.5);
+      }
     };
     ^ret;
   }
@@ -211,4 +225,6 @@ ESClip {
   prHoverLeave {}
   prMouseMove { |x, y, xDelta, yDelta, left, top, width, height| }
   prMouseDown { |x, y, mods, buttNum, clickCount, left, top, width, height| }
+
+  hasEditingMode { ^false }
 }

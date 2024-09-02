@@ -158,6 +158,11 @@ ESTimelineView : UserView {
     );
 
     this.drawFunc_({
+      if (editingMode) {
+        Pen.addRect(Rect(0, 0, this.bounds.width, this.bounds.height));
+        Pen.color_(Color.hsv(0.58, 0.45, 0.65, 0.2));
+        Pen.fill;
+      };
       if (timeSelection.notNil) {
         var left = this.absoluteTimeToPixels(timeSelection[0]);
         var width = this.relativeTimeToPixels(timeSelection[1] - timeSelection[0]);
