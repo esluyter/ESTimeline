@@ -5,11 +5,12 @@ ESTimelineView : UserView {
   var <startTime, <duration;
   var <trackHeight, <heightRatio = 1;
   var clickPoint, clickTime, scrolling = false, originalDuration;
-  var hoverClip, hoverCode, hoverClipStartTime, hoverClipEndTime, hoverClipOffset;
+  var <hoverClip, <hoverCode, hoverClipStartTime, hoverClipEndTime, hoverClipOffset;
   var hoverTime = 0, hoverTrack = 0, hoverClipIndex = 0;
   var duplicatedClip, <timeSelection, clipSelection, stagedClipSelection;
 
   var <editingMode = false;
+  var <drawClipGuides = false;
 
   selectedClips { ^(clipSelection ++ stagedClipSelection) }
   timeSelection_ { |val| timeSelection = val; this.changed(\timeSelection, val); }
@@ -255,6 +256,7 @@ ESTimelineView : UserView {
       };
 
       [leftGuideView, rightGuideView].do(_.visible_(false));
+      drawClipGuides = false;
 
       clickPoint = nil;
       clickTime = nil;
@@ -264,6 +266,7 @@ ESTimelineView : UserView {
 
       timeline.addUndoPoint;
       this.refresh;
+      this.changed(\mouseUp);
     }).mouseMoveAction_({ |view, x, y, mods|
       var yDelta = y - clickPoint.y;
       var xDelta = x - clickPoint.x;
@@ -357,8 +360,10 @@ ESTimelineView : UserView {
           leftGuideView.bounds_(leftGuideView.bounds.left_(this.absoluteTimeToPixels(hoverClip.startTime)));
           rightGuideView.bounds_(rightGuideView.bounds.left_(this.absoluteTimeToPixels(hoverClip.endTime)));
           [leftGuideView, rightGuideView].do(_.visible_(true));
+          drawClipGuides = true;
         } {
           [leftGuideView, rightGuideView].do(_.visible_(false));
+          drawClipGuides = false;
         };
       } {  // if editingMode
         if (hoverClip.notNil) {
@@ -366,6 +371,8 @@ ESTimelineView : UserView {
           hoverClip.prMouseMove(x, y - (trackHeight * hoverClip.track.index), xDelta, yDelta, *this.clipBounds(hoverClip));
         };
       };// end editingMode
+
+      this.changed(\mouseMove);
     }).mouseOverAction_({ |view, x, y|
       var i, j;
       var oldHoverClip = hoverClip;
