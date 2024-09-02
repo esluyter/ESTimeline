@@ -81,7 +81,9 @@ ESTrackPanelView : UserView {
         }),
         nameField: TextView(view, Rect(2, 35, width - 4, trackHeight - 40)).keyDownAction_({ |...args| this.handleKey(track, *args) }).focusLostAction_({ |view|
           // if you click somewhere else, accept changes
-          track.name = if (view.string == "") { nil } { view.string.asSymbol };
+          if (view.visible) {
+            track.name = if (view.string == "") { nil } { view.string.asSymbol };
+          };
           view.visible = false;
         }).visible_(false).font_(Font.sansSerif(14)),
         mix: Button(view, Rect(21, 4, 25, 25)).states_([

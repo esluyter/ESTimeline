@@ -140,7 +140,7 @@ ESTrack {
   name_ { |val|
     name = val;
     timeline.initMixerChannels;
-    this.changed(\name);
+    this.changed(\name, val);
   }
 
   mute_ { |val|
