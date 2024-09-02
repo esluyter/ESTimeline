@@ -270,5 +270,9 @@ ESTimeline {
     };
     ^ret;
   }
+
+  clips {
+    ^tracks.collect(_.clips).flat;
+  }
 }
 
