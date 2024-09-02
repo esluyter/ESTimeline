@@ -6,7 +6,7 @@ ESTimelineView : UserView {
   var <trackHeight, <heightRatio = 1;
   var clickPoint, clickTime, scrolling = false, originalDuration;
   var <hoverClip, <hoverCode, hoverClipStartTime, hoverClipEndTime, hoverClipOffset;
-  var hoverTime = 0, hoverTrack = 0;
+  var hoverTime = 0, hoverTrack;
   var duplicatedClips, <timeSelection, clipSelection, stagedClipSelection;
 
   var <editingMode = false;
@@ -204,7 +204,7 @@ ESTimelineView : UserView {
             if (mods.isShift.not) {
               clipSelection = Set[];
             };
-            stagedClipSelection = Set.newFrom(timeline.clipsInRange(this.trackAtY(clickPoint.y), this.trackAtY(y), timeA, timeB));
+            stagedClipSelection = Set.newFrom(timeline.clipsInRange(this.trackAtY(clickPoint.y).index, this.trackAtY(y).index, timeA, timeB));
             this.changed(\selectedClips);
           } {
             stagedClipSelection = Set[];
@@ -312,8 +312,8 @@ ESTimelineView : UserView {
               };
             };
             // move clips between tracks
-            if (currentHoverTrack != hoverTrack) {
-              var trackDelta = currentHoverTrack - hoverTrack;
+            if (currentHoverTrack.index != hoverTrack.index) {
+              var trackDelta = currentHoverTrack.index - hoverTrack.index;
               var clips;
               if (this.selectedClips.includes(hoverClip)) {
                 clips = this.selectedClips;
@@ -355,7 +355,7 @@ ESTimelineView : UserView {
       var i, j;
       var oldHoverClip = hoverClip;
       # hoverClip, i, j, hoverCode = this.clipAtPoint(x@y);
-      hoverTrack = i;
+      hoverTrack = timeline.tracks[i];
       hoverTime = this.pixelsToAbsoluteTime(x);
 
       if (editingMode.not) {
@@ -396,7 +396,7 @@ ESTimelineView : UserView {
         var points = [];
         var prevPrevPoint = 0, prevPoint = 0, skipRest = false;
         var goForwards = (char == $]);
-        timeline.tracks[hoverTrack].clips.do { |clip|
+        hoverTrack.clips.do { |clip|
           points = points ++ [clip.startTime, clip.endTime];
         };
         points.sort.do { |point|
@@ -422,7 +422,7 @@ ESTimelineView : UserView {
         if (mods.isAlt) {
           timeline.snapToGrid = timeline.snapToGrid.not;
         } {
-          if (hoverClip.notNil) { timeline.tracks[hoverTrack].splitClip(hoverClip.index, snappedHoverTime) };
+          if (hoverClip.notNil) { hoverTrack.splitClip(hoverClip.index, snappedHoverTime) };
         };
       };
       // m - mute clip
@@ -436,23 +436,23 @@ ESTimelineView : UserView {
         };
       };
       if (char == $S) {
-        timeline.tracks[hoverTrack].addClip(ESSynthClip(newClipStartTime, newClipDuration ?? 0.5, defName: \default));
+        hoverTrack.addClip(ESSynthClip(newClipStartTime, newClipDuration ?? 0.5, defName: \default));
       };
       if (char == $T) {
-        timeline.tracks[hoverTrack].addClip(ESTimelineClip(newClipStartTime, newClipDuration ?? 10, timeline: ESTimeline()));
+        hoverTrack.addClip(ESTimelineClip(newClipStartTime, newClipDuration ?? 10, timeline: ESTimeline()));
       };
       if (char == $C) {
-        timeline.tracks[hoverTrack].addClip(ESClip(newClipStartTime, newClipDuration ?? 5));
+        hoverTrack.addClip(ESClip(newClipStartTime, newClipDuration ?? 5));
       };
       if (char == $P) {
-        timeline.tracks[hoverTrack].addClip(ESPatternClip(newClipStartTime, newClipDuration ?? 5, pattern: {Pbind()}));
+        hoverTrack.addClip(ESPatternClip(newClipStartTime, newClipDuration ?? 5, pattern: {Pbind()}));
       };
       if (char == $R) {
-        timeline.tracks[hoverTrack].addClip(ESRoutineClip(newClipStartTime, newClipDuration ?? 5, func: {}));
+        hoverTrack.addClip(ESRoutineClip(newClipStartTime, newClipDuration ?? 5, func: {}));
       };
       if (char == $E) {
         var thisDuration = newClipDuration ?? 5;
-        timeline.tracks[hoverTrack].addClip(ESEnvClip(newClipStartTime, thisDuration, env: Env([0.5, 0.5], [thisDuration], 0), prep: true));
+        hoverTrack.addClip(ESEnvClip(newClipStartTime, thisDuration, env: Env([0.5, 0.5], [thisDuration], 0), prep: true));
       };
       if (char == $e) {
         if (hoverClip.class == ESTimelineClip) {
@@ -484,11 +484,11 @@ ESTimelineView : UserView {
               timeline.deleteTime(*timeSelection);
             };
           } {
-            timeline.removeTrack(hoverTrack);
+            timeline.removeTrack(hoverTrack.index);
           };
         } {
           if (hoverClip.notNil and: this.selectedClips.includes(hoverClip).not) {
-            timeline.tracks[hoverTrack].removeClip(hoverClip.index);
+            hoverTrack.removeClip(hoverClip.index);
             hoverClip = nil;
           } {
             this.selectedClips.do { |clip|
@@ -500,9 +500,9 @@ ESTimelineView : UserView {
       // cmd-t new track (shift before, default after)
       if (mods.isCmd and: (key == 84)) {
         if (mods.isShift) {
-          timeline.addTrack(hoverTrack);
+          timeline.addTrack(hoverTrack.index);
         } {
-          timeline.addTrack(hoverTrack + 1);
+          timeline.addTrack(hoverTrack.index + 1);
         };
       };
 
@@ -522,12 +522,12 @@ ESTimelineView : UserView {
   makeContextMenu {
     this.setContextMenuActions(
       Menu(
-        MenuAction("Add Comment (C)", { timeline.tracks[hoverTrack].addClip(ESClip(hoverTime, 5)) }),
-        MenuAction("Add Synth Clip (S)", { timeline.tracks[hoverTrack].addClip(ESSynthClip(hoverTime, 0.5, defName: \default)) }),
-        MenuAction("Add Pattern Clip (P)", { timeline.tracks[hoverTrack].addClip(ESPatternClip(hoverTime, 5, pattern: {Pbind()})) }),
-        MenuAction("Add Routine Clip (R)", { timeline.tracks[hoverTrack].addClip(ESRoutineClip(hoverTime, 5, func: {})) }),
-        MenuAction("Add Env Clip (E)", { timeline.tracks[hoverTrack].addClip(ESEnvClip(hoverTime, 5, env: Env([0, 1, 0], [2.5, 2.5], \sin), prep: true)); }),
-        MenuAction("Add Timeline Clip (T)", { timeline.tracks[hoverTrack].addClip(ESTimelineClip(hoverTime, 10, timeline: ESTimeline())); })
+        MenuAction("Add Comment (C)", { hoverTrack.addClip(ESClip(hoverTime, 5)) }),
+        MenuAction("Add Synth Clip (S)", { hoverTrack.addClip(ESSynthClip(hoverTime, 0.5, defName: \default)) }),
+        MenuAction("Add Pattern Clip (P)", { hoverTrack.addClip(ESPatternClip(hoverTime, 5, pattern: {Pbind()})) }),
+        MenuAction("Add Routine Clip (R)", { hoverTrack.addClip(ESRoutineClip(hoverTime, 5, func: {})) }),
+        MenuAction("Add Env Clip (E)", { hoverTrack.addClip(ESEnvClip(hoverTime, 5, env: Env([0, 1, 0], [2.5, 2.5], \sin), prep: true)); }),
+        MenuAction("Add Timeline Clip (T)", { hoverTrack.addClip(ESTimelineClip(hoverTime, 10, timeline: ESTimeline())); })
       ).title_("Add Clip"),
       Menu(
         MenuAction("Add Env for Synth argument", {
@@ -645,8 +645,8 @@ ESTimelineView : UserView {
         }),
         MenuAction.separator(""),
         MenuAction("Edit Clip (e)", { hoverClip.guiClass.new(hoverClip, timeline) }),
-        MenuAction("Split Clip (s)", { if (hoverClip.notNil) { timeline.tracks[hoverTrack].splitClip(hoverClip.index, hoverTime) } }),
-        MenuAction("Delete Clip (⌫)", { if (hoverClip.notNil) { timeline.tracks[hoverTrack].removeClip(hoverClip.index) } }),
+        MenuAction("Split Clip (s)", { if (hoverClip.notNil) { hoverTrack.splitClip(hoverClip.index, hoverTime) } }),
+        MenuAction("Delete Clip (⌫)", { if (hoverClip.notNil) { hoverTrack.removeClip(hoverClip.index) } }),
       ).title_("Clip actions"),
       MenuAction.separator(""),
       Menu(
@@ -654,9 +654,9 @@ ESTimelineView : UserView {
         MenuAction("Delete Time (Shift+Cmd+⌫)", { if (timeSelection.notNil) { timeline.deleteTime(*timeSelection); }; }),
       ).title_("Time actions"),
       MenuAction.separator(""),
-      MenuAction("Add Track Before (Cmd+T)", { timeline.addTrack(hoverTrack) }),
-      MenuAction("Add Track After (Cmd+t)", { timeline.addTrack(hoverTrack + 1) }),
-      MenuAction("Delete Track (Cmd+⌫)", { timeline.removeTrack(hoverTrack) }),
+      MenuAction("Add Track Before (Cmd+T)", { timeline.addTrack(hoverTrack.index) }),
+      MenuAction("Add Track After (Cmd+t)", { timeline.addTrack(hoverTrack.index + 1) }),
+      MenuAction("Delete Track (Cmd+⌫)", { timeline.removeTrack(hoverTrack.index) }),
     );
   }
 
@@ -740,10 +740,10 @@ ESTimelineView : UserView {
     timeline.tracks.do { |track, i|
       var bottom = (i + 1) * trackHeight;
       if (y < bottom) {
-        ^i;
+        ^track;
       };
     };
-    ^(timeline.tracks.size - 1);
+    ^timeline.tracks.last;
   }
 
   // helper methods:
