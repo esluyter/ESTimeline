@@ -349,7 +349,13 @@ ESEnvClip : ESClip {
                 val = midiVal.linlin(0, 16383, 0.0, 1.0);
                 synth.set(\val, val);
               }, chan);
-            };
+            }
+            { 4 } { // note
+              midiFunc = MIDIFunc.noteOn({ |vel, num|
+                val = num.linlin(0, 127, 0.0, 1.0);
+                synth.set(\val, val);
+              }, chan: chan);
+            }
             { "This MIDI input not yet implemented".warn; };
 
             if (armed) {
