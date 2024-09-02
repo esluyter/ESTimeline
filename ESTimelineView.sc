@@ -44,6 +44,26 @@ ESTimelineView : UserView {
         MenuAction("Add Timeline Clip (T)", { timeline.tracks[hoverTrack].addClip(ESTimelineClip(hoverTime, 10, ESTimeline())); })
       ).title_("Add Clip"),
       MenuAction("Edit Clip (e)", { hoverClip.guiClass.new(hoverClip, timeline) }),
+      Menu(
+        MenuAction("Bulk edit synth arguments", {
+          ESBulkEditWindow.keyValue(callback: { |key, val|
+            this.selectedClips.do { |clip|
+              if (clip.class == ESSynthClip) {
+                clip.setArg(key, val);
+              };
+            };
+          });
+        }),
+        MenuAction("Bulk edit synth defName", {
+          ESBulkEditWindow.value(callback: { |val|
+            this.selectedClips.do { |clip|
+              if (clip.class == ESSynthClip) {
+                clip.defName = val;
+              };
+            };
+          });
+        })
+      ).title_("Bulk edit selected clips"),
       MenuAction("Split Clip (s)", { if (hoverClip.notNil) { timeline.tracks[hoverTrack].splitClip(hoverClipIndex, hoverTime) } }),
       MenuAction("Delete Clip (⌫)", { if (hoverClipIndex.notNil) { timeline.tracks[hoverTrack].removeClip(hoverClipIndex) } }),
       MenuAction.separator(""),
