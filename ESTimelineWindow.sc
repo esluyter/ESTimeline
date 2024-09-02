@@ -124,6 +124,9 @@ ESTimelineWindow : Window {
           this.close;
         }
         { \playbar } {
+          if ((timeline.now < timelineView.startTime) or: (timeline.now > timelineView.endTime)) {
+            timelineView.startTime = timeline.now - (timelineView.duration / 6);
+          };
           timelineView.refresh;
           rulerView.refresh;
         }
@@ -133,6 +136,9 @@ ESTimelineWindow : Window {
             playheadRout.stop; // just to make sure
             playheadRout = {
               inf.do { |i|
+                if ((timeline.now < timelineView.startTime) or: (timeline.now > timelineView.endTime)) {
+                  timelineView.startTime = timeline.now - (timelineView.duration / 6);
+                };
                 timelineView.playheadView.refresh;
                 rulerView.playheadView.refresh;
                 if (timeline.optimizeView.not) {
