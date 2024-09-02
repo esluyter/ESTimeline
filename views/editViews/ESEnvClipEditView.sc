@@ -38,18 +38,21 @@ ESEnvClipEditView : ESClipEditView {
           var curve = curveView.value;
           var isExponential = isExponentialBox.value;
 
-          if ((isExponential and: ((min.sign != max.sign))).not) {
-            var thisEnv = env.value;
-            var oldLevels = thisEnv.levels;
-            var values = oldLevels.collect(clip.prValueScale(_));
-            var newLevels;
-            clip.min = min;
-            clip.max = max;
-            clip.curve = curve;
-            clip.isExponential = isExponential;
-            newLevels = values.collect(clip.prValueUnscale(_));
-            clip.env = Env(newLevels, thisEnv.times, thisEnv.curves);
-            codeView.string_(clip.env.asESDisplayString);
+          // only do this if there's a change
+          if ((clip.min != min) or: (clip.max != max) or: (clip.curve != curve) or: (clip.isExponential != isExponential)) {
+            if ((isExponential and: ((min.sign != max.sign))).not) {
+              var thisEnv = env.value;
+              var oldLevels = thisEnv.levels;
+              var values = oldLevels.collect(clip.prValueScale(_));
+              var newLevels;
+              clip.min = min;
+              clip.max = max;
+              clip.curve = curve;
+              clip.isExponential = isExponential;
+              newLevels = values.collect(clip.prValueUnscale(_));
+              clip.env = Env(newLevels, thisEnv.times, thisEnv.curves);
+              codeView.string_(clip.env.asESDisplayString);
+            };
           };
         };
 
