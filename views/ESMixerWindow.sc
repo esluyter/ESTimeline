@@ -134,7 +134,7 @@ ESMixerWindow {
       //[index, peaks, powers].postln;
       defer {
         //[busIndex, index].postln;
-        if (index.notNil) {
+        if (index.notNil and: { peaks[index].notNil }) {
           thisPeaks.size.do { |i|
             peaks[index][i].value = powers[i].ampdb.linlin(-60, 0, 0, 1);
             peaks[index][i].peakLevel = thisPeaks[i].ampdb.linlin(-60, 0, 0, 1);
