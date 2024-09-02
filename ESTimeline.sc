@@ -118,7 +118,10 @@ ESTimeline {
     //var clock = TempoClock(tempo).permanent_(true);
 
     tracks = tracks ?? [ESTrack()];
+
     mixerChannelTemplates = mixerChannelTemplates ?? ();
+    mixerChannelTemplates = ESEvent.newFrom(mixerChannelTemplates);
+
     globalMixerChannelNames = globalMixerChannelNames ?? [\master];
 
     ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames).initId.initEnvir.initDependantFunc.init(true);
@@ -126,7 +129,10 @@ ESTimeline {
 
   *new { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = false, gridDivision = 4, snapToGrid = false, useMixerChannel = true, mixerChannelTemplates, globalMixerChannelNames|
     tracks = tracks ?? [ESTrack()];
+
     mixerChannelTemplates = mixerChannelTemplates ?? ();
+    mixerChannelTemplates = ESEvent.newFrom(mixerChannelTemplates);
+
     globalMixerChannelNames = globalMixerChannelNames ?? [\master];
 
     ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames).initId.initEnvir.initDependantFunc.init(true, initMixerChannels: false);
@@ -225,7 +231,7 @@ ESTimeline {
 
     this.prFreeMixerChannels({
       var defaultOutbus;
-      var newTemplates = ();
+      var newTemplates = ESEvent.newFrom(());
 
       mixerChannels = ();
 
@@ -718,6 +724,8 @@ ESTimeline {
     };
 
     #tracks, thisTempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, dummyGD, dummySTG, dummyUMC, mixerChannelTemplates, globalMixerChannelNames = arr;
+
+    mixerChannelTemplates = ESEvent.newFrom(mixerChannelTemplates);
 
     // prep fx and legacy support
     mixerChannelTemplates.keysValuesDo { |key, value|
