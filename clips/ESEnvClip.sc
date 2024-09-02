@@ -329,6 +329,7 @@ ESEnvClip : ESClip {
           var val = switch (liveInput)
           { 2 } { track.timeline.listener.ccValue(ccNum, midiChannel) }
           { 3 } { track.timeline.listener.bendValue(midiChannel) }
+          { 4 } { track.timeline.listener.noteValue(midiChannel) }
           { 0 };
 
           defName = (defName ++ "midi").asSymbol;
@@ -354,6 +355,12 @@ ESEnvClip : ESClip {
             { 4 } { // note
               midiFunc = MIDIFunc.noteOn({ |vel, num|
                 val = num.linlin(0, 127, 0.0, 1.0);
+                synth.set(\val, val);
+              }, chan: chan);
+            }
+            { 6 } { // vel
+              midiFunc = MIDIFunc.noteOn({ |vel, num|
+                val = vel.linlin(0, 127, 0.0, 1.0);
                 synth.set(\val, val);
               }, chan: chan);
             }

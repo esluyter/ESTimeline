@@ -1,6 +1,7 @@
 ESMidiListener {
   var ccFuncs, ccValues;
   var bendFuncs, bendValues;
+  var noteFuncs, noteValues, velValues;
 
   *new {
     ^super.new.init;
@@ -26,7 +27,18 @@ ESMidiListener {
       MIDIFunc.bend({ |val|
         bendValues[n] = val.linlin(0, 16383, 0.0, 1.0);
       }, chan).permanent_(true);
-    }
+    };
+
+    noteValues = 0.5.dup(17);
+    velValues = 0.5.dup(17);
+
+    noteFuncs = 17.collect { |n|
+      var chan = if (n == 16) { nil } { n };
+      MIDIFunc.noteOn({ |vel, num|
+        noteValues[n] = num.linlin(0, 127, 0.0, 1.0);
+        velValues[n] = vel.linlin(0, 127, 0.0, 1.0);
+      }, chan: chan).permanent_(true);
+    };
   }
 
   ccValue { |num = 0, chan|
@@ -37,6 +49,16 @@ ESMidiListener {
   bendValue { |chan|
     chan = chan ?? 16;
     ^bendValues[chan];
+  }
+
+  noteValue { |chan|
+    chan = chan ?? 16;
+    ^noteValues[chan];
+  }
+
+  velValue { |chan|
+    chan = chan ?? 16;
+    ^velValues[chan];
   }
 
   free {

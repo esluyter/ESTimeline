@@ -2,7 +2,7 @@ ESEnvClipEditView : ESClipEditView {
 
   *new { |clip, timeline|
     var panelFont = Font("Helvetica", 16);
-    var busView, makeBusBox, makeBusRateMenu, targetView, addActionView, useLiveInputBox, liveInputMenu, ccNumField, channelMenu, channelText, recordArmButt, codeView, minView, maxView, curveView, isExponentialBox, keepBreakpointValuesBox;
+    var busView, makeBusBox, makeBusRateMenu, targetView, addActionView, useLiveInputBox, liveInputMenu, ccNumField, channelMenu, channelText, smoothBox, smoothText, recordArmButt, codeView, minView, maxView, curveView, isExponentialBox, keepBreakpointValuesBox;
     var adjustBg = {
       busView.background_(if (makeBusBox.value) { Color.gray(0.8) } { Color.white });
     };
@@ -25,6 +25,7 @@ ESEnvClipEditView : ESClipEditView {
         clip.liveInput = liveInputMenu.value;
         clip.ccNum = ccNumField.string.interpret;
         clip.midiChannel = channelMenu.value;
+        clip.midiSmooth = smoothBox.value;
 
         if (keepBreakpointValuesBox.value.not) {
           // keep Env the same but change breakpoint values bc of range adjustment.
@@ -90,6 +91,8 @@ ESEnvClipEditView : ESClipEditView {
 
     channelText = StaticText(editorWindow, Rect(555, 100, 160, 30)).string_("MIDI Channel #").align_(\right);
     channelMenu = PopUpMenu(editorWindow, Rect(720, 100, 80, 30)).items_((0..15) ++ \all).value_(clip.midiChannel);
+    smoothText = StaticText(editorWindow, Rect(555, 135, 160, 30)).string_("Smoothing").align_(\right);
+    smoothBox = NumberBox(editorWindow, Rect(720, 135, 80, 30)).value_(clip.midiSmooth).step_(0.1).scroll_step_(0.1).shift_scale_(10);
     ccNumField = TextField(editorWindow, Rect(720, 65, 80, 30)).string_(clip.ccNum).visible_(false);
     liveInputMenu = PopUpMenu(editorWindow, Rect(555, 65, 160, 30)).items_(["Mouse X", "Mouse Y", "MIDI Control #", "MIDI Pitch Bend", "MIDI Note", "MIDI Mono Note", "MIDI Velocity", "MIDI Gated Velocity"]).action_({ |view|
       if (view.value == 2) {
@@ -100,9 +103,13 @@ ESEnvClipEditView : ESClipEditView {
       if (view.value >= 2) {
         channelText.visible = true;
         channelMenu.visible = true;
+        smoothText.visible = true;
+        smoothBox.visible = true;
       } {
         channelText.visible = false;
         channelMenu.visible = false;
+        smoothText.visible = false;
+        smoothBox.visible = false;
       }
     }).valueAction_(clip.liveInput);
 
