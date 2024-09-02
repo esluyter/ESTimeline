@@ -75,7 +75,7 @@ ESSynthClipEditView : ESClipEditView {
       clip.color = colorView.background;
       clip.startTime = startTimeView.value;
       clip.duration =  durationView.value;
-      clip.offset = offsetView.value;
+      //clip.offset = offsetView.value; no offset for synth
 
       timeline.addUndoPoint;
     });
