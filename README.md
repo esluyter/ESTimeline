@@ -39,6 +39,7 @@ The distant goal is that anything you can do in SuperCollider could be sequenced
 ## Mouse interaction
 - drag middle of clip to move
 - drag edges of clip to resize
+- double click on clip to open editor window
 - cmd-scroll zoom horizontally
 - opt-scroll zoom vertically
 - right click to see action menu
