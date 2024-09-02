@@ -131,6 +131,13 @@ ESTimeline {
       };
 
       mixerChannelTemplates = newTemplates;
+
+      this.clips.do { |clip|
+        if (clip.class == ESTimelineClip) {
+          clip.initMixerChannels;
+        };
+      };
+
       this.changed(\initMixerChannels);
     });
 
@@ -140,14 +147,6 @@ ESTimeline {
     //if (useMixerChannel) {
 
     //};
-    /*
-    this.clips.do { |clip|
-      if (clip.class == ESTimelineClip) {
-        clip.initMixerChannels;
-      };
-    };
-    */
-    //}.fork(SystemClock);
   }
 
   orderedMixerChannels {
