@@ -11,7 +11,7 @@ ESTimeline {
   var <buses;
   var <mixerChannels;
 
-  var <>timelineController;
+  var <>timelineController, listener;
 
   var <>notifyOnEndInitMixerChannels = false;
   classvar <freeQueue;
@@ -22,6 +22,8 @@ ESTimeline {
   *initClass { freeQueue = []; timelines = (); }
 
   *at { |val| ^timelines[val] }
+
+  listener { if (parentClip.notNil) { ^parentClip.track.timeline.listener } { ^listener } }
 
   tempo {
     if (parentClip.notNil and: { parentClip.useParentClock }) {
@@ -117,11 +119,6 @@ ESTimeline {
   defaultUndoPoint { ^[[ESTrack([])], 1, nil, nil, bootOnPrep, useEnvir, optimizeView, 4, false, useMixerChannel, (), [\master]].asESArray }
 
   *newInitMixerChannels { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = true, gridDivision = 4, snapToGrid = false, useMixerChannel = true, mixerChannelTemplates, globalMixerChannelNames, initMidi = true|
-    if (initMidi) {
-      MIDIClient.init;
-      MIDIIn.connectAll;
-    };
-
     tracks = tracks ?? [ESTrack()];
 
     mixerChannelTemplates = mixerChannelTemplates ?? ();
@@ -129,15 +126,10 @@ ESTimeline {
 
     globalMixerChannelNames = globalMixerChannelNames ?? [\master];
 
-    ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames).initId.initEnvir.initDependantFunc.init(true);
+    ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames).initId.initEnvir.initDependantFunc.init(true, initMidi: initMidi);
   }
 
   *new { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = false, gridDivision = 4, snapToGrid = false, useMixerChannel = false, mixerChannelTemplates, globalMixerChannelNames, initMidi = true|
-    if (initMidi) {
-      MIDIClient.init;
-      MIDIIn.connectAll;
-    };
-
     tracks = tracks ?? [ESTrack()];
 
     mixerChannelTemplates = mixerChannelTemplates ?? ();
@@ -145,7 +137,7 @@ ESTimeline {
 
     globalMixerChannelNames = globalMixerChannelNames ?? [\master];
 
-    ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames).initId.initEnvir.initDependantFunc.init(true, initMixerChannels: false);
+    ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames).initId.initEnvir.initDependantFunc.init(true, initMixerChannels: false, initMidi: initMidi);
   }
 
   initId {
@@ -408,7 +400,11 @@ ESTimeline {
     };
   }
 
-  init { |resetUndo = false, cleanupFirst = false, initMixerChannels = true|
+  init { |resetUndo = false, cleanupFirst = false, initMixerChannels = true, initMidi = false|
+    if (initMidi) {
+      listener = ESMidiListener();
+    };
+
     if (cleanupFirst) {
       this.cleanup;
     };
@@ -837,6 +833,7 @@ ESTimeline {
     this.releaseDependants;
     mixerChannelTemplates.do({ |template| template.releaseDependants });
     timelines[id] = nil;
+    listener.free;
   }
 
   encapsulateSelf {

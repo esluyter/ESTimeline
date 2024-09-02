@@ -327,9 +327,10 @@ ESEnvClip : ESClip {
 
           defName = (defName ++ "midi").asSymbol;
           Server.default.bind {
-            // TODO: how to get the last input value, if it exists
-            // this might require a dedicated midi listening class :(
-            synth = Synth(defName, [out: bus.value, min: min, max: max, curve: curve], target.value, addAction.value);
+            var lastVal = switch (liveInput)
+            { 2 } { track.timeline.listener.ccValue(ccNum, midiChannel) }
+            { 0 };
+            synth = Synth(defName, [out: bus.value, min: min, max: max, curve: curve, val: lastVal], target.value, addAction.value);
           };
 
           {
