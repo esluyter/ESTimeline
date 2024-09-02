@@ -130,11 +130,14 @@ ESMixerWindow {
       //msg.postln;
       # oscMsg, synthId, busIndex = msg;
       # thisPeaks, powers = msg[3..].clump(2).flop;
-      index = channelIndexMap[busIndex];
+
+      if (channelIndexMap.notNil) {
+        index = channelIndexMap[busIndex];
+      };
       //[index, peaks, powers].postln;
-      defer {
-        //[busIndex, index].postln;
-        if (index.notNil and: { peaks[index].notNil }) {
+      //[busIndex, index].postln;
+      if (index.notNil and: { peaks.notNil } and: { peaks[index].notNil }) {
+        defer {
           thisPeaks.size.do { |i|
             peaks[index][i].value = powers[i].ampdb.linlin(-60, 0, 0, 1);
             peaks[index][i].peakLevel = thisPeaks[i].ampdb.linlin(-60, 0, 0, 1);
