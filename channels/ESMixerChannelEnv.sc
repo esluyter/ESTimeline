@@ -5,6 +5,7 @@ ESMixerChannelEnv {
   var <>template;
   var <>name;
   var <synth, playRout, <bus;
+  var indexSelection, breakPointCache;
 
   hoverIndex_ { |val|
     if (val != hoverIndex) {
@@ -120,7 +121,7 @@ ESMixerChannelEnv {
     this.hoverIndex = nil;
   }
 
-  prMouseDown { |x, y, mods, buttNum, clickCount|
+  prMouseDown { |x, y, mods, buttNum, clickCount, timeSelection|
     editingFirst = false;
     originalCurve = nil;
     curveIndex = nil;
@@ -156,44 +157,70 @@ ESMixerChannelEnv {
       env = Env(levels, times, curves);
       template.changed(\env);
     };
+
+    if (hoverIndex.notNil and: timeSelection.notNil) {
+      var t = 0;
+      var startI, endI;
+      env.times.do { |timediff, i|
+        if (startI.isNil and: { t > timeSelection[0] }) {
+          startI = i;
+        };
+        if (endI.isNil and: { t > timeSelection[1] }) {
+          endI = i - 1;
+        };
+
+        t = t + timediff;
+      };
+      if (endI.isNil and: { t > timeSelection[1] }) {
+        endI = env.times.size - 1;
+      };
+      if (endI.isNil) { endI = env.times.size };
+      indexSelection = [startI, endI];
+      breakPointCache = this.envBreakPoints;
+    } {
+      indexSelection = nil;
+      breakPointCache = this.envBreakPoints;
+    };
   }
 
-  prMouseMove { |x, y, xDelta, yDelta, mods|
-    //try {
-      var thisEnv = env;
-      var points;
-      if (hoverIndex == 0) {
-        env = Env([thisEnv.levels[0]] ++ thisEnv.levels, [0] ++ thisEnv.times, if (thisEnv.curves.isArray) { [thisEnv.curves[0]] ++ thisEnv.curves } { thisEnv.curves });
-        hoverIndex = 1;
-        editingFirst = true;
-        thisEnv = env;
-      };
-      points = this.envBreakPoints;
-      if (hoverIndex.notNil) {
+  prMouseMove { |x, y, xDelta, yDelta, mods, timeSelection|
+    var thisEnv = env;
+    var points;
+    if (hoverIndex == 0) {
+      env = Env([thisEnv.levels[0]] ++ thisEnv.levels, [0] ++ thisEnv.times, if (thisEnv.curves.isArray) { [thisEnv.curves[0]] ++ thisEnv.curves } { thisEnv.curves });
+      hoverIndex = 1;
+      editingFirst = true;
+      thisEnv = env;
+    };
+    points = breakPointCache.copy;//this.envBreakPoints;
+    if (hoverIndex.notNil) {
+      var indices = if (indexSelection.notNil) { (indexSelection[0]..indexSelection[1]) } { [hoverIndex] };
+
+      indices.do { |index|
         var newEnv, offset;
         // adjust breakpoint
-        var prevPoint = points[max(0, hoverIndex - 1)];
-        var nextPoint = if (hoverIndex < (points.size - 1)) { points[hoverIndex + 1] } { (left + width)@0 };
-        var adjustedX = x.clip(prevPoint.x, nextPoint.x).clip(left, left + width);
-        var adjustedY = y.clip(top, top + height);
-        points[hoverIndex] = adjustedX@adjustedY;
+        var prevPoint = points[max(0, indices.first - 1)];
+        var nextPoint = if (indices.last < (points.size - 1)) { points[indices.last + 1] } { (left + width)@0 };
+        var adjustedX = (points[index].x + xDelta).clip(prevPoint.x, nextPoint.x).clip(left, left + width);
+        var adjustedY = (points[index].y + yDelta).clip(top, top + height);
+        points[index] = adjustedX@adjustedY;
         if (editingFirst) { points[0] = left@adjustedY; };
         this.env = this.envFromBreakPoints(points);
-      } {
-        // adjust curve if not over breakpoint and no modifiers
-        if (mods == 0) {
-          var curves = if (thisEnv.curves.isArray) { thisEnv.curves } { thisEnv.curves.dup(thisEnv.times.size) };
-          curveIndex = curveIndex ?? this.segmentIndex(points, x@y);
-          originalCurve = originalCurve ?? curves[curveIndex];
-          if (originalCurve.isNumber) {
-            var slope = thisEnv.levels[curveIndex + 1] - thisEnv.levels[curveIndex];
-            curves[curveIndex] = originalCurve + (yDelta * 0.1 * slope.sign);
-            this.env = Env(thisEnv.levels, thisEnv.times, curves);
-          };
+      };
+    } {
+      // adjust curve if not over breakpoint and no modifiers
+      if (mods == 0) {
+        var curves = if (thisEnv.curves.isArray) { thisEnv.curves } { thisEnv.curves.dup(thisEnv.times.size) };
+        curveIndex = curveIndex ?? this.segmentIndex(points, x@y);
+        originalCurve = originalCurve ?? curves[curveIndex];
+        if (originalCurve.isNumber) {
+          var slope = thisEnv.levels[curveIndex + 1] - thisEnv.levels[curveIndex];
+          curves[curveIndex] = originalCurve + (yDelta * 0.1 * slope.sign);
+          this.env = Env(thisEnv.levels, thisEnv.times, curves);
         };
       };
-      template.changed(\env);
-    //};
+    };
+    template.changed(\env);
   }
 
   envBreakPoints {

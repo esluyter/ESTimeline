@@ -176,7 +176,7 @@ ESTimelineView : UserView {
         var top = 0;
         var i = hoverTrack.index;
         i.do { |j| top = top + trackHeights[j] };
-        hoverEnv.prMouseDown(x, y - top, mods, buttNum, clickCount);
+        hoverEnv.prMouseDown(x, y - top, mods, buttNum, clickCount, this.timeSelection);
       };
     };
 
@@ -381,7 +381,7 @@ ESTimelineView : UserView {
         var top = 0;
         var i = hoverTrack.index;
         i.do { |j| top = top + trackHeights[j] };
-        hoverEnv.prMouseMove(x, y - top, xDelta, yDelta, mods);
+        hoverEnv.prMouseMove(x, y - top, xDelta, yDelta, mods, this.timeSelection);
       };
 
       this.changed(\mouseMove);
