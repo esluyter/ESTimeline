@@ -46,7 +46,7 @@ Timelines inside of timelines with optionally separate play clocks:
 - ddwPlug integration -- simplify bus routing for modulation
 - jitlib integration -- ditto
 - clothesline integration -- put whole .scd files on the timeline
-- ....dare I suggest VSTPlugin integration?
+- VSTPlugin integration, somehow..... this could be a can of worms
 
 ## Issues
 1. Although I've tried to make it pleasant, the GUI based code editing environment does not syntax highlight, autocomplete, etc -- for this reason I've added "Open in IDE" / "Copy from IDE" buttons as necessary.
