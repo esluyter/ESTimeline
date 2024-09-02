@@ -140,13 +140,7 @@ ESClip {
         width = width - (clipLeft - left);
         left = clipLeft;
       };
-      while { max(0, width - 3.5) < (QtGUI.stringBounds(title, font).width) } {
-        if (title.size == 1) {
-          title = "";
-        } {
-          title = title[0..title.size-2];
-        };
-      };
+      title = ESStringShortener.trim(title, width - 3.5, font);
       Pen.stringAtPoint(title, (left + 3.5)@(top + 2), font, Color.gray(1, 0.6));
     };
   }
@@ -173,13 +167,7 @@ ESClip {
     lines = [if (name.isNil) { "" } { name.asString }] ++ lines;
     lines.do { |line, i|
       var thisFont = if (i > 0) { font } { font.copy.size_(17) };
-      while { max(0, width - 5) < (QtGUI.stringBounds(line, thisFont).width) } {
-        if (line.size == 1) {
-          line = "";
-        } {
-          line = line[0..line.size-2];
-        };
-      };
+      line = ESStringShortener.trim(line, width - 5, thisFont);
       strTop = (2+(i * 16));
       if (strTop < height) {
         Pen.stringAtPoint(line, (left+3.5)@(strTop + top), thisFont, Color.gray(0.0, 0.7));

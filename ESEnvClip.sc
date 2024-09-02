@@ -192,35 +192,15 @@ ESEnvClip : ESClip {
     };
 
     if (editingMode.not and: (height > 50)) {
-      while { max(0, width - 5) < (QtGUI.stringBounds(line, font).width) } {
-        if (line.size == 1) {
-          line = "";
-        } {
-          line = line[0..line.size-2];
-        };
-      };
-      if (20 < height) {
-        Pen.stringAtPoint(line, (left+3.5)@(top+20+(0 * 10)), font, Color.gray(1.0, 0.5));
-      };
+      line = ESStringShortener.trim(line, width - 5, font);
+      Pen.stringAtPoint(line, (left+3.5)@(top+20+(0 * 10)), font, Color.gray(1.0, 0.5));
     };
 
     if (width > 50) {
-      while { max(0, width - 30) < (maxWidth = QtGUI.stringBounds(maxString, font).width) } {
-        if (maxString.size == 1) {
-          maxString = "";
-        } {
-          maxString = maxString[0..maxString.size-2];
-        };
-      };
+      # maxString, maxWidth = ESStringShortener.trimWidth(maxString, width - 30, font);
       Pen.stringAtPoint(maxString, (left + width - maxWidth - 2)@(top), font, Color.gray(1.0, 0.5));
 
-      while { max(0, width - 5) < (minWidth = QtGUI.stringBounds(minString, font).width) } {
-        if (minString.size == 1) {
-          minString = "";
-        } {
-          minString = minString[0..minString.size-2];
-        };
-      };
+      # minString, minWidth = ESStringShortener.trimWidth(minString, width - 5, font);
       Pen.stringAtPoint(minString, (left + width - minWidth - 2)@(top + height - 11), font, Color.gray(1.0, 0.5));
     };
 
