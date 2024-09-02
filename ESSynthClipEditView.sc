@@ -91,7 +91,7 @@ ESArgsView : ScrollView {
   var control_i;
 
   *new { |parent, bounds, clip|
-    ^super.new(parent, bounds).hasBorder_(false).init(clip.args, clip.argControls);
+    ^super.new(parent, bounds).hasBorder_(false).init(clip.args.copy, clip.argControls);
   }
 
   initArgControls { |argargControls|

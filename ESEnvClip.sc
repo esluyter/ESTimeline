@@ -1,11 +1,12 @@
 ESEnvClip : ESClip {
-  var <env, <bus, <>target, <>addAction, <>min, <>max, <>curve, <>isExponential;
+  var <env, <bus, <>target, <>addAction, <>min, <>max, <>curve, <>isExponential, <makeBus = false, <>makeBusRate;
   var <synth;
   var <hoverIndex;
 
   env_ { |val| env = val; this.changed(\env); }
   bus_ { |val| bus = val; this.changed(\bus); }
   rate { ^this.bus.value.rate }
+  makeBus_ { |val| this.cleanup; makeBus = val; this.prep; this.changed(\makeBus); }
 
   hoverIndex_ { |val|
     if (val != hoverIndex) {
@@ -14,7 +15,7 @@ ESEnvClip : ESClip {
     };
   }
 
-  storeArgs { ^[startTime, duration, offset, color, name, env, bus, target, addAction, min, max, curve, isExponential] }
+  storeArgs { ^[startTime, duration, offset, color, name, env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate] }
 
   *initClass {
     ServerBoot.add {
@@ -46,11 +47,11 @@ ESEnvClip : ESClip {
     };
   }
 
-  *new { |startTime, duration, offset = 0, color, name, env, bus, target, addAction = 'addToHead', min = 0, max = 1, curve = 0, isExponential = false|
-    ^super.new(startTime, duration, offset, color, name).init(env, bus, target, addAction, min, max, curve, isExponential);
+  *new { |startTime, duration, offset = 0, color, name, env, bus, target, addAction = 'addToHead', min = 0, max = 1, curve = 0, isExponential = false, makeBus = true, makeBusRate = \audio, prep = false|
+    ^super.new(startTime, duration, offset, color, name).init(env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate, prep);
   }
 
-  init { |argEnv, argBus, argTarget, argAddAction, argMin, argMax, argCurve, argExp|
+  init { |argEnv, argBus, argTarget, argAddAction, argMin, argMax, argCurve, argExp, argMakeBus, argMakeBusRate, argPrep|
     env = argEnv;
     bus = argBus;
     target = argTarget;
@@ -59,6 +60,23 @@ ESEnvClip : ESClip {
     max = argMax;
     curve = argCurve;
     isExponential = argExp;
+    makeBusRate = argMakeBusRate;
+    makeBus = argMakeBus;
+    if (argPrep) { this.prep };
+  }
+
+  prep {
+    if (makeBus) {
+      "allocating bus".postln;
+      bus = Bus.perform(makeBusRate, Server.default, 1);
+    };
+  }
+
+  cleanup {
+    if (makeBus) {
+      "freeing bus".postln;
+      bus.free;
+    };
   }
 
   prStop {

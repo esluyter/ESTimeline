@@ -2,7 +2,7 @@ ESEnvClipEditView : ESClipEditView {
 
   *new { |clip, timeline|
     var panelFont = Font("Helvetica", 16);
-    var busView, targetView, addActionView, codeView, sidePanel, nameField, startTimeView, durationView, offsetView, colorView, minView, maxView, curveView, isExponentialBox;
+    var busView, makeBusBox, makeBusRateMenu, targetView, addActionView, codeView, sidePanel, nameField, startTimeView, durationView, offsetView, colorView, minView, maxView, curveView, isExponentialBox;
 
     if (editorWindow.notNil) { editorWindow.close };
     editorWindow = Window("Env Clip Editor", Rect(0, 0, 800, 600))
@@ -10,7 +10,12 @@ ESEnvClipEditView : ESClipEditView {
     .front;
 
     StaticText(editorWindow, Rect(20, 30, 180, 20)).string_("bus").font_(panelFont);
-    busView = TextField(editorWindow, Rect(10, 50, 590, 40)).string_(clip.bus.asESDisplayString).font_(Font.monospace(16));
+    busView = TextField(editorWindow, Rect(10, 50, 350, 40)).string_(if (clip.makeBus.not) { clip.bus.asESDisplayString } { "" }).font_(Font.monospace(16));
+
+    StaticText(editorWindow, Rect(365, 30, 100, 30)).string_(". . . or:");
+    makeBusBox = CheckBox(editorWindow, Rect(415, 30, 20, 20)).value_(clip.makeBus);
+    StaticText(editorWindow, Rect(440, 30, 200, 20)).string_("makeBus with rate:").font_(panelFont);
+    makeBusRateMenu = PopUpMenu(editorWindow, Rect(415, 50, 180, 30)).items_(["audio", "control"]).value_([\audio, \control].indexOf(clip.makeBusRate));
 
     StaticText(editorWindow, Rect(20, 100, 180, 20)).string_("target").font_(panelFont);
     targetView = TextField(editorWindow, Rect(10, 120, 290, 40)).string_(clip.target.asESDisplayString).font_(Font.monospace(16));
@@ -76,7 +81,6 @@ ESEnvClipEditView : ESClipEditView {
     Button(sidePanel, Rect(0, 520, 180, 30)).string_("Save").font_(panelFont.copy.size_(14)).action_({
       clip.name = nameField.string.asSymbol;
       clip.env = codeView.string.interpret;
-      clip.bus = ("{" ++ busView.string ++ "}").interpret;
       clip.target = ("{" ++ targetView.string ++ "}").interpret;
       clip.addAction = ("{" ++ addActionView.string ++ "}").interpret;
       clip.color = colorView.background;
@@ -87,6 +91,12 @@ ESEnvClipEditView : ESClipEditView {
       clip.max = maxView.value;
       clip.curve = curveView.value;
       clip.isExponential = isExponentialBox.value;
+
+      clip.makeBusRate = makeBusRateMenu.item.asSymbol;
+      clip.makeBus = makeBusBox.value;
+      if (clip.makeBus.not) {
+        clip.bus = ("{" ++ busView.string ++ "}").interpret;
+      };
 
       timeline.addUndoPoint;
     });

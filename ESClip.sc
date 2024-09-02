@@ -52,6 +52,9 @@ ESClip {
     this.changed(\comment, val);
   }
 
+  prep {}
+  cleanup {}
+
   stop { |hard = false|
     // stop the clip
     this.prStop(hard);
@@ -140,6 +143,7 @@ ESClip {
   }
 
   free {
+    this.cleanup;
     this.prFree;
     this.release;
   }
