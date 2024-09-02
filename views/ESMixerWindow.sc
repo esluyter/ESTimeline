@@ -613,9 +613,9 @@ ESMixerWindow {
                 .background_(Color.gray(0.82)).setContextMenuActions(
                   MenuAction("New Insert FX", {
                     var newClip = ESFxSynth(func: {
-                      var sig = In.ar(~out, 2);
-                      sig;
-                    }, doPlayFunc: true).prep;
+  var sig = In.ar(~out, 2);
+  sig;
+}, doPlayFunc: true).prep;
                     newClip.guiClass.new(newClip, timeline, template, template.fx.size);
                     template.fx = template.fx.add(newClip);
                     this.buildMixer;
