@@ -282,10 +282,11 @@ Pbind(
   - double click on the envelope to edit its parameters
     - name it `pan0`
     - set its range from -1 to 1
+    - deselect "keep breakpoint values when adjusting range" so that the pan stays in the middle
   - click "save" to save it, and close the window if you want
 - double click on each of the pattern clips and add
 ```
-  \pan, ~thisTimeline[\pan0],
+\pan, ~thisTimeline[\pan0],
 ```
 - cmd-e and edit the panning to your liking
 
