@@ -54,7 +54,7 @@ ESTrack {
       this.changed(\clip, [clips.indexOf(theClip), theClip, what, value].flat);
     };
     clips.do { |clip, i|
-      clip.track = this;
+      clip.track_(this, false);
       clip.addDependant(dependantFunc);
     };
   }
