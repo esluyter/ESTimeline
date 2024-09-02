@@ -8,7 +8,9 @@ ESTrack {
   totalHeightMultiplier {
     var template = this.mixerChannelTemplate;
     // note: this isn't right, but just doing this to have something to test with
-    var envHeight = (template.fx.size + template.preSends.size + template.postSends.size) * timeline.envHeightMultiplier;
+    //var envHeight = (template.fx.size + template.preSends.size + template.postSends.size) * timeline.envHeightMultiplier;
+    var envs = template.envs.collect { |item| if (item.isArray and: item.size == 0) { nil } { item }};
+    var envHeight = envs.size * timeline.envHeightMultiplier;
     ^heightMultiplier + envHeight;
   }
 
