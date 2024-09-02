@@ -46,8 +46,9 @@ ESEnvClip : ESClip {
     };
   }
 
-  prDraw { |left, top, width, height|
+  prDraw { |left, top, width, height, editingMode|
     var pratio = duration / width;
+    var tratio = pratio.reciprocal;
     var line = this.busString ++ "  -> " ++ bus.value.asCompileString;
     var font = Font.monospace(10);
     Pen.use {
@@ -56,7 +57,22 @@ ESEnvClip : ESClip {
         Pen.lineTo((left + i)@(top + ((1 - env[offset + (i * pratio)]) * height)));
       };
       Pen.color = Color.gray(1.0, 0.5);
+      Pen.width = 1;
       Pen.stroke;
+    };
+    if (editingMode) {
+      var thisEnv = this.envToPlay;
+      var time = 0;
+      thisEnv.levels.do { |level, i|
+        Pen.addOval(Rect(left + (time * tratio - 3), top + ((1 - level) * height - 3), 6, 6));
+        Pen.strokeColor = Color.white;
+        Pen.fillColor = this.color;
+        Pen.width = 2;
+        Pen.fillStroke;
+        if (i < thisEnv.times.size) {
+          time = time + thisEnv.times[i];
+        };
+      };
     };
     while { max(0, width - 5) < (QtGUI.stringBounds(line, font).width) } {
       if (line.size == 1) {
@@ -69,7 +85,7 @@ ESEnvClip : ESClip {
     ^"Env"
   }
 
-  defaultColor { ^Color.hsv(0.58, 0.4, 0.7, 0.7) }
+  defaultColor { ^Color.hsv(0.58, 0.45, 0.65, 0.7) }
 
   guiClass { ^nil }
 

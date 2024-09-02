@@ -75,7 +75,7 @@ ESClip {
   }
 
   // draw this clip on a UserView using Pen
-  draw { |left, top, width, height|
+  draw { |left, top, width, height, editingMode|
     if (track.shouldPlay) {
       Pen.color = this.color;
     } {
@@ -94,10 +94,10 @@ ESClip {
       var title;
       if (track.timeline.useEnvir) {
         track.timeline.envir.use {
-          title = this.prDraw(left, top, width, height);
+          title = this.prDraw(left, top, width, height, editingMode);
         }
       } {
-        title = this.prDraw(left, top, width, height);
+        title = this.prDraw(left, top, width, height, editingMode);
       };
 
       if (left < 0) {

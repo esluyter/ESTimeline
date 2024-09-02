@@ -19,7 +19,7 @@ ESTrackView : UserView {
             // only draw clips in the timeline view bounds
             var left = timelineView.absoluteTimeToPixels(clip.startTime);
             var width = timelineView.relativeTimeToPixels(clip.duration);
-            clip.draw(left, 3, width, this.bounds.height - 4);
+            clip.draw(left, 3, width, this.bounds.height - 4, timelineView.editingMode);
           };
         };
         if (track.shouldPlay.not) {
