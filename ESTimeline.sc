@@ -177,11 +177,12 @@ ESTimeline {
   }
 
   initMixerChannels { |first = true|
-    this.changed(\beginInitMixerChannels);
-
     if (first) {
       var maxLevel = 0;
       var thisTimeline;
+
+      this.changed(\beginInitMixerChannels);
+
       this.subTimelines.flat.do { |assoc|
         if (assoc.key > maxLevel) { maxLevel = assoc.key };
       };
