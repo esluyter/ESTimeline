@@ -429,7 +429,9 @@ SynthDef(\verb, { |out, verbbus, gate = 1, amp = 1|
   <summary><strong>Current ad-hoc mixer interface</strong></summary>
 
 ## Current ad-hoc mixer interface
-its not pretty but everything works, you can create/monitor envelopes and everything saves with timeline except mixer channel output bus (will reset to default)
+The code is not pretty but the mixer interface is! The only thing that doesn't work is the mixer channel output bus (will reset to default).
+
+I will encapsulate this in its own class/es someday.
 ```
 (
 // for flattening mixer channel names and timeline ids
@@ -625,8 +627,8 @@ OSCdef(\test, { |msg|
           template.envs.level = ESMixerChannelEnv(Env(unmappedLevel.dup(2), [0], [0]), faderSpec.minval, faderSpec.maxval, 4); // <- this curve could be issue, assumes faderSpec will always have curve 4...
           timeline.addUndoPoint;
         });
-      ).mouseUpAction_({ 
-        timeline.addUndoPoint 
+      ).mouseUpAction_({
+        timeline.addUndoPoint
       });
 
       UserView(~scrollView, bounds).drawFunc_({
@@ -963,6 +965,13 @@ OSCdef(\test, { |msg|
           ~waitWin = nil;
         };
       };
+      if (args.indexOf(\template).notNil) {
+        var i = args.indexOf(\template);
+        var next = args[i + 1];
+        if ((next == \envs) or: (next == \env)) {
+          updateAutomatedLevels.();
+        };
+      };
     }
     { \template } {
       if ((args[0] == \envs) or: (args[0] == \env)) {
@@ -972,7 +981,7 @@ OSCdef(\test, { |msg|
     { \isPlaying } {
       var names;
 
-      if (~timeline.isPlaying) {
+      if (/*~timeline.isPlaying*/args) {
         var waitTime = 20.reciprocal; // 5 fps refresh mixer
         names = ~timeline.orderedMixerChannelNames;
         ~mixerRout.stop; // just to make sure
