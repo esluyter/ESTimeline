@@ -139,14 +139,15 @@ ESEnvClip : ESClip {
       var n = (width / (height / 50).max(1)).asInteger;
       var nratio = width / n;
       var firstI, lastI, prevY;
+      var thisEnv = env.value;
       firstI = ((0 - left) / nratio).asInteger.clip(0, n);
       lastI = ((Window.screenBounds.width - left) / nratio).asInteger.clip(0, n);
-      prevY = top + ((1 - env[offset + (firstI * pratio)]) * height);
+      prevY = top + ((1 - thisEnv[offset + (firstI * pratio)]) * height);
       (firstI..lastI).do { |i|
         var thisY, thisX;
         i = i * nratio;
         thisX = left + i;
-        thisY = top + ((1 - env[offset + (i * pratio)]) * height);
+        thisY = top + ((1 - thisEnv[offset + (i * pratio)]) * height);
         Pen.addRect(Rect(thisX, min(prevY, thisY), nratio, max(1, abs(prevY - thisY))));
         prevY = thisY;
       };
@@ -356,17 +357,17 @@ ESEnvClip : ESClip {
   guiClass { ^ESEnvClipEditView }
 
   envToPlay { |startOffset = 0|
+    var thisEnv = env.value;
     var playOffset = offset + startOffset;
-    var initlevel = env[playOffset];
+    var initlevel = thisEnv[playOffset];
 
-    var levels = env.levels;
-    var times = env.times;
-    var curves = env.curves;
+    var levels = thisEnv.levels;
+    var times = thisEnv.times;
+    var curves = thisEnv.curves;
 
     var thisDuration = duration - startOffset;
 
     if (playOffset < 0) {
-      //thisEnv = thisEnv.delay(playOffset * -1);
       levels = [levels[0]] ++ levels;
       times = [playOffset * -1] ++ times;
       curves = if (curves.isArray) { [curves[0]] ++ curves } { curves };
