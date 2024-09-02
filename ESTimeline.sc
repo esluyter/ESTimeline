@@ -758,7 +758,7 @@ ESTimeline {
   }
 
   new { |clearUndoStack = false|
-    this.restoreUndoPoint(this.defaultUndoPoint, clearUndoStack);
+    this.restoreUndoPoint(this.defaultUndoPoint, clearUndoStack, useAllFields: true);
     this.changed(\new);
   }
 
