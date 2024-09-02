@@ -68,7 +68,7 @@ ESTrackPanelView : UserView {
       StaticText(view, Rect(2, 4, 18, 25)).string_(i.asString).stringColor_(Color.gray(0.4)).font_(Font.monospace(14));
 
       ev = (
-        nameText: StaticText(view, Rect(2, 35, width - 4, trackHeight - 35)).align_(\topLeft).string_(track.name ?? "").stringColor_(Color.gray(0.4)).font_(Font.monospace(12)).canReceiveDragHandler_(true)
+        nameText: StaticText(view, Rect(2, 35, width - 4, trackHeight - 35)).align_(\topLeft).string_(track.name ?? "").stringColor_(Color.gray(0.5)).font_(Font.sansSerif(14, true)).canReceiveDragHandler_(true)
         .receiveDragHandler_({
           var thisTrack = View.currentDrag;
           timeline.removeTrack(thisTrack.index, false);
@@ -83,7 +83,7 @@ ESTrackPanelView : UserView {
           // if you click somewhere else, accept changes
           track.name = if (view.string == "") { nil } { view.string.asSymbol };
           view.visible = false;
-        }).visible_(false).font_(Font.monospace(12)),
+        }).visible_(false).font_(Font.sansSerif(14)),
         mix: Button(view, Rect(21, 4, 25, 25)).states_([
           ["mix", Color.gray(0.5), Color.gray(0.8)],
           ["mix", Color.gray(0.85), Color.gray(0.45)]])
