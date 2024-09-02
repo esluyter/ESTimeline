@@ -109,6 +109,31 @@ ESTimelineController {
           globalMixerChannelNames: [])));
   }
 
+  expandTimelineClip { |clip, selectedClips|
+    if (clip.class == ESTimelineClip) {
+      var offset = clip.startTime - clip.offset;
+
+      clip.timeline.tracks.reverse.do { |thisTrack|
+        var newTrack = ESTrack([], thisTrack.mute, thisTrack.name, thisTrack.useMixerChannel);
+        timeline.addTrack(clip.track.index + 1, newTrack, thisTrack.mixerChannelTemplate);
+
+        thisTrack.clips.reverse.do { |thisClip|
+          thisTrack.removeClip(thisClip.index, false);
+          thisClip.startTime = thisClip.startTime + offset;
+          if ((thisClip.startTime < clip.endTime) and: (thisClip.endTime > clip.startTime)) {
+            if (thisClip.endTime > clip.endTime) {
+              thisClip.endTime = clip.endTime;
+            };
+            if (thisClip.startTime < clip.startTime) {
+              thisClip.startTime_(clip.startTime, true);
+            };
+            newTrack.addClip(thisClip);
+          };
+        };
+      };
+    };
+  }
+
   newCommentClip { |track, startTime, duration|
     track.addClip(ESClip(startTime, duration ?? 5));
   }
