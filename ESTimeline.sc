@@ -243,9 +243,9 @@ ESTimeline {
       currentState = undoPoint.interpret.asESArray;
     };
     currentState = undoPoint;
-    {
+    //{
       this.prFree;
-      Server.default.sync;
+      //Server.default.sync;
       #tracks, thisTempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView = Object.fromESArray(currentState);
       this.tempo = thisTempo;
       if (clearUndoStack) {
@@ -254,7 +254,7 @@ ESTimeline {
       };
       this.init;
       this.changed(\restoreUndoPoint);
-    }.fork(AppClock)
+    //}.fork(AppClock)
   }
 
   new { |clearUndoStack = false|
