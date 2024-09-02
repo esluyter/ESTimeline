@@ -231,5 +231,9 @@ ESTimeline {
     };
     ^false;
   }
+
+  duration {
+    ^tracks.collect(_.clips).flat.collect(_.endTime).maxItem
+  }
 }
 
