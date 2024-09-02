@@ -11,6 +11,7 @@ The distant goal is that anything you can do in SuperCollider could be sequenced
 - Tracks can contain all clip types, and can be muted/soloed
 - Most fields can take a Function, so playback params can be generated on the fly
 - Where possible, clips can start playing in the middle
+- Where possible, clips can be seeded so random number generation is deterministic
 - Each Timeline can have its own TempoClock and Environment, and has an init / free hook that save with the timeline
 - DAW-like GUI with key commands for editing and playback
 - Undo and redo
