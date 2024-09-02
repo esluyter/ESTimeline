@@ -83,12 +83,12 @@ Also note that because timelines are built to execute user-supplied code they ar
   - More live interaction - e.g. map a controller to a bus and record its movements to an envelope
   - Higher dimensional envelopes - e.g. movement through x/y space
   - Timeline tempo envelopes (this is already possible but kind of annoying, using an Env clip and a Routine clip)
+  - Automate mixer channel parameters (level, pan, sends, insert fx parameters) with envelopes
 - Playback and record audio files
   - easily access this Buffer for further manipulation
 - MIDI integration
   - not sure how DAW-like I want to make this.....
 - Library integration
-  - ddwMixerChannel for simple, solid bus routing.
   - ddwPlug -- simplify bus routing for modulation
   - VSTPlugin, somehow..... this could be a can of worms
   - clothesline -- put whole .scd files on the timeline
