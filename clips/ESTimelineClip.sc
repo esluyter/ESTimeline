@@ -21,11 +21,13 @@ ESTimelineClip : ESClip {
 
   initMixerChannels {
     timeline.initMixerChannels;
+    /*
     timeline.clips.do { |clip|
       if (clip.class == ESTimelineClip) {
         clip.initMixerChannels;
       };
     };
+    */
   }
 
   refreshTimelineNow {
