@@ -839,7 +839,7 @@ ESTimeline {
   encapsulateSelf {
     var duration = this.duration;
     if (duration > 0) {
-      var newTimeline = ESTimeline(bootOnPrep: bootOnPrep, gridDivision: gridDivision, snapToGrid: snapToGrid, useMixerChannel: useMixerChannel);
+      var newTimeline = ESTimeline(bootOnPrep: bootOnPrep, gridDivision: gridDivision, snapToGrid: snapToGrid, useMixerChannel: useMixerChannel, initMidi: false);
       this.prFree;
       tracks = [ESTrack([ESTimelineClip(0, duration, timeline: newTimeline)])];
       prepFunc = {};

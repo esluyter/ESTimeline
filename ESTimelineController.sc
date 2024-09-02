@@ -49,7 +49,9 @@ ESTimelineController {
           gridDivision: timeline.gridDivision,
           snapToGrid: timeline.snapToGrid,
           useMixerChannel: timeline.useMixerChannel,
-          globalMixerChannelNames: [])));
+          globalMixerChannelNames: [],
+          initMidi: false
+    )));
   }
 
   newTimelineClipFromSelected { |track|
@@ -115,7 +117,9 @@ ESTimelineController {
           snapToGrid: timeline.snapToGrid,
           useMixerChannel: timeline.useMixerChannel,
           mixerChannelTemplates: newMixerChannelTemplates,
-          globalMixerChannelNames: [])));
+          globalMixerChannelNames: [],
+          initMidi: false
+    )));
   }
 
   expandTimelineClip { |clip, selectedClips|
