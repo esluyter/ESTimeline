@@ -19,6 +19,15 @@ ESTimelineClip : ESClip {
     timeline.addDependant(this);
   }
 
+  initMixerChannels {
+    timeline.initMixerChannels;
+    timeline.clips.do { |clip|
+      if (clip.class == ESTimelineClip) {
+        clip.initMixerChannels;
+      };
+    };
+  }
+
   update { |argTimeline, what, val|
     this.changed(\timeline, [what, val]);
   }
