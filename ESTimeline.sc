@@ -41,7 +41,7 @@ ESTimeline {
     };
     this.changed(\tempo, val);
   }
-  prChangeEnvTempos {
+  envs {
     var envs = [];
     mixerChannelTemplates.do { |template|
       if (template.envs.level.notNil) {
@@ -70,6 +70,10 @@ ESTimeline {
         };
       };
     };
+    ^envs;
+  }
+  prChangeEnvTempos {
+    var envs = this.envs;
     envs.do { |env|
       if (env.synth.notNil) {
         Server.default.bind {
@@ -828,7 +832,9 @@ ESTimeline {
   }
 
   duration {
-    ^this.clips.collect(_.endTime).maxItem ?? 0
+    var endOfLastClip = this.clips.collect(_.endTime).maxItem ?? 0;
+    var longestEnvelope = this.envs.collect({ |env| env.env.duration }).maxItem ?? 0;
+    ^[endOfLastClip, longestEnvelope].maxItem;
   }
 
   clipsInRange { |trackAIndex, trackBIndex, timeA, timeB|
