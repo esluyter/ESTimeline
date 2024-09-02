@@ -8,7 +8,7 @@ ESEnvClip : ESClip {
 
   storeArgs { ^[startTime, duration, env, bus, color, offset] }
 
-  *new { |startTime, duration, env, bus, color, offset|
+  *new { |startTime, duration, env, bus, color, offset = 0|
     ^super.new(startTime, duration, color).init(env, bus, offset);
   }
 
@@ -20,7 +20,7 @@ ESEnvClip : ESClip {
     ServerBoot.add {
       SynthDef('ESEnvClip_internal_kr', { |out, gate = 1, tempo = 1|
         var env = \env.kr(Env(0.dup(1000), 1.dup(999), 0.dup(999)));
-        var sig = EnvGen.kr(env, timeScale: tempo.poll.reciprocal);
+        var sig = EnvGen.kr(env, timeScale: tempo.reciprocal);
         FreeSelf.kr(gate <= 0);
         Out.kr(out, sig);
       }).add;
@@ -41,7 +41,7 @@ ESEnvClip : ESClip {
   prStart { |startOffset = 0.0, clock|
     var defName = if (this.rate == 'control') { 'ESEnvClip_internal_kr' } { 'ESEnvClip_internal_ar' };
     Server.default.bind {
-      synth = Synth(defName, [env: this.envToPlay, out: bus.value, tempo: track.timeline.tempo.postln]);
+      synth = Synth(defName, [env: this.envToPlay(startOffset), out: bus.value, tempo: track.timeline.tempo.postln]);
       //synth = Synth(defName.value, this.prArgsValue(clock), target.value, addAction.value)
     };
   }
@@ -117,7 +117,7 @@ ESEnvClip : ESClip {
       if (runningtime <= playOffset) { // passed target
         var timetokeep = playOffset - runningtime;
         thisEnv.levels = thisEnv.levels[(i - 1)..thisEnv.levels.size];
-        thisEnv.times = thisEnv.times[(i - 1).thisEenv.times.size];
+        thisEnv.times = thisEnv.times[(i - 1)..thisEnv.times.size];
         thisEnv.curves = if (thisEnv.curves.isArray) { thisEnv.curves[(i - 1)..thisEnv.curves.size] } { thisEnv.curves };
         thisEnv.times[0] = timetokeep;
         thisEnv.levels[0] = initlevel;
