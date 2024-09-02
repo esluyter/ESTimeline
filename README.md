@@ -349,6 +349,9 @@ loop {
   - shift-cmd-delete deletes selected time
 - cmd-z undo
 - cmd-Z redo
+- cmd-n new
+- cmd-s save as
+- cmd-o open
 </details>
 
 <br />
