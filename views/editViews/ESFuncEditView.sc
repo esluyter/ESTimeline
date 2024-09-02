@@ -67,13 +67,19 @@ ESFuncEditView : ESClipEditView {
 
     Button(sidePanel, Rect(0, 485, 90, 30)).string_("Cancel").font_(panelFont.copy.size_(14)).action_({ editorWindow.close });
     Button(sidePanel, Rect(0, 520, 90, 30)).string_("Save").font_(panelFont.copy.size_(14)).action_({
-      timeline.prepFunc = ("{" ++ funcView.string ++ "}").interpret;
-      timeline.cleanupFunc = ("{" ++ cleanupFuncView.string ++ "}").interpret;
-      timeline.bootOnPrep = bootBox.value;
-      timeline.useEnvir = envirBox.value;
+      var prepFunc = ("{" ++ funcView.string ++ "}").interpret;
+      var cleanupFunc = ("{" ++ cleanupFuncView.string ++ "}").interpret;
+      if ((prepFunc.isNil) or: (cleanupFunc.isNil)) {
+        ESBulkEditWindow.ok
+      } {
+        timeline.prepFunc = prepFunc;
+        timeline.cleanupFunc = cleanupFunc;
+        timeline.bootOnPrep = bootBox.value;
+        timeline.useEnvir = envirBox.value;
 
-      timeline.init(cleanupFirst: true);
-      timeline.addUndoPoint;
+        timeline.init(cleanupFirst: true);
+        timeline.addUndoPoint;
+      };
     });
   }
 }

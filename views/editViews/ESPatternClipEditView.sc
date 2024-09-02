@@ -4,16 +4,21 @@ ESPatternClipEditView : ESClipEditView {
     var codeView, randSeedField, isSeededBox;
 
     this.prNew(clip, timeline, {
-      clip.name = nameField.string.asSymbol;
-      clip.pattern = ("{" ++ codeView.string ++ "}").interpret;
-      clip.randSeed = randSeedField.string.asInteger;
-      clip.isSeeded = isSeededBox.value;
-      clip.color = colorView.background;
-      clip.startTime = startTimeView.string.interpret;
-      clip.duration =  durationView.string.interpret;
-      clip.offset = offsetView.string.interpret;
+      var pattern = ("{" ++ codeView.string ++ "}").interpret;
+      if (pattern.isNil) {
+        ESBulkEditWindow.ok;
+      } {
+        clip.name = nameField.string.asSymbol;
+        clip.pattern = pattern;
+        clip.randSeed = randSeedField.string.asInteger;
+        clip.isSeeded = isSeededBox.value;
+        clip.color = colorView.background;
+        clip.startTime = startTimeView.string.interpret;
+        clip.duration =  durationView.string.interpret;
+        clip.offset = offsetView.string.interpret;
 
-      timeline.addUndoPoint;
+        timeline.addUndoPoint;
+      };
     });
 
     codeView = CodeView(editorWindow, Rect(0, 0, 800, 600)).font_(Font.monospace(16)).string_(clip.patternString);
