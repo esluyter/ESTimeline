@@ -113,12 +113,13 @@ ESTrack {
     this.release;
   }
 
-  displayName {
+  mixerChannelName {
     ^if (name.isNil) { this.index.asSymbol } { name.asSymbol };
   }
 
   name_ { |val|
     name = val;
+    timeline.initMixerChannels;
     this.changed(\name);
   }
 
@@ -134,6 +135,7 @@ ESTrack {
 
   useMixerChannel_ { |val|
     useMixerChannel = val;
+    timeline.initMixerChannels;
     this.changed(\useMixerChannel)
   }
 
