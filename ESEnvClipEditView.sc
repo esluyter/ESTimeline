@@ -1,16 +1,16 @@
-ESSynthClipEditView : ESClipEditView {
+ESEnvClipEditView : ESClipEditView {
 
   *new { |clip, timeline|
     var panelFont = Font("Helvetica", 16);
-    var defNameView, targetView, addActionView, codeView, sidePanel, startTimeView, durationView, offsetView, colorView, randSeedField;
+    var busView, targetView, addActionView, codeView, sidePanel, startTimeView, durationView, offsetView, colorView, minView, maxView, curveView, isExponentialBox;
 
     if (editorWindow.notNil) { editorWindow.close };
-    editorWindow = Window("Synth Clip Editor", Rect(0, 0, 800, 600))
+    editorWindow = Window("Env Clip Editor", Rect(0, 0, 800, 600))
     .background_(Color.gray(0.9))
     .front;
 
-    StaticText(editorWindow, Rect(20, 30, 180, 20)).string_("defName").font_(panelFont);
-    defNameView = TextField(editorWindow, Rect(10, 50, 590, 40)).string_(clip.defNameString).font_(Font.monospace(16));
+    StaticText(editorWindow, Rect(20, 30, 180, 20)).string_("bus").font_(panelFont);
+    busView = TextField(editorWindow, Rect(10, 50, 590, 40)).string_(clip.busString).font_(Font.monospace(16));
 
     StaticText(editorWindow, Rect(20, 100, 180, 20)).string_("target").font_(panelFont);
     targetView = TextField(editorWindow, Rect(10, 120, 290, 40)).string_(clip.targetString).font_(Font.monospace(16));
@@ -18,21 +18,21 @@ ESSynthClipEditView : ESClipEditView {
     StaticText(editorWindow, Rect(315, 100, 180, 20)).string_("addAction").font_(panelFont);
     addActionView = TextField(editorWindow, Rect(305, 120, 290, 40)).string_(clip.addActionString).font_(Font.monospace(16));
 
-    StaticText(editorWindow, Rect(20, 175, 180, 20)).string_("args").font_(panelFont);
-    codeView = CodeView(editorWindow, Rect(10, 200, 590, 400)).font_(Font.monospace(16)).string_(clip.argsString);
+    StaticText(editorWindow, Rect(20, 175, 180, 20)).string_("env").font_(panelFont);
+    codeView = CodeView(editorWindow, Rect(10, 200, 590, 400)).font_(Font.monospace(16)).string_(clip.env.asCompileString);
     if (timeline.useEnvir) {
       codeView.interpretEnvir_(timeline.envir);
     };
 
     sidePanel = View(editorWindow, Rect(610, 30, 180, 550));
+
     StaticText(sidePanel, Rect(0, 0, 180, 20)).string_("startTime").font_(panelFont);
     startTimeView = NumberBox(sidePanel, Rect(0, 20, 180, 20)).font_(Font.monospace(16)).value_(clip.startTime);
     StaticText(sidePanel, Rect(0, 50, 180, 20)).string_("duration").font_(panelFont);
     durationView = NumberBox(sidePanel, Rect(0, 70, 180, 20)).font_(Font.monospace(16)).value_(clip.duration);
-    /* not yet relevant for synth clips
     StaticText(sidePanel, Rect(0, 100, 180, 20)).string_("offset").font_(panelFont);
     offsetView = NumberBox(sidePanel, Rect(0, 120, 180, 20)).font_(Font.monospace(16)).value_(clip.offset);
-    */
+
     StaticText(sidePanel, Rect(0, 150, 180, 20)).string_("color").font_(panelFont);
     colorView = UserView(sidePanel, Rect(0, 170, 180, 20)).drawFunc_({ |view|
       Pen.use {
@@ -60,16 +60,29 @@ ESSynthClipEditView : ESClipEditView {
       MenuAction("Desaturate", { colorView.background = Color.black.saturationBlend(colorView.background, 0.8) }),
     );
 
+    StaticText(sidePanel, Rect(0, 250, 180, 20)).string_("min").font_(panelFont);
+    minView = NumberBox(sidePanel, Rect(0, 270, 180, 20)).font_(Font.monospace(16)).value_(clip.min);
+    StaticText(sidePanel, Rect(0, 300, 180, 20)).string_("max").font_(panelFont);
+    maxView = NumberBox(sidePanel, Rect(0, 320, 180, 20)).font_(Font.monospace(16)).value_(clip.max);
+    StaticText(sidePanel, Rect(0, 350, 180, 20)).string_("curve").font_(panelFont);
+    curveView = NumberBox(sidePanel, Rect(0, 370, 180, 20)).font_(Font.monospace(16)).value_(clip.curve);
+    isExponentialBox = CheckBox(sidePanel, Rect(0, 400, 20, 20)).value_(clip.isExponential);
+    StaticText(sidePanel, Rect(20, 400, 150, 20)).string_("isExponential").font_(panelFont);
+
     Button(sidePanel, Rect(0, 485, 180, 30)).string_("Cancel").font_(panelFont.copy.size_(14)).action_({ editorWindow.close });
     Button(sidePanel, Rect(0, 520, 180, 30)).string_("Save").font_(panelFont.copy.size_(14)).action_({
-      clip.args = ("{" ++ codeView.string ++ "}").interpret;
-      clip.defName = ("{" ++ defNameView.string ++ "}").interpret;
+      clip.env = codeView.string.interpret;
+      clip.bus = ("{" ++ busView.string ++ "}").interpret;
       clip.target = ("{" ++ targetView.string ++ "}").interpret;
       clip.addAction = ("{" ++ addActionView.string ++ "}").interpret;
       clip.color = colorView.background;
       clip.startTime = startTimeView.value;
       clip.duration =  durationView.value;
       clip.offset = offsetView.value;
+      clip.min = minView.value;
+      clip.max = maxView.value;
+      clip.curve = curveView.value;
+      clip.isExponential = isExponentialBox.value;
 
       timeline.addUndoPoint;
     });

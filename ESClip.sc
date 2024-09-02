@@ -140,7 +140,7 @@ ESClip {
     Pen.stroke;
     ^""
   }
-  defaultColor { ^Color.gray(0.9); }
+  defaultColor { ^Color.gray(1); }
 
   // helper methods
   endTime { ^startTime + duration }
@@ -155,4 +155,9 @@ ESClip {
   }
 
   guiClass { ^ESClipEditView }
+
+  prHover { |x, y, hoverTime, left, top, width, height| }
+  prHoverLeave {}
+  prMouseMove { |x, y, xDelta, yDelta, left, top, width, height| }
+  prMouseDown { |x, y, mods, buttNum, clickCount, left, top, width, height| }
 }
