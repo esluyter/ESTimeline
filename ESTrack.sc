@@ -75,6 +75,7 @@ ESTrack {
   }
 
   addClip { |clip|
+    clip.track = this;
     clip.addDependant(dependantFunc);
     clips = clips.add(clip);
     this.sortClips;

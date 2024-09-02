@@ -50,7 +50,8 @@ ESSynthClip : ESClip {
         Pen.stringAtPoint(line, (left+3.5)@(top+22+(i * 6)), font, Color.gray(1.0, 0.55));
       };
     };
-    if (freqIndex.notNil) {
+
+    if (freqIndex.notNil and: { argsValue[freqIndex + 1].isNumber }) {
       var freq = argsValue[freqIndex + 1];
       var y = freq.explin(20, 20000, height, top);
       var amp = 0.2;

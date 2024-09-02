@@ -52,9 +52,6 @@ ESPatternClip : ESClip {
 
   pattern {
     // this is because we can supply a function to generate the pattern
-    if (isSeeded) {
-      thisThread.randSeed = randSeed;
-    };
     ^pattern.value;
   }
 

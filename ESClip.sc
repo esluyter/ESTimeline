@@ -90,8 +90,16 @@ ESClip {
 
     // if it's more than 5 pixels wide, call the prDraw function
     if (width > 5) {
-      var title = this.prDraw(left, top, width, height);
       var font = Font("Helvetica", 14, true);
+      var title;
+      if (track.timeline.useEnvir) {
+        track.timeline.envir.use {
+          title = this.prDraw(left, top, width, height);
+        }
+      } {
+        title = this.prDraw(left, top, width, height);
+      };
+
       if (left < 0) {
         width = width + left;
         left = 0;

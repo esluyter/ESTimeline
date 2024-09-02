@@ -1,16 +1,23 @@
 ESTimeline {
-  var <tracks, <clock, <>initFunc, <>cleanupFunc, <>bootOnInit;
+  var <tracks, <clock, <>initFunc, <>cleanupFunc, <>bootOnInit, <>useEnvir, <>optimizeView;
   var <isPlaying = false;
   var <playbar = 0.0;
   var playBeats, playStartTime, playClock;
   var dependantFunc;
   var <>undoStack, <>redoStack, <>currentState;
+  var <envir;
 
-  storeArgs { ^[tracks, this.tempo, initFunc, cleanupFunc, bootOnInit] }
+  storeArgs { ^[tracks, this.tempo, initFunc, cleanupFunc, bootOnInit, useEnvir, optimizeView] }
 
-  *new { |tracks, tempo = 1, initFunc, cleanupFunc, bootOnInit = true|
+  *new { |tracks, tempo = 1, initFunc, cleanupFunc, bootOnInit = true, useEnvir = true, optimizeView = false|
     var clock = TempoClock(tempo).permanent_(true);
-    ^super.newCopyArgs(tracks, clock, initFunc, cleanupFunc, bootOnInit).initDependantFunc.init(true);
+    ^super.newCopyArgs(tracks, clock, initFunc, cleanupFunc, bootOnInit, useEnvir, optimizeView).initEnvir.initDependantFunc.init(true);
+  }
+
+  initEnvir {
+    envir = Environment.make {
+      ~timeline = this;
+    };
   }
 
   initDependantFunc {
@@ -21,7 +28,7 @@ ESTimeline {
 
   init { |resetUndo = false, cleanupFirst = false|
     if (cleanupFirst) {
-      cleanupFunc.();
+      this.cleanup;
     };
 
     // forward changed messages from clips
@@ -38,12 +45,12 @@ ESTimeline {
 
     if (bootOnInit) {
       Server.default.waitForBoot {
-        this.initFunc.();
+        this.doInitFunc;
         Server.default.sync;
         this.changed(\init);
       };
     } {
-      this.initFunc.();
+      this.doInitFunc;
       this.changed(\init);
     };
   }
@@ -70,7 +77,12 @@ ESTimeline {
   }
 
   stop {
-    tracks.do(_.stop);
+    if (useEnvir) {
+      envir.use { tracks.do(_.stop); };
+    } {
+      tracks.do(_.stop);
+    };
+
     //playbar = this.now;
     isPlaying = false;
     this.changed(\isPlaying, false);
@@ -95,7 +107,13 @@ ESTimeline {
     playBeats = clock.beats;
     playStartTime = playbar;
 
-    tracks.do(_.play(playbar, clock));
+    if (useEnvir) {
+      envir.use {
+        tracks.do(_.play(playbar, clock));
+      };
+    } {
+      tracks.do(_.play(playbar, clock));
+    }
   }
 
   togglePlay {
@@ -115,6 +133,7 @@ ESTimeline {
     index = index ?? tracks.size;
     track = track ?? { ESTrack([]) };
     track.addDependant(dependantFunc);
+    track.timeline = this;
     tracks = tracks.insert(index, track);
     this.changed(\tracks);
   }
@@ -160,8 +179,24 @@ ESTimeline {
     };
   }
 
+  doInitFunc {
+    if (useEnvir) {
+      envir.use { this.initFunc.(); };
+    } {
+      this.initFunc.();
+    };
+  }
+
+  cleanup {
+    if (useEnvir) {
+      envir.use { this.cleanupFunc.(); }
+    } {
+      this.cleanupFunc.();
+    }
+  }
+
   prFree {
-    this.cleanupFunc.();
+    this.cleanup;
     tracks.do(_.free);
     clock.stop;// why is this making newly created timelines crash bc their clock is stopped?
   }
