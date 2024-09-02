@@ -34,6 +34,10 @@ ESFxSynth : ESSynthClip {
     };
   }
 
+  argControls {
+    ^SynthDescLib.at(this.playDefName).controls.select({ |cn| (cn.name != \out) and: (cn.name != \gate) });
+  }
+
   prArgsValue { |clock|
     var ret = [];
     args.pairsDo { |key, val|

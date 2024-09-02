@@ -4,9 +4,18 @@ ESMixerChannelEnvs {
 
   template_ { |val|
     template = val;
-    ([level, pan] ++ fx ++ preSends ++ postSends).do { |env|
+    ([level, pan] ++ preSends ++ postSends).do { |env|
       if (env.notNil) {
         env.template = val;
+      };
+    };
+    fx.do { |ev|
+      if (ev.notNil) {
+        ev.do { |env|
+          if (env.notNil) {
+            env.template = val;
+          };
+        };
       };
     };
   }
@@ -36,8 +45,8 @@ ESMixerChannelEnvs {
         env.template = template;
         env.name = "pre_" ++ i;
       };
-      template.changed(\envs);
     };
+    template.changed(\envs);
   }
 
   postSends_ { |arr|
@@ -47,8 +56,23 @@ ESMixerChannelEnvs {
         env.template = template;
         env.name = "post_" ++ i;
       };
-      template.changed(\envs);
     };
+    template.changed(\envs);
+  }
+
+  fx_ { |arr|
+    fx = arr;
+    arr.do { |ev, i|
+      if (ev.notNil) {
+        ev.keysValuesDo { |param, env|
+          if (env.notNil) {
+            env.template = template;
+            env.name = "fx_" ++ i ++ "_" ++ param;
+          };
+        };
+      };
+    };
+    template.changed(\envs);
   }
 
   storeArgs { ^[level, pan, fx, preSends, postSends]; }
@@ -105,6 +129,15 @@ ESMixerChannelEnvs {
         env.playSend(startTime, clock, mc, duration);
       };
     };
+    fx.do { |ev|
+      if (ev.notNil) {
+        ev.do { |env|
+          if (env.notNil) {
+            env.playFx(startTime, clock, mc, duration);
+          };
+        };
+      };
+    };
   }
 
   stop { |mc|
@@ -115,6 +148,20 @@ ESMixerChannelEnvs {
     if (level.notNil) {
       level.stop;
       //mc.stopAuto(\level);
+    };
+    (preSends ++ postSends).do { |env|
+      if (env.notNil) {
+        env.stop;
+      };
+    };
+    fx.do { |ev|
+      if (ev.notNil) {
+        ev.do { |env|
+          if (env.notNil) {
+            env.stop;
+          };
+        };
+      };
     };
   }
 }

@@ -380,46 +380,48 @@ ESTimelineView : UserView {
     };
 
     this.mouseOverAction = { |view, x, y|
-      var i, j;
-      var oldHoverClip = hoverClip;
-      var oldHoverEnv = hoverEnv;
-      var trackHeights = this.trackHeights;
-      var top = 0;
-      # hoverClip, i, j, hoverCode = this.clipAtPoint(x@y);
-      hoverTrack = timeline.tracks[i];
-      hoverTime = this.pixelsToAbsoluteTime(x);
-      i.do { |j| top = top + trackHeights[j] };
+      try {
+        var i, j;
+        var oldHoverClip = hoverClip;
+        var oldHoverEnv = hoverEnv;
+        var trackHeights = this.trackHeights;
+        var top = 0;
+        # hoverClip, i, j, hoverCode = this.clipAtPoint(x@y);
+        hoverTrack = timeline.tracks[i];
+        hoverTime = this.pixelsToAbsoluteTime(x);
+        i.do { |j| top = top + trackHeights[j] };
 
-      if (editingMode.not) {
-        switch (hoverCode)
-        {1} { // left edge
-          dragView.bounds_(dragView.bounds.origin_(this.absoluteTimeToPixels(hoverClip.startTime)@top));
-          dragView.visible_(true);
-        }
-        {2} { // right edge
-          dragView.bounds_(dragView.bounds.origin_((this.absoluteTimeToPixels(hoverClip.endTime) - 2)@top));
-          dragView.visible_(true);
-        }
-        { // default
-          dragView.visible_(false);
+        if (editingMode.not) {
+          switch (hoverCode)
+          {1} { // left edge
+            dragView.bounds_(dragView.bounds.origin_(this.absoluteTimeToPixels(hoverClip.startTime)@top));
+            dragView.visible_(true);
+          }
+          {2} { // right edge
+            dragView.bounds_(dragView.bounds.origin_((this.absoluteTimeToPixels(hoverClip.endTime) - 2)@top));
+            dragView.visible_(true);
+          }
+          { // default
+            dragView.visible_(false);
+          };
+        } {
+          if (oldHoverClip.notNil and: (oldHoverClip != hoverClip)) {
+            oldHoverClip.drawClip.prHoverLeave;
+          };
+          if (hoverClip.notNil) {
+            //                  this is bad:
+            hoverClip.drawClip.prHover(x, y - top, hoverTime, *this.clipBounds(hoverClip));
+          };
         };
-      } {
-        if (oldHoverClip.notNil and: (oldHoverClip != hoverClip)) {
-          oldHoverClip.drawClip.prHoverLeave;
-        };
-        if (hoverClip.notNil) {
-          //                  this is bad:
-          hoverClip.drawClip.prHover(x, y - top, hoverTime, *this.clipBounds(hoverClip));
-        };
-      };
 
-      // pass hover on to envelope view
-      hoverEnv = this.envAtY(y);
-      if (hoverEnv.notNil) {
-        hoverEnv.prHover(x, (y - top), hoverTime)
-      };
-      if (oldHoverEnv.notNil and: (oldHoverEnv != hoverEnv)) {
-        oldHoverEnv.prHoverLeave;
+        // pass hover on to envelope view
+        hoverEnv = this.envAtY(y);
+        if (hoverEnv.notNil) {
+          hoverEnv.prHover(x, (y - top), hoverTime)
+        };
+        if (oldHoverEnv.notNil and: (oldHoverEnv != hoverEnv)) {
+          oldHoverEnv.prHoverLeave;
+        };
       };
     };
 
