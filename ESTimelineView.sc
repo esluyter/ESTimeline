@@ -515,6 +515,8 @@ ESTimelineView : UserView {
       //key.postln;
       // space is play
       if (char == $ ) { timeline.togglePlay };
+      // enter goes to beginning
+      if (key == 16777220) { timeline.goto(0) };
       // [ and ] move playhead to nearest clip edge on hovered track
       if ((char == $[) or: (char == $])) {
         var points = [];
