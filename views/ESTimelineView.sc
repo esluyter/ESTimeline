@@ -561,10 +561,12 @@ ESTimelineView : UserView {
                 Pen.fill;
 
                 // "scheduling playhead" in gray
-                Pen.color = Color.gray(0.5, 0.5);
-                left = this.absoluteTimeToPixels(clip.timeline.now) + leftOffset;
-                Pen.addRect(Rect(left, i * trackHeight, 2, trackHeight));
-                Pen.fill;
+                if (clip.timeline.now < (clip.offset + clip.duration)) {
+                  Pen.color = Color.gray(0.5, 0.5);
+                  left = this.absoluteTimeToPixels(clip.timeline.now) + leftOffset;
+                  Pen.addRect(Rect(left, i * trackHeight, 2, trackHeight));
+                  Pen.fill;
+                };
               };
             } {
               // sounding playhead in black
