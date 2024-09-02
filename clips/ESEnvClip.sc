@@ -203,18 +203,22 @@ ESEnvClip : ESClip {
     synth = nil;
 
     if (useLiveInput and: armed) {
-      {
-        (Server.default.latency * 2).wait; // make sure all OSC messages have been recieved
-        oscFunc.free;
-        if (recordedLevels.size == 1) {
-          recordedLevels = recordedLevels.add(recordedLevels[0]);
-          recordedTimes = [duration];
-        };
-        this.env = Env(recordedLevels, recordedTimes, 0);
-        this.armed = false;
-        this.useLiveInput = false;
-        this.offset = recordedOffset;
-      }.fork(SystemClock);
+      if (liveInput < 2) { // mouse input
+        {
+          (Server.default.latency * 2).wait; // make sure all OSC messages have been recieved
+          oscFunc.free;
+          if (recordedLevels.size == 1) {
+            recordedLevels = recordedLevels.add(recordedLevels[0]);
+            recordedTimes = [duration];
+          };
+          this.env = Env(recordedLevels, recordedTimes, 0);
+          this.armed = false;
+          this.useLiveInput = false;
+          this.offset = recordedOffset;
+        }.fork(SystemClock);
+      } { // midi input
+
+      };
     };
   }
 
@@ -240,40 +244,46 @@ ESEnvClip : ESClip {
     } { // useLiveInput
       if (bus.value.notNil) {
         var defName = if (this.rate == 'control') { 'ESEnvClip_kr' } { 'ESEnvClip_ar' };
-        defName = (defName ++ if (this.isExponential) { "_exp_" } { "_curve_" } ++ ["mouseX", "mouseY"][liveInput]).asSymbol;
-        Server.default.bind {
-          synth = Synth(defName, [out: bus.value, tempo: clock.tempo, min: min, max: max, curve: curve, id: id], target.value, addAction.value);
-        };
+        defName = defName ++ if (this.isExponential) { "_exp_" } { "_curve_" };
 
-        if (armed) {
-          var prevLevel;
-          var prevTime;
-          var prevPointTime;
-          recordedLevels = [];
-          recordedTimes = [];
-          recordedOffset = startOffset * -1;
+        if (liveInput < 2) { // mouse input
+          defName = (defName ++ ["mouseX", "mouseY"][liveInput]).asSymbol;
+          Server.default.bind {
+            synth = Synth(defName, [out: bus.value, tempo: clock.tempo, min: min, max: max, curve: curve, id: id], target.value, addAction.value);
+          };
 
-          oscFunc = OSCFunc({ |msg|
-            var thisId, time, level;
-            #thisId, time, level = msg[2..];
-            if (id == thisId) {
-              if (level != prevLevel) {
-                if (recordedLevels.size == 0) {
-                  recordedLevels = [level];
-                } {
-                  if (prevTime > prevPointTime) {
-                    recordedLevels = recordedLevels.add(prevLevel);
-                    recordedTimes = recordedTimes.add(prevTime - prevPointTime);
+          if (armed) {
+            var prevLevel;
+            var prevTime;
+            var prevPointTime;
+            recordedLevels = [];
+            recordedTimes = [];
+            recordedOffset = startOffset * -1;
+
+            oscFunc = OSCFunc({ |msg|
+              var thisId, time, level;
+              #thisId, time, level = msg[2..];
+              if (id == thisId) {
+                if (level != prevLevel) {
+                  if (recordedLevels.size == 0) {
+                    recordedLevels = [level];
+                  } {
+                    if (prevTime > prevPointTime) {
+                      recordedLevels = recordedLevels.add(prevLevel);
+                      recordedTimes = recordedTimes.add(prevTime - prevPointTime);
+                    };
+                    recordedLevels = recordedLevels.add(level);
+                    recordedTimes = recordedTimes.add(time - prevTime);
                   };
-                  recordedLevels = recordedLevels.add(level);
-                  recordedTimes = recordedTimes.add(time - prevTime);
+                  prevPointTime = time;
                 };
-                prevPointTime = time;
+                prevTime = time;
+                prevLevel = level;
               };
-              prevTime = time;
-              prevLevel = level;
-            };
-          }, "/mouse");
+            }, "/mouse");
+          };
+        } { // midi input
+          "MIDI input not yet implemented".warn;
         };
       };
     };
