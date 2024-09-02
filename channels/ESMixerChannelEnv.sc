@@ -465,6 +465,7 @@ ESMixerChannelEnv {
     var times = [], curves = [];
     var time = 0, inserted = false;
     var curve, level;
+    var ret = nil;
     thisLevel = thisLevel ?? env[thisTime];
 
     thisEnv.times.do { |timeDiff, i|
@@ -473,6 +474,7 @@ ESMixerChannelEnv {
       if (inserted.not) {
         if ((time + timeDiff) > thisTime) {
           var ratio = (thisTime - time) / timeDiff;
+          ret = i;
           levels = levels.add(thisLevel);
           times = times.add(thisTime - time);
           if (curve.isNumber) {
@@ -511,6 +513,7 @@ ESMixerChannelEnv {
     if (notify) {
       template.changed(\env);
     };
+    ^ret;
   }
 
   insertTime { |timeA, timeB|
@@ -522,6 +525,27 @@ ESMixerChannelEnv {
   }
 
   deleteTime { |timeA, timeB|
+    var times = [], levels = [env.levels[0]], curves = [];
+    var level, curve;
+    var startI, endI;
+    var thisStartTime, thisEndTime, thisDuration;
+    #thisStartTime, thisEndTime = [timeA, timeB].sort;
+    thisDuration = thisEndTime - thisStartTime;
 
+    startI = this.addBreakPoint(thisStartTime, notify: false);
+    endI = this.addBreakPoint(thisEndTime, notify: false);
+
+    env.times.do { |timeDiff, i|
+      curve = if (env.curves.isArray) { env.curves[i] } { env.curves };
+      level = env.levels[i + 1] ?? level;
+      if ((i <= startI) or: (i >= endI)) {
+        levels = levels.add(level);
+        times = times.add(if (i == endI) { 0 } { timeDiff });
+        curves = curves.add(curve);
+      };
+    };
+
+    env = Env(levels, times, curves);
+    template.changed(\env);
   }
 }
