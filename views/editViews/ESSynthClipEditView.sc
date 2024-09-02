@@ -13,6 +13,7 @@ ESSynthClipEditView : ESClipEditView {
     this.prNew(clip, timeline, {
       var func = funcView.string.interpret;
       if (func.isNil) {
+        "func is nil".postln;
         ESBulkEditWindow.ok
       } {
         clip.func = func;
@@ -26,6 +27,9 @@ ESSynthClipEditView : ESClipEditView {
       clip.color = colorView.background;
       clip.startTime = startTimeView.string.interpret;
       clip.duration =  durationView.string.interpret;
+
+      argsView.free;
+      argsView.init(clip.args.copy, clip.argControls);
 
       timeline.addUndoPoint;
     });
