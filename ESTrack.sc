@@ -138,7 +138,16 @@ ESTrack {
   */
 
   name_ { |val|
+    var mcName = this.mixerChannelName;
+    var mcTemplate = timeline.mixerChannelTemplates[mcName];
+    var index = this.index;
+
+    timeline.mixerChannelTemplates[mcName] = nil;
+
     name = val;
+
+    timeline.mixerChannelTemplates[this.mixerChannelName] = mcTemplate;
+
     timeline.initMixerChannels;
     this.changed(\name, val);
   }
