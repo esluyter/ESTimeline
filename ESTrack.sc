@@ -137,4 +137,16 @@ ESTrack {
   index {
     ^timeline.tracks.indexOf(this);
   }
+
+  clipsInRange { |timeA, timeB|
+    var thisStartTime, thisEndTime;
+    var ret = [];
+    #thisStartTime, thisEndTime = [timeA, timeB].sort;
+    clips.do { |clip|
+      if ((clip.startTime < thisEndTime) and: (clip.endTime > thisStartTime)) {
+        ret = ret.add(clip);
+      };
+    };
+    ^ret;
+  }
 }

@@ -260,5 +260,15 @@ ESTimeline {
   duration {
     ^tracks.collect(_.clips).flat.collect(_.endTime).maxItem ?? 0
   }
+
+  clipsInRange { |trackAIndex, trackBIndex, timeA, timeB|
+    var startTrackIndex, endTrackIndex;
+    var ret = [];
+    #startTrackIndex, endTrackIndex = [trackAIndex, trackBIndex].sort;
+    tracks[startTrackIndex..endTrackIndex].do { |track|
+      ret = ret ++ track.clipsInRange(timeA, timeB);
+    };
+    ^ret;
+  }
 }
 

@@ -190,6 +190,7 @@ ESTimelineWindow : Window {
       { \makeTrackViews } { trackPanelView.makeTrackViews }
       { \editingMode } { timelineView.refresh }
       { \timeSelection } { timelineView.refresh; rulerView.refresh }
+      { \selectedClips } { timelineView.refresh }
     });
   }
 }
