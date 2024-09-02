@@ -587,21 +587,43 @@ ESTimeline {
   }
 
   removeTrack { |index, doFree = true, doMcInit = true|
-    var track = tracks.removeAt(index);
+    var track = tracks.at(index);
+    var mc, mcName = track.mixerChannelName, hasSameMcName = false;
+
+    tracks.removeAt(index);
+
     track.removeDependant(dependantFunc);
     if (doFree) {
       track.free;
     };
+
+    mc = mixerChannels[mcName];
+
     // update mixer templates so all track settings stay as they were
     tracks[index..].do { |thisTrack|
       if (thisTrack.useMixerChannel and: thisTrack.mixerChannelName.isInteger) {
         mixerChannelTemplates[thisTrack.mixerChannelName] = mixerChannelTemplates[thisTrack.mixerChannelName + 1];
         mixerChannelTemplates[thisTrack.mixerChannelName + 1] = nil;
+
+        mixerChannels[thisTrack.mixerChannelName] = mixerChannels[thisTrack.mixerChannelName + 1];
+        mixerChannels[thisTrack.mixerChannelName + 1] = nil;
       };
     };
-    if (doMcInit) {
-      this.initMixerChannels;
+    //if (doMcInit) {
+      //this.initMixerChannels;
+    //};
+
+    tracks.do { |t|
+      if (t.mixerChannelName == mcName) {
+        hasSameMcName = true;
+      };
     };
+
+    if (track.useMixerChannel and: (mcName.isInteger or: hasSameMcName.not)) {
+      mc.releaseDependants;
+      mc.free;
+    };
+
     this.changed(\tracks);
   }
 
