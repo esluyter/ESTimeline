@@ -27,6 +27,8 @@ Note that this is a work in progress and all is subject to revision.
   
 ## Features
 - **Non-prescriptive:**
+  - for the moment just real-time but some of this could be translated easily to work NRT
+    - there are certain things impossible in NRT, i.e. to do with real-time input
   - the basic goal is only to "execute this code at this particular time"
     - although the competing goal is to make it easy to do the things you want to do, which is subjective
   - as little architecture as possible is forced on you,
