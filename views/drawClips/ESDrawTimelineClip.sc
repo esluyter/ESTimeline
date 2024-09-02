@@ -56,11 +56,19 @@ ESDrawTimelineClip : ESDrawClip {
 
       trackHeight = (height - rulerHeight) / tracks.size;
       tracks.do { |track, i|
+        var thisTop = top + rulerHeight + (trackHeight * i) + 2;
+        if (i > 0) {
+          Pen.addRect(Rect(clipLeft, thisTop - 2, clipWidth, 1));
+          Pen.color = Color.gray(0.5, 0.3);
+          Pen.fill;
+        };
+        if (trackHeight > 8) {
+          Pen.stringAtPoint(ESStringShortener.trim(track.mixerChannelName.asString, clipWidth - 5, Font.sansSerif(10)), (clipLeft + 5)@(thisTop + trackHeight - 13), Font.sansSerif(10), Color.gray(0.5));
+        };
         track.clips.do { |thisClip|
           if ((thisClip.endTime > clip.offset) and: (thisClip.startTime < (clip.offset + clip.duration))) {
             var thisLeft = ((thisClip.startTime - clip.offset) * tratio) + left;
             var thisWidth = (thisClip.duration * tratio);
-            var thisTop = top + rulerHeight + (trackHeight * i) + 2;
             var thisHeight = trackHeight - 3;
 
             // this stuff is all just for nested ESTimelineClips:
