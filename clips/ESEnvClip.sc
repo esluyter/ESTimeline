@@ -39,13 +39,8 @@ ESEnvClip : ESClip {
   }
 
   *initClass {
-    var sizes;
-
-    //buses = ();
-
+    var sizes = [2, 4, 8, 16, 32, 64, 128, 256, 512]; //, 1024, 2048     //, 4096, 8190]; // 8191 crashes server;
     // cap at 512 so booting server doesn't take forever
-    // TODO: figure out how to split up long envelopes
-    sizes = [2, 4, 8, 16, 32, 64, 128, 256, 512]; //, 1024, 2048     //, 4096, 8190]; // 8191 crashes server
     ServerBoot.add {
       {
         sizes.do { |n|
@@ -224,20 +219,6 @@ ESEnvClip : ESClip {
   prStart { |startOffset = 0.0, clock|
     if (useLiveInput.not) {
       var thisEnv = this.envToPlay(startOffset, true);
-      /*
-      var size = thisEnv.levels.size.nextPowerOfTwo;
-      if (size > 512) {
-        "WARNING: Envelope can have max 512 points. Please adjust.".postln;
-        size = 512;
-      };
-      if (bus.value.notNil) {
-        var defName = if (this.rate == 'control') { 'ESEnvClip_kr' } { 'ESEnvClip_ar' };
-        defName = (defName ++ if (this.isExponential) { "_exp_" } { "_curve_" } ++ size).asSymbol;
-        Server.default.bind {
-          synth = Synth(defName, [env: thisEnv.asArrayForInterpolation.collect(_.reference).unbubble, out: bus.value, tempo: clock.tempo, min: min, max: max, curve: curve], target.value, addAction.value);
-        };
-      };
-      */
       if (bus.value.notNil) {
         var defName = if (this.rate == 'control') { 'ESEnvClip_kr' } { 'ESEnvClip_ar' } ++ if (this.isExponential) { "_exp_" } { "_curve_" };
         var envs = [];
@@ -256,7 +237,6 @@ ESEnvClip : ESClip {
         };
         envs = envs.add(Env(levels, times, curves));
 
-        //defName = (defName ++ 2).asSymbol;
         envPlayRout = {
           envs.do { |e|
             var size = e.levels.size.nextPowerOfTwo;
@@ -270,19 +250,6 @@ ESEnvClip : ESClip {
             };
             time.wait;
           };
-          /*
-          thisEnv.times.do { |time, i|
-            if (time > 0) {
-              var levels = thisEnv.levels[i..i+1];
-              var curves = if (thisEnv.curves.isArray) { thisEnv.curves[i] } { thisEnv.curves };
-              Server.default.bind {
-                synth.release;
-                synth = Synth(defName, [env: Env(levels, [time], curves).asArrayForInterpolation.collect(_.reference).unbubble, out: bus.value, tempo: clock.tempo, min: min, max: max, curve: curve], target.value, addAction.value);
-              };
-              time.wait;
-            };
-          };
-          */
         }.fork(clock);
       };
     } { // useLiveInput
