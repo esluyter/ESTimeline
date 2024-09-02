@@ -17,7 +17,7 @@ ESSynthClip : ESClip {
 
   *new { |startTime, duration, offset = 0, color, name, defName, args, target, addAction = 'addToHead', mute = false, func, doPlayFunc = false|
     args = args ?? [];
-    func = func ? "{ |freq = 440, amp = 0.1, pan|\n  \n}".interpret;
+    func = func ? "{ |freq = 440, amp = 0.1, pan|\n  var sig = SinOsc.ar(freq);\n  Pan2.ar(sig, pan, amp);\n}".interpret;
     ^super.new(startTime, duration, offset, color, name, mute: mute).init(defName, args, target, addAction, func, doPlayFunc);
   }
 
