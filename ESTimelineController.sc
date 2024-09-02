@@ -137,12 +137,18 @@ ESTimelineController {
     if (arr.size == 0) { arr = [clip] };
     ESBulkEditWindow.keyValue(callback: { |key, val, hardCode|
       var func;
+      var i = 0;
       key = key.asSymbol;
-      val = ("{" ++ val ++ "}").interpret;
+      val = if (hardCode) {
+        ("{ |i| " ++ val ++ "}").interpret;
+      } {
+        ("{" ++ val ++ "}").interpret;
+      };
       func = { |clips|
-        clips.do { |clip|
+        clips.asArray.sort({ |a, b| a.startTime < b.startTime }).do { |clip|
           if (clip.class == ESSynthClip) {
-            clip.setArg(key, if (hardCode) { val.value } { val });
+            clip.setArg(key, if (hardCode) { val.value(i) } { val });
+            i = i + 1;
           };
           if (clip.class == ESTimelineClip) {
             func.(clip.timeline.clips);
