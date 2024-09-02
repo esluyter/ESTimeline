@@ -279,6 +279,12 @@ ESTimelineController {
     }, path: lastPath);
   }
 
+  findPlayhead {
+    if ((timeline.now < timelineView.startTime) or: (timeline.now > timelineView.endTime)) {
+      timelineView.startTime = timeline.now - (timelineView.duration / 6);
+    };
+  }
+
   new {
     lastPath = nil;
     timeline.new;
