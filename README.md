@@ -10,25 +10,28 @@ The distant goal is that anything you can do in SuperCollider could be sequenced
 
 ## Features
 - Comment, Synth, Pattern, Routine, and Env clip types
+- Timeline Clip -- embed one timeline in another! This is encouraged, to avoid issue#2 below
+  - Each timeline clip can optionally use its own TempoClock, and optionally use its own Environment
 - Tracks can contain all clip types, and can be muted/soloed
-- Non-prescriptive: no server architecture is forced on you, possible to disable timeline-specific clock and environment so as to interact with the timeline as part of a larger project; the goal is only to "execute this code at this particular time"
+- Non-prescriptive: no server architecture is forced on you, possible to disable timeline-specific clock and environment so as to interact with the timeline as part of a larger project; the basic goal is only to "execute this code at this particular time"
 - Gray playhead is "scheduling playhead" and black playhead is "sounding playhead" -- to take into account server latency. Routines can be played with additional latency so non-sounding events line up with the sounding playhead.
 - Most fields can take a Function, so params can be generated on the fly
-- Pattern, Routine, and Env clips can "fast forward" to start playing in the middle
+- Pattern, Routine, Env, and Timeline clips can "fast forward" to start playing in the middle
+  - (there is no way to fast forward a Synth, that I know of....)
 - Pattern and Routine clips can be seeded so random number generation is deterministic
-- Each Timeline can have its own TempoClock and Environment, and has an init / free hook that save with the timeline
+- Each timeline (and timeline clip) has an init / free hook for e.g. allocating and freeing resources
 - DAW-like GUI with key commands for editing and playback
-- Undo and redo
+- Undo and redo at each timeline level
 - Easy to export timeline to IDE as compile string and load it back again
 
 ## Hypothetical features
-- Timeline Clip -- embed one timeline in another! This should be easily doable, and encouraged, to avoid issue#2 below
+- Set default params per track (e.g. pan: -1)
 - Name clips to access them from other clips - e.g. to set Synth params
 - Reference clips to create clones that all change together
 - Better GUI editing
   - Selecting / bulk editing clips
   - Insert / delete time
-  - Precisely align clips with each other and with grid
+  - Snap clips to each other and to grid
 - More live interaction - e.g. map a controller to a bus and record its movements to an envelope
 - Higher dimensional envelopes - e.g. movement through x/y space
 - Playback and record audio files; easily access this Buffer for further manipulation
@@ -38,6 +41,7 @@ The distant goal is that anything you can do in SuperCollider could be sequenced
 - ddwPlug integration -- simplify bus routing for modulation
 - jitlib integration -- ditto
 - clothesline integration -- put whole .scd files on the timeline
+- ....dare I suggest VSTPlugin integration?
 
 ## Issues
 1. Although I've tried to make it pleasant, the GUI based code editing environment does not syntax highlight, autocomplete, etc -- for this reason I've added "Open in IDE" / "Copy from IDE" buttons as necessary.
