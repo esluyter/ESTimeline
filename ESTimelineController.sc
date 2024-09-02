@@ -139,6 +139,31 @@ ESTimelineController {
     });
   }
 
+  bulkAdjustSynthArgs { |clip, selectedClips|
+    var arr = selectedClips;
+    if (arr.size == 0) { arr = [clip] };
+    ESBulkEditWindow.keyValue("Bulk adjust Synth args", valDefault: "+ 1", callback: { |key, val, hardCode|
+      var func;
+      key = key.asSymbol;
+      /*val = if (hardCode) {
+        ("{ |i| " ++ val ++ "}").interpret;
+      } {
+        ("{" ++ val ++ "}").interpret;
+      };*/
+      func = { |clips|
+        clips.do { |clip|
+          if (clip.class == ESSynthClip) {
+            clip.setArg(key, ((if (hardCode) { clip.getArg(key).value } { clip.getArg(key) }).asCompileString ++ val).interpret);
+          };
+          if (clip.class == ESTimelineClip) {
+            func.(clip.timeline.clips);
+          };
+        };
+      };
+      func.(arr);
+    });
+  }
+
   bulkEditSynthArgs { |clip, selectedClips|
     var arr = selectedClips;
     if (arr.size == 0) { arr = [clip] };
