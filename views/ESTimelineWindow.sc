@@ -119,6 +119,11 @@ ESTimelineWindow : Window {
       timelineView.focus;
     });
 
+    Button(this, Rect(1650, 5, 80, 30)).states_([["Init MIDI"]]).action_({
+      MIDIClient.init;
+      MIDIIn.connectAll;
+    });
+
     //Button(this, Rect(1200, 5, 100, 30)).states_([["Load legacy"]]).action_({timeline.restoreUndoPoint(Document.current.string, false, true); timelineView.focus;});
 
     [saveIDEButt, loadIDEButt, funcEditButt, undoButt, redoButt, tempoKnob.numberView, tempoKnob.knobView].do { |thing|
@@ -218,6 +223,12 @@ ESTimelineWindow : Window {
           }
           { \useMixerChannel } {
             trackPanelView.refresh;
+            if (mixerWindow.notNil) { mixerWindow.close };
+            if (timeline.useMixerChannel) {
+              mixerWindow = ESMixerWindow(timeline, this);
+            };
+          }
+          { \openedFile } {
             if (mixerWindow.notNil) { mixerWindow.close };
             if (timeline.useMixerChannel) {
               mixerWindow = ESMixerWindow(timeline, this);

@@ -386,6 +386,7 @@ ESTimelineController {
           timelineView.startTime = -2;
           timelineView.duration = timeline.duration + 5;
           timeline.removeDependant(func);
+          timeline.changed(\openedFile);
         };
       };
 
