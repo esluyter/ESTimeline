@@ -68,7 +68,7 @@ Also note that because timelines are built to execute user-supplied code they ar
 - **Timeline Clip** -- embed one timeline in another!
   - Each timeline clip can optionally use its own TempoClock, and optionally use its own Environment 
   - Each timeline (and timeline clip) has an init / free hook for e.g. allocating and freeing resources
-- **Undo and redo** at each timeline level -- *sometimes this works a charm.. I need to fix it though*
+- **Undo and redo** at each timeline level -- *sometimes this works a charm.. not reliable though. I need to fix.*
 - **Save and recall**
   - Save as plain text files in SC array format
   - Once you have saved, the timeline will update a backup file every time you add an undo point, in case of crash
