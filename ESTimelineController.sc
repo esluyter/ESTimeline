@@ -193,4 +193,12 @@ ESTimelineController {
       prevPoint = point;
     }
   }
+
+  insertTime { |timeSelection|
+    if (timeSelection.notNil) { timeline.insertTime(*timeSelection); };
+  }
+
+  deleteTime { |timeSelection|
+    if (timeSelection.notNil) { timeline.deleteTime(*timeSelection); };
+  }
 }
