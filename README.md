@@ -240,6 +240,7 @@ Pbind(
   \dur, Pbrown().linexp(0, 1, 0.02, 1.0),
 )
 ```
+- save and play
 - if you want to try a new random seed, click "re-roll" button and save
   - you can always undo if you don't like it (cmd-z undo, shift-cmd-Z redo)
 - you can drag the edges to adjust start and end point without changing the timing of the notes
