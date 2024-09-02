@@ -235,6 +235,17 @@ ESTimelineWindow : Window {
           }
           { \useMixerChannel } {
             timelineView.makeTrackViews;
+          }
+          { \template } {
+            if (args[0] == \envs) {
+              timelineView.makeTrackViews;
+            };
+            if (args[0] == \env) {
+              timelineView.refresh;
+            };
+            if (args[0] == \hoverIndex) {
+              timelineView.refresh;
+            };
           };
         };
       };

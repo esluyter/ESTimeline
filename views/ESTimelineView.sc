@@ -6,6 +6,7 @@ ESTimelineView : UserView {
   var <trackHeight, <heightRatio = 1;
   var clickPoint, clickTime, scrolling = false, originalDuration;
   var <hoverClip, <hoverCode, hoverClipStartTime, hoverClipEndTime, hoverClipOffset;
+  var <hoverEnv;
   var hoverTime = 0, hoverTrack;
   var duplicatedClips, <timeSelection, clipSelection, stagedClipSelection;
 
@@ -161,6 +162,14 @@ ESTimelineView : UserView {
         // again, not the best:
         hoverClip.drawClip.prMouseDown(x, y - top, mods, buttNum, clickCount, *this.clipBounds(hoverClip))
       };
+
+      if (hoverEnv.notNil) {
+        var trackHeights = this.trackHeights;
+        var top = 0;
+        var i = hoverTrack.index;
+        i.do { |j| top = top + trackHeights[j] };
+        hoverEnv.prMouseDown(x, y - top, mods, buttNum, clickCount);
+      };
     };
 
     this.mouseUpAction = { |view, x, y, mods|
@@ -202,7 +211,7 @@ ESTimelineView : UserView {
       var xDelta = x - clickPoint.x;
 
       // select time/clips if start dragging from empty area
-      if (hoverClip.isNil) {
+      if (hoverClip.isNil and: hoverEnv.isNil) {
         if (xDelta.abs > 1) {
           var timeA = this.pixelsToAbsoluteTime(clickPoint.x);
           var timeB = this.pixelsToAbsoluteTime(x);
@@ -359,12 +368,21 @@ ESTimelineView : UserView {
         };
       };// end editingMode
 
+      if (hoverEnv.notNil) {
+        var trackHeights = this.trackHeights;
+        var top = 0;
+        var i = hoverTrack.index;
+        i.do { |j| top = top + trackHeights[j] };
+        hoverEnv.prMouseMove(x, y - top, xDelta, yDelta, mods);
+      };
+
       this.changed(\mouseMove);
     };
 
     this.mouseOverAction = { |view, x, y|
       var i, j;
       var oldHoverClip = hoverClip;
+      var oldHoverEnv = hoverEnv;
       var trackHeights = this.trackHeights;
       var top = 0;
       # hoverClip, i, j, hoverCode = this.clipAtPoint(x@y);
@@ -393,6 +411,15 @@ ESTimelineView : UserView {
           //                  this is bad:
           hoverClip.drawClip.prHover(x, y - top, hoverTime, *this.clipBounds(hoverClip));
         };
+      };
+
+      // pass hover on to envelope view
+      hoverEnv = this.envAtY(y);
+      if (hoverEnv.notNil) {
+        hoverEnv.prHover(x, y - top, hoverTime)
+      };
+      if (oldHoverEnv.notNil and: (oldHoverEnv != hoverEnv)) {
+        oldHoverEnv.prHoverLeave;
       };
     };
 
@@ -669,6 +696,28 @@ ESTimelineView : UserView {
       top = bottom;
     };
     ^timeline.tracks.last;
+  }
+
+  envAtY { |y|
+    var trackHeights = this.trackHeights;
+    var envHeight = timeline.envHeightMultiplier * trackHeight;
+    var top = 0;
+
+    timeline.tracks.do { |track, i|
+      var bottom = top + trackHeights[i];
+      if (y < bottom) {
+        if (y > (top + trackHeight)) {
+          var envIndex = ((y - (top + trackHeight)) / envHeight).asInteger;
+          ^track.envs[envIndex].value;
+        } {
+          ^nil;
+        };
+      };
+      top = bottom;
+    };
+
+    // this should never happen
+    ^nil.debug("ESTimelineView envAtY");
   }
 
   // helper methods:
