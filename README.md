@@ -5,21 +5,8 @@ The distant goal is that anything you can do in SuperCollider could be sequenced
 Note that this is a work in progress and all is subject to revision. I am trying if at all possible to keep the saved timeline files valid.
 
 Also note that because timelines are built to execute user-supplied code they are inherently insecure. Before opening timeline files from another source, open them in a text editor to make sure they don't have malicious code. (i.e. treat them just like any other random SC code you are executing for the first time)
-<br />
-<br />
-<details>
-  <summary>Out of date screenshots</summary>
-  <img src="img/ss2.png" />
-  <img src="img/sse.png" width="500" />
-  
-  <img src="img/ssee1.png" width="400" /><img src="img/sss1.png" width="400" /><img src="img/rss.png" width="400" /><img src="img/ssep.png" width="400" />
-  <img src="img/fss.png" width="400" />
-</details>
 
-<details>
-  <summary>Out of date video demo: Timelines inside of timelines with optionally separate play clocks</summary>
-  http://www.youtube.com/watch?v=8jcxcfvS_08
-</details>
+<img src="img/tutorial/14.png" />
 
 <br />
 <br />
@@ -475,6 +462,22 @@ SynthDef(\verb, { |out, verbbus, gate = 1, amp = 1|
 - cmd-n new
 - cmd-s save as
 - cmd-o open
+</details>
+
+<br />
+<br />
+<details>
+  <summary>Out of date screenshots</summary>
+  <img src="img/ss2.png" />
+  <img src="img/sse.png" width="500" />
+  
+  <img src="img/ssee1.png" width="400" /><img src="img/sss1.png" width="400" /><img src="img/rss.png" width="400" /><img src="img/ssep.png" width="400" />
+  <img src="img/fss.png" width="400" />
+</details>
+
+<details>
+  <summary>Out of date video demo: Timelines inside of timelines with optionally separate play clocks</summary>
+  http://www.youtube.com/watch?v=8jcxcfvS_08
 </details>
 
 <br />
