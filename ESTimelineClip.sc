@@ -25,12 +25,7 @@ ESTimelineClip : ESClip {
   }
 
   play { |startOffset = 0.0, clock|
-    // default to play on default TempoClock
-    clock = clock ?? TempoClock.default;
-
-    if (useParentClock.not) {
-      clock = timeline.clock;
-    };
+    clock = timeline.prMakeClock;
 
     // stop if we're playing
     if (isPlaying) {
@@ -58,11 +53,7 @@ ESTimelineClip : ESClip {
   prStart { |startOffset = 0.0, clock|
     startOffset = startOffset + offset;
 
-    if (useParentClock) {
-      timeline.play(startOffset, clock);
-    } {
-      timeline.play(startOffset);
-    };
+    timeline.play(startOffset, makeClock: false);
   }
 
   prDraw { |left, top, width, height, editingMode|
@@ -79,15 +70,21 @@ ESTimelineClip : ESClip {
       Pen.clip;
 
       rulerHeight = ((height + 400) / 60).clip(10, 20);
-      Pen.addRect(Rect(left + 1, top + 1, width - 2, rulerHeight));
-      Pen.color = if (useParentClock) { Color.gray(0.93) } { Color.white };
-      Pen.fill;
-
-      if (useParentClock.not) {
-        Pen.addRect(Rect(left, top + rulerHeight, width, 1));
-        Pen.color = Color.gray(0.8);
+      Pen.addRect(Rect(left, top, width, rulerHeight));
+      Pen.fillColor = if (useParentClock) { Color.gray(0.93) } { Color.white };
+      Pen.strokeColor = Color.gray(0.3);
+      Pen.width = 1;
+      if (useParentClock) {
         Pen.fill;
+      } {
+        Pen.fillStroke;
       };
+      //
+      // if (useParentClock.not) {
+      //   Pen.addRect(Rect(left, top + rulerHeight, width, 1));
+      //   Pen.color = Color.gray(0.8);
+      //   Pen.fill;
+      // };
 
       division = (60 / (width / duration)).ceil;
       Pen.color = if (useParentClock) { Color.gray(0.3, 0.5) } { Color.gray(0.3) };
@@ -130,14 +127,14 @@ ESTimelineClip : ESClip {
         Pen.fill;
       };
 
-      Pen.addRect(Rect(left, top + rulerHeight, width, height - rulerHeight));
+      Pen.addRect(Rect(left, top + rulerHeight + 1, width, height - rulerHeight - 1));
       Pen.strokeColor = if (timeline.useEnvir) { Color.gray(0.4) } { Color.gray(0.8) };
       Pen.width = 1;
       Pen.stroke;
     };
   }
 
-  defaultColor { ^if (timeline.useEnvir) { Color.gray(0.97) } { Color.clear  } }
+  defaultColor { ^if (timeline.useEnvir) { Color.gray(0.96, 0.5) } { Color.clear  } }
 
   guiClass { ^ESTimelineClipEditView }
 

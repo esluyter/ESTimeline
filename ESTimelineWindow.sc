@@ -52,6 +52,7 @@ ESTimelineWindow : Window {
     });
     loadIDEButt = Button(this, Rect(535, 5, 100, 30)).states_([["Load from IDE"]]).action_({
       timeline.restoreUndoPoint(Document.current.string);
+      timelineView.focus;
       /*
       var bounds = timelineView.bounds;
       rulerView.release;
@@ -69,7 +70,6 @@ ESTimelineWindow : Window {
       this.makeDependant;
       this.makeViewDependant;
       rulerView.refresh;
-      timelineView.focus;
       */
     });
 
@@ -84,7 +84,7 @@ ESTimelineWindow : Window {
       StaticText(this, Rect(920, 10, 120, 20)).string_("useParentClock").font_(Font.sansSerif(16));
     } {
       Button(this, Rect(925, 5, 200, 30)).states_([["Open as clip in new timeline"]]).action_({
-        ESTimelineWindow(bounds: this.bounds, timeline: ESTimeline([ESTrack([ESTimelineClip(0, timeline.duration, timeline)])], timeline.tempo));
+        ESTimelineWindow(bounds: this.bounds, timeline: ESTimeline([ESTrack([ESTimelineClip(0, if (timeline.duration == 0) { 10 } { timeline.duration }, timeline)])], timeline.tempo));
         this.close;
       })
     };
@@ -179,6 +179,7 @@ ESTimelineWindow : Window {
       { \duration } { rulerView.refresh }
       { \makeTrackViews } { trackPanelView.makeTrackViews }
       { \editingMode } { timelineView.refresh }
+      { \timeSelection } { timelineView.refresh; rulerView.refresh }
     });
 
     timeline.addDependant(rulerView);

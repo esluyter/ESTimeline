@@ -93,7 +93,8 @@ ESTrack {
 
   splitClip { |index, time|
     var clip = clips[index];
-    var newClip = clip.deepCopy;
+    var newClip = clip.duplicate;
+    newClip.track = this;
     clip.endTime = time;
     newClip.startTime_(time, true);
     newClip.addDependant(dependantFunc);

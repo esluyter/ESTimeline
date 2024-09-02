@@ -169,7 +169,7 @@ ESClip {
   }
 
   duplicate {
-    ^this.asCompileString.postln.interpret;
+    ^this.asCompileString.interpret;
   }
 
   guiClass { ^ESClipEditView }
