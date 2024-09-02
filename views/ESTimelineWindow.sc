@@ -56,13 +56,16 @@ ESTimelineWindow : Window {
     redoButt = Button(this, Rect(680, 5, 70, 30)).states_([["Redo"]]).action_({ timeline.redo; timelineView.focus; });
 
     if (timeline.parentClip.notNil) {
-      useParentClockBox = CheckBox(this, Rect(795, 10, 20, 20)).value_(timeline.parentClip.useParentClock).action_({ |view|
+      useParentClockBox = CheckBox(this, Rect(785, 10, 20, 20)).value_(timeline.parentClip.useParentClock).action_({ |view|
         timeline.parentClip.useParentClock = view.value;
         tempoKnob.value = timeline.tempoBPM;
         rulerView.refresh;
         timelineView.focus;
       });
-      StaticText(this, Rect(815, 10, 120, 20)).string_("useParentClock").font_(Font.sansSerif(13));
+      StaticText(this, Rect(805, 10, 120, 20)).string_("useParentClock").font_(Font.sansSerif(13));
+
+      CheckBox(this, Rect(915, 10, 20, 20)).value_(true);
+      StaticText(this, Rect(935, 10, 100, 20)).string_("play parent").font_(Font.sansSerif(13));
     } {  //925
       newTimelineClipButt = Button(this, Rect(790, 5, 205, 30)).states_([["Open as clip in new timeline"]]).action_({
         if (timelineView.selectedClips.size > 0) {
@@ -74,12 +77,12 @@ ESTimelineWindow : Window {
       })
     };
 
-    snapToGridBox = CheckBox(this, Rect(1020, 10, 20, 20)).value_(timeline.snapToGrid).action_({ |view|
+    snapToGridBox = CheckBox(this, Rect(1030, 10, 20, 20)).value_(timeline.snapToGrid).action_({ |view|
       timeline.snapToGrid = view.value;
       timelineView.focus;
     });
-    StaticText(this, Rect(1040, 10, 120, 20)).string_("snapToGrid:  1 / ").font_(Font.sansSerif(16));
-    gridDivisionBox = NumberBox(this, Rect(1160, 10, 70, 20)).value_(timeline.gridDivision).action_({ |view|
+    StaticText(this, Rect(1050, 10, 120, 20)).string_("snapToGrid:  1 / ").font_(Font.sansSerif(16));
+    gridDivisionBox = NumberBox(this, Rect(1170, 10, 70, 20)).value_(timeline.gridDivision).action_({ |view|
       timeline.gridDivision = view.value;
       timelineView.focus;
     }).clipLo_(1).decimals_(0);

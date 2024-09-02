@@ -79,6 +79,11 @@ ESTimelineController {
       };
     };
 
+    if (timelineView.timeSelection.notNil) {
+      if (timelineView.timeSelection[0] < startTime) { startTime = timelineView.timeSelection[0] };
+      if (timelineView.timeSelection[1] > endTime) { endTime = timelineView.timeSelection[1] };
+    };
+
     index = oldTracks[0].index;
     oldTracks.reverse.do { |thisTrack|
       if (thisTrack.clips.size == 0) {

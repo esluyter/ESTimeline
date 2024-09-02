@@ -469,7 +469,13 @@ ESTimelineView : UserView {
       // m - mute clip
       if (char == $m) { timelineController.toggleMuteClips(hoverClip, this.selectedClips); };
       if (char == $S) { timelineController.newSynthClip(hoverTrack, newClipStartTime, newClipDuration); };
-      if (char == $T) { timelineController.newTimelineClip(hoverTrack, newClipStartTime, newClipDuration); };
+      if (char == $T) {
+        if (this.selectedClips.size == 0) {
+          timelineController.newTimelineClip(hoverTrack, newClipStartTime, newClipDuration);
+        } {
+          timelineController.newTimelineClipFromSelected;
+        };
+      };
       if (char == $C) { timelineController.newCommentClip(hoverTrack, newClipStartTime, newClipDuration); };
       if (char == $P) { timelineController.newPatternClip(hoverTrack, newClipStartTime, newClipDuration); };
       if (char == $R) { timelineController.newRoutineClip(hoverTrack, newClipStartTime, newClipDuration); };
