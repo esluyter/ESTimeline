@@ -70,6 +70,16 @@ Also note that because timelines are built to execute user-supplied code they ar
 - **Save and recall**
   - Save as plain text files in SC array format
   - Once you have saved, the timeline will update a backup file every time you add an undo point, in case of crash
+ 
+## Issues
+1. Although I've tried to make it pleasant, the GUI based code editing environment does not syntax highlight, autocomplete, etc -- for this reason I've added "Open in IDE" / "Copy from IDE" buttons as necessary.
+    - Solution would be to someday add a Qt code view to core SC
+2. ~~When there are lots of quick zig-zags, high-resolution envelope drawing makes the GUI freeze up~~
+    - ~~to avoid this I have extremely pixelated the envelope drawing when zoomed in. Solution would be to someday add a better Qt envelope view to core sc.~~
+    - I have improved this by drawing envelopes as images. Still not perfect.
+3. I would have liked to have saved the timeline files as executable SCLang just as you would write by hand; however:
+    - There is a limit to the complexity of a timeline created using SCLang (i.e. by evaluating `ESTimeline([ESTrack([....`) -- it may only contain max 256 functions.
+    - to avoid this I have created a light custom file format that compiles complex timeline structures from the inside out
 
 ## Hypothetical features
 These are all things I would like to implement someday:
@@ -92,14 +102,6 @@ These are all things I would like to implement someday:
   - VSTPlugin for adding VST effects to mixing chain
   - ddwPlug -- simplify bus routing for modulation
   - clothesline -- put whole .scd files on the timeline
-
-## Issues
-1. Although I've tried to make it pleasant, the GUI based code editing environment does not syntax highlight, autocomplete, etc -- for this reason I've added "Open in IDE" / "Copy from IDE" buttons as necessary.
-    - Solution would be to someday add a Qt code view to core SC
-2. When there are lots of quick zig-zags, high-resolution envelope drawing makes the GUI freeze up
-    - to avoid this I have extremely pixelated the envelope drawing when zoomed in. Solution would be to someday add a better Qt envelope view to core sc.
-3. There is a limit to the complexity of a timeline created using SCLang (i.e. by evaluating `ESTimeline([ESTrack([....`) -- it may only contain max 256 functions.
-    - to avoid this I have created a light custom file format that compiles complex timeline structures from the inside out
 
 <br />
 </details>
