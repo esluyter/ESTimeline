@@ -33,6 +33,7 @@ Timelines inside of timelines with optionally separate play clocks:
 ## Hypothetical features
 - GUI editing
   - Snap to clips and/or to grid
+  - Enhanced workflows and key commands for navigating and editing......
 - Time features
   - Non-linearity: loop points, wait points, etc.
   - Indeterminacy: probability for clips not to play?
