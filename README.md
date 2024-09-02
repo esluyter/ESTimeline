@@ -106,8 +106,8 @@ These are all things I would like to implement someday:
 
 <details>
   <summary><strong>Getting started: installing and tutorial</strong></summary>
-  
-here is a slightly out of date tutorial in that it doesn't use MixerChannel. definitely still relevant up to environment variables - adding reverb, and the patterns and routines are relevant but under-documented.
+  <br /><br />
+Here is a slightly out of date tutorial in that it doesn't use MixerChannel. All parts are still relevant except "Environment variables - adding reverb" -- which is useful to demonstrate how the timeline works but there is a much better way in the form of mixer channels, which I will soon update this tutorial to encompass. 
   
 ## Installing
 Download or clone this repository into your SuperCollider Extensions directory. To see where this is, go to `File > Open user support directory` and find the `Extensions` directory, or evaluate:
