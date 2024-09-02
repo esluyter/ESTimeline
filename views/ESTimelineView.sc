@@ -81,6 +81,27 @@ ESTimelineView : UserView {
         Pen.color = Color.gray(0.6);
         Pen.fill;
       };
+
+      // draw tempo env view if it exists
+      if (timeline.tempoEnv.notNil) {
+        var envHeight = trackHeight * timeline.envHeightMultiplier;
+
+        Pen.addRect(Rect(0, 0, this.bounds.width, envHeight));
+        Pen.color = Color.gray(0.8, 0.2);
+        Pen.fill;
+
+        // draw envelope
+        {
+          var width = this.bounds.width;
+          var height = envHeight - 2;
+          var pratio = duration / width;
+          var tratio = pratio.reciprocal;
+          var top = 1;
+          var left = 0;
+
+          timeline.tempoEnv.prDraw(left, top, width, height, pratio, tratio, envHeight, startTime);
+        }.value;
+      };
     };
 
     this.mouseWheelAction = { |view, x, y, mods, xDelta, yDelta|
@@ -394,11 +415,12 @@ ESTimelineView : UserView {
       var oldHoverClip = hoverClip;
       var oldHoverEnv = hoverEnv;
       var trackHeights = this.trackHeights;
-      var top = 0;
+      var envOffset = if (timeline.tempoEnv.notNil) { 1 } { 0 };
+      var top = timeline.envHeightMultiplier * trackHeight * envOffset;
       # hoverClip, i, j, hoverCode = this.clipAtPoint(x@y);
       hoverTrack = timeline.tracks[i];
       hoverTime = this.pixelsToAbsoluteTime(x);
-      i.do { |j| top = top + trackHeights[j] };
+      i.do { |j| top = top + trackHeights[j + envOffset] };
 
       if (editingMode.not) {
         switch (hoverCode)
@@ -639,7 +661,7 @@ ESTimelineView : UserView {
   }
 
   trackHeights {
-    var heightMultipliers = timeline.tracks.collect(_.totalHeightMultiplier);
+    var heightMultipliers = if (timeline.tempoEnv.notNil) { [timeline.envHeightMultiplier] } { [] } ++ timeline.tracks.collect(_.totalHeightMultiplier);
     var sum = heightMultipliers.sum;
     var height = this.bounds.height;
     trackHeight = height / sum;
@@ -653,14 +675,21 @@ ESTimelineView : UserView {
       var height = this.bounds.height;
       var trackHeights = this.trackHeights;
       var top = 0;
+      var envOffset = if (timeline.tempoEnv.notNil) { 1 } { 0 };
       // necessary for scroll view
       heightRatio = height / this.parent.bounds.height;
+
+      // leave room for tempo env view if it exists
+      if (timeline.tempoEnv.notNil) {
+        var envHeight = trackHeight * timeline.envHeightMultiplier;
+        top = top + envHeight;
+      };
 
       // make track views
       trackViews.do(_.remove);
       trackViews = timeline.tracks.collect { |track, i|
-        var tv = ESTrackView(this, Rect(0, top, width, trackHeights[i]), track);
-        top = top + trackHeights[i];
+        var tv = ESTrackView(this, Rect(0, top, width, trackHeights[i + envOffset]), track);
+        top = top + trackHeights[i + envOffset];
         tv;
       };
 
@@ -670,7 +699,17 @@ ESTimelineView : UserView {
       .acceptsMouse_(false)
       .drawFunc_({
         var left = this.absoluteTimeToPixels(timeline.soundingNow);
-        var top = 0;
+        var top = timeline.envHeightMultiplier * trackHeight * envOffset;
+
+        // draw playhead for tempo envelope
+        Pen.addRect(Rect(left, 0, 2, top));
+        Pen.color = Color.black;
+        Pen.fill;
+        Pen.color = Color.gray(0.5, 0.5);
+        left = this.absoluteTimeToPixels(timeline.now);
+        Pen.addRect(Rect(left, 0, 2, top));
+        Pen.fill;
+
         timeline.tracks.do { |track, i|
           var clip = this.clipAtX(track, left)[0];
           if ((clip.class == ESTimelineClip)/* and: { clip.useParentClock.not }*/ and: { timeline.isPlaying }) {
@@ -678,7 +717,7 @@ ESTimelineView : UserView {
               var leftOffset = this.absoluteTimeToPixels(clip.startTime + startTime - clip.offset);
               // sounding playhead in black
               left = this.absoluteTimeToPixels(clip.timeline.soundingNow) + leftOffset;
-              Pen.addRect(Rect(left, top, 2, trackHeight/*trackHeights[i]*/));
+              Pen.addRect(Rect(left, top, 2, trackHeight));
               Pen.color = Color.black;
               Pen.fill;
 
@@ -686,18 +725,18 @@ ESTimelineView : UserView {
               if (clip.timeline.now < (clip.offset + clip.duration)) {
                 Pen.color = Color.gray(0.5, 0.5);
                 left = this.absoluteTimeToPixels(clip.timeline.now) + leftOffset;
-                Pen.addRect(Rect(left, top, 2, trackHeight/*trackHeights[i]*/));
+                Pen.addRect(Rect(left, top, 2, trackHeight));
                 Pen.fill;
               };
 
               // also draw timeline playhead for envelopes
               left = this.absoluteTimeToPixels(timeline.soundingNow);
-              Pen.addRect(Rect(left, top + trackHeight, 2, trackHeights[i] - trackHeight));
+              Pen.addRect(Rect(left, top + trackHeight, 2, trackHeights[i + envOffset] - trackHeight));
               Pen.color = Color.black;
               Pen.fill;
               Pen.color = Color.gray(0.5, 0.5);
               left = this.absoluteTimeToPixels(timeline.now);
-              Pen.addRect(Rect(left, top + trackHeight, 2, trackHeights[i] - trackHeight));
+              Pen.addRect(Rect(left, top + trackHeight, 2, trackHeights[i + envOffset] - trackHeight));
               Pen.fill;
             };
 
@@ -705,13 +744,13 @@ ESTimelineView : UserView {
               // "scheduling playhead" in gray
               Pen.color = Color.gray(0.5, 0.5);
               left = this.absoluteTimeToPixels(timeline.now);
-              Pen.addRect(Rect(left, top, 2, trackHeights[i]));
+              Pen.addRect(Rect(left, top, 2, trackHeights[i + envOffset]));
               Pen.fill;
             };
           } {
             // sounding playhead in black
             left = this.absoluteTimeToPixels(timeline.soundingNow);
-            Pen.addRect(Rect(left, top, 2, trackHeights[i]));
+            Pen.addRect(Rect(left, top, 2, trackHeights[i + envOffset]));
             Pen.color = Color.black;
             Pen.fill;
 
@@ -719,12 +758,12 @@ ESTimelineView : UserView {
               // "scheduling playhead" in gray
               Pen.color = Color.gray(0.5, 0.5);
               left = this.absoluteTimeToPixels(timeline.now);
-              Pen.addRect(Rect(left, top, 2, trackHeights[i]));
+              Pen.addRect(Rect(left, top, 2, trackHeights[i + envOffset]));
               Pen.fill;
             };
           };
 
-          top = top + (trackHeights[i] ?? 0); // for some reason this happens sometimes
+          top = top + (trackHeights[i + envOffset] ?? 0); // for some reason this happens sometimes
         };
       });
       dragView = View(this, Rect(0, 0, 2, trackHeight)).visible_(false).background_(Color.red).acceptsMouse_(false);
@@ -763,10 +802,11 @@ ESTimelineView : UserView {
 
   trackAtY { |y, onlyClip = false|
     var trackHeights = this.trackHeights;
-    var top = 0;
+    var envOffset = if (timeline.tempoEnv.notNil) { 1 } { 0 };
+    var top = timeline.envHeightMultiplier * trackHeight * envOffset;
 
     timeline.tracks.do { |track, i|
-      var bottom = top + trackHeights[i];
+      var bottom = top + trackHeights[i + envOffset];
       if (y < bottom) {
         if (onlyClip.not) {
           ^track;
@@ -786,10 +826,11 @@ ESTimelineView : UserView {
   envAtY { |y|
     var trackHeights = this.trackHeights;
     var envHeight = timeline.envHeightMultiplier * trackHeight;
-    var top = 0;
+    var envOffset = if (timeline.tempoEnv.notNil) { 1 } { 0 };
+    var top = envHeight * envOffset;
 
     timeline.tracks.do { |track, i|
-      var bottom = top + trackHeights[i];
+      var bottom = top + trackHeights[i + envOffset];
       if (y < bottom) {
         if (y > (top + trackHeight)) {
           var envIndex = ((y - (top + trackHeight)) / envHeight).asInteger;

@@ -50,16 +50,49 @@ ESTrackPanelView : UserView {
     var width = this.bounds.width;
     var height = timelineView.bounds.height;
     var trackHeights = timelineView.trackHeights;
-    var top = 0;
+    var envOffset = if (timeline.tempoEnv.notNil) { 1 } { 0 };
+    var top = timelineView.trackHeight * timeline.envHeightMultiplier * envOffset;
 
     this.bounds_(this.bounds.height_(height));
+
+    if (timeline.tempoEnv.notNil) {
+      var envHeight = timelineView.trackHeight * timeline.envHeightMultiplier;
+      var env = timeline.tempoEnv;
+      View(this, Rect(0, 0, width, envHeight)).background_(Color.gray(0.77));
+      StaticText(this, Rect(5, 4, width - 10, envHeight - 4)).string_("tempo").align_(\topRight).stringColor_(Color.gray(0.6)).setContextMenuActions(
+        MenuAction("Set automation range", {
+          ESBulkEditWindow.keyValue("Set automation range keeping breakpoint values",
+            "min", env.min, "max", env.max, "isExponential", env.isExponential, true, "curve", env.curve,
+            callback: { |min, max, isExponential, curve|
+              min = min.interpret;
+              max = max.interpret;
+              curve = curve.interpret;
+              if ((isExponential and: ((min.sign != max.sign))).not) {
+                var oldLevels = env.env.levels;
+                var values = oldLevels.collect(env.prValueScale(_));
+                var newLevels;
+                env.min = min;
+                env.max = max;
+                env.curve = curve;
+                env.isExponential = isExponential;
+                newLevels = values.collect(env.prValueUnscale(_));
+                env.env = Env(newLevels, env.env.times, env.env.curves);
+              };
+            }
+          );
+        }),
+        MenuAction("Remove automation envelope", {
+          timeline.tempoEnv = nil;
+        })
+      );
+    };
 
     trackButts = [];
     trackViews.do(_.remove);
 
     trackViews = timeline.tracks.collect { |track, i|
       var ev;
-      var view = UserView(this, Rect(0, top, width, trackHeights[i]))
+      var view = UserView(this, Rect(0, top, width, trackHeights[i + envOffset]))
       .drawFunc_({
         Pen.addRect(Rect(0, 0, width, height));
         Pen.color = Color.gray(if (track.shouldPlay) { 0.8 } { 0.68 });
@@ -67,7 +100,7 @@ ESTrackPanelView : UserView {
         Pen.addRect(Rect(0, 0, width, 1));
         Pen.color = Color.gray(0.55);
         Pen.fill;
-        Pen.addRect(Rect(width - 1, 0, 1, trackHeights[i]));
+        Pen.addRect(Rect(width - 1, 0, 1, trackHeights[i + envOffset]));
         Pen.color = Color.gray(0.65);
         Pen.fill;
         if (track.name.notNil) {
@@ -214,7 +247,7 @@ ESTrackPanelView : UserView {
         );
       };
       trackButts = trackButts.add(ev);
-      top = top + trackHeights[i];
+      top = top + trackHeights[i + envOffset];
       view;
     };
   }

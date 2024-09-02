@@ -34,6 +34,19 @@ ESTimelineController {
     };
   }
 
+  addTempoEnv {
+    if (timeline.tempoEnv.isNil) {
+      var spec = [30, 1000].asSpec;
+      var unmappedLevel = spec.unmap(timeline.tempoBPM);
+      timeline.tempoEnv = ESMixerChannelEnv(Env(unmappedLevel.dup(2), [0], [0]), spec.minval, spec.maxval);
+      timeline.addUndoPoint;
+    };
+  }
+  removeTempoEnv {
+    timeline.tempoEnv = nil;
+    timeline.addUndoPoint;
+  }
+
   newSynthClip { |track, startTime, duration|
     track.addClip(ESSynthClip(startTime, duration ?? 0.5, defName: \default));
   }

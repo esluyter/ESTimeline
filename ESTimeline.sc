@@ -1,5 +1,5 @@
 ESTimeline {
-  var <tracks, tempo, <>prepFunc, <>cleanupFunc, <>bootOnPrep, <>useEnvir, <>optimizeView, <gridDivision, <snapToGrid, <useMixerChannel, <mixerChannelTemplates, <globalMixerChannelNames, <envHeightMultiplier = 0.5;
+  var <tracks, tempo, <>prepFunc, <>cleanupFunc, <>bootOnPrep, <>useEnvir, <>optimizeView, <gridDivision, <snapToGrid, <useMixerChannel, <mixerChannelTemplates, <globalMixerChannelNames, <envHeightMultiplier = 0.5, <tempoEnv;
   var <isPlaying = false;
   var <playbar = 0.0;
   var playBeats, playStartTime, <playClock;
@@ -25,6 +25,14 @@ ESTimeline {
 
   listener { if (parentClip.notNil) { ^parentClip.track.timeline.listener } { ^listener } }
 
+  tempoEnv_ { |val|
+    tempoEnv = val;
+    if (tempoEnv.notNil) {
+      tempoEnv.template = this; // hack to pass changed messages
+      tempoEnv.name = "tempo";
+    };
+    this.changed(\envs);
+  }
   tempo {
     if (parentClip.notNil and: { parentClip.useParentClock }) {
       ^parentClip.track.timeline.tempo;

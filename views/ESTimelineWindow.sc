@@ -242,6 +242,7 @@ ESTimelineWindow : Window {
             //{
             //0.01.wait; // this solves a weird bug?
             timelineView.makeTrackViews;
+            timelineView.refresh;
             //}.fork(AppClock);
           }
           { \addUndoPoint } {
@@ -277,6 +278,13 @@ ESTimelineWindow : Window {
           }
           { \useMixerChannel } {
             timelineView.makeTrackViews;
+          }
+          { \envs } {
+            timelineView.makeTrackViews;
+            timelineView.refresh;
+          }
+          { \env } {
+            timelineView.refresh;
           }
           { \template } {
             if (args[0] == \envs) {
