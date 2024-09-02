@@ -528,7 +528,12 @@ ESTimelineView : UserView {
           if (mods.isShift) {
             timeline.addTrack(hoverTrack.index);
           } {
-            timeline.addTrack(hoverTrack.index + 1);
+            // opt-cmd-t show server nodes
+            if (mods.isAlt) {
+              Server.default.plotTree;
+            } {
+              timeline.addTrack(hoverTrack.index + 1);
+            };
           };
         };
       };
@@ -542,6 +547,29 @@ ESTimelineView : UserView {
         };
       } {
         timeline.addUndoPoint;
+      };
+
+      if (key == 66 && mods.isCmd && mods.isAlt.not) { // cmd-B
+        if (mods.isShift) {
+          Server.default.reboot;
+        };
+        Server.default.boot;
+      };
+
+      if (key == 75 && mods.isCmd && mods.isShift.not && mods.isAlt.not) { // cmd-K
+        Server.default.quit;
+      };
+
+      if (key == 77 && mods.isCmd && (mods.isShift && mods.isAlt).not) { // cmd-M
+        if (mods.isShift) {
+          Server.default.scope;
+        } {
+          if (mods.isAlt) {
+            Server.default.freqscope;
+          } {
+            Server.default.meter;
+          };
+        };
       };
     };
   }
