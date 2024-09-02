@@ -127,7 +127,7 @@ ESTimeline {
 
       // put \master at the end of the global mixer channels for best results
       globalMixerChannelNames.reverse.do { |name|
-        var template = mixerChannelTemplates[name] ?? (inChannels: 2, outChannels: 2, level: 1, pan: 0);
+        var template = mixerChannelTemplates[name] ?? (inChannels: 2, outChannels: 2, level: 1, pan: 0, fx: [], preSends: [], postSends: []);
         newTemplates[name] = template;
         if (mixerChannels[name].isNil) {
           var outbus = if (name == \master) { defaultOutbus } { mixerChannels[\master] ?? defaultOutbus };
@@ -138,7 +138,7 @@ ESTimeline {
 
       tracks.do { |track|
         var name = track.mixerChannelName;
-        var template = mixerChannelTemplates[name] ?? (inChannels: 2, outChannels: 2, level: 1, pan: 0);
+        var template = mixerChannelTemplates[name] ?? (inChannels: 2, outChannels: 2, level: 1, pan: 0, fx: [], preSends: [], postSends: []);
         newTemplates[name] = template;
         if (track.useMixerChannel and: mixerChannels[track.mixerChannelName].isNil) {
           mixerChannels[name] = MixerChannel(name.asSymbol, Server.default, template.inChannels, template.outChannels, template.level, template.pan, outbus: mixerChannels[\master] ?? defaultOutbus);
@@ -356,6 +356,10 @@ ESTimeline {
 
   prStop {
     isPlaying = false;
+    mixerChannels.do { |mc|
+      //mc.synthgroup.freeAll;
+      mc.effectgroup.release;
+    };
     this.changed(\isPlaying, false);
     this.changed(\playbar);
   }
@@ -397,6 +401,14 @@ ESTimeline {
 
     if (makeClock) {
       this.prMakeClock(altClock);
+    };
+
+    // play effects
+    mixerChannelTemplates.keysValuesDo { |name, template|
+      var mc = mixerChannels[name];
+      template.fx.do { |fx|
+        mc.playfx(fx);
+      };
     };
 
     /*
