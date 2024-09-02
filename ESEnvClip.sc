@@ -16,7 +16,7 @@ ESEnvClip : ESClip {
 
   storeArgs { ^[startTime, duration, env, bus, target, addAction, min, max, curve, isExponential, color, offset] }
 
-  *new { |startTime, duration, env, bus, target, min = 0, max = 1, curve = 0, isExponential = false, addAction = 'addToHead', color, offset = 0|
+  *new { |startTime, duration, env, bus, target, addAction = 'addToHead', min = 0, max = 1, curve = 0, isExponential = false, color, offset = 0|
     ^super.new(startTime, duration, color).init(env, bus, offset, target, addAction, min, max, curve, isExponential);
   }
 
@@ -145,14 +145,16 @@ ESEnvClip : ESClip {
       };
     };
 
-    while { max(0, width - 5) < (QtGUI.stringBounds(line, font).width) } {
-      if (line.size == 1) {
-        line = "";
-      } {
-        line = line[0..line.size-2];
+    if (editingMode.not) {
+      while { max(0, width - 5) < (QtGUI.stringBounds(line, font).width) } {
+        if (line.size == 1) {
+          line = "";
+        } {
+          line = line[0..line.size-2];
+        };
       };
+      Pen.stringAtPoint(line, (left+3.5)@(top+20+(0 * 10)), font, Color.gray(1.0, 0.8));
     };
-    Pen.stringAtPoint(line, (left+3.5)@(top+20+(0 * 10)), font, Color.gray(1.0, 0.8));
 
     if (width > 50) {
       while { max(0, width - 30) < (maxWidth = QtGUI.stringBounds(maxString, font).width) } {
