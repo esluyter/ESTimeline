@@ -70,54 +70,6 @@ Download or clone this repository into your SuperCollider Extensions directory. 
 Platform.userExtensionDir
 ```
 
-## Mouse interaction
-- drag middle of clip to move
-- drag edges of clip to resize
-- double click on clip to open editor window
-- right click anywhere to see action menu
-- Zooming
-  - cmd-scroll zoom horizontally
-  - opt-scroll zoom vertically
-- Envelope breakpoint editing (cmd-e to toggle this mode)
-  - click and drag to move breakpoints or adjust curves
-  - shift-click to add breakpoint
-  - opt-click to remvove breakpoint
-- Selecting
-  - click and drag to select both time and clips
-    - hold cmd to just select clips
-    - hold opt to just select time
-  - hold shift to add/remove clips from existing selection
-- click and drag tracks to rearrange
-
-## Key commands
-- space toggles play
-- opt-s toggles snap to grid
-- Navigation
-  - enter goes to beginning of timeline
-  - [ and ] go to next/previous clip edge on track under mouse
-- Editing clip
-  - s splits clip at mouse pointer
-  - delete deletes clip at mouse pointer
-  - e opens edit window for clip at mouse pointer, or init/cleanup func window for a timeline clip
-  - cmd-e toggles mouse editing of envelope breakpoints
-- Insert clip
-  - C inserts comment clip at mouse
-  - S inserts synth clip at mouse
-  - P inserts pattern clip at mouse
-  - R inserts routine clip at mouse
-  - E inserts env clip at mouse
-  - T inserts timeline clip at mouse
-- Tracks
-  - cmd-t inserts new track after track at mouse
-  - cmd-T inserts new track before track at mouse
-  - cmd-delete deletes track at mouse
-- Seletion
-  - cmd-a select all clips
-  - cmd-i inserts selected time
-  - shift-cmd-delete deletes selected time
-- cmd-z undo
-- cmd-Z redo
-
 ## Basic workflow example
 ```
 (
@@ -272,5 +224,54 @@ loop {
 ```
 - you can use a comment clip (shift-C) for this dummy "next" clip -- the first line of the comment is its name
 - you can also goto a number, which will be interpreted as beat number.
+
+
+## Mouse interaction
+- drag middle of clip to move
+- drag edges of clip to resize
+- double click on clip to open editor window
+- right click anywhere to see action menu
+- Zooming
+  - cmd-scroll zoom horizontally
+  - opt-scroll zoom vertically
+- Envelope breakpoint editing (cmd-e to toggle this mode)
+  - click and drag to move breakpoints or adjust curves
+  - shift-click to add breakpoint
+  - opt-click to remvove breakpoint
+- Selecting
+  - click and drag to select both time and clips
+    - hold cmd to just select clips
+    - hold opt to just select time
+  - hold shift to add/remove clips from existing selection
+- click and drag tracks to rearrange
+
+## Key commands
+- space toggles play
+- opt-s toggles snap to grid
+- Navigation
+  - enter goes to beginning of timeline
+  - [ and ] go to next/previous clip edge on track under mouse
+- Editing clip
+  - s splits clip at mouse pointer
+  - delete deletes clip at mouse pointer
+  - e opens edit window for clip at mouse pointer, or init/cleanup func window for a timeline clip
+  - cmd-e toggles mouse editing of envelope breakpoints
+- Insert clip
+  - C inserts comment clip at mouse
+  - S inserts synth clip at mouse
+  - P inserts pattern clip at mouse
+  - R inserts routine clip at mouse
+  - E inserts env clip at mouse
+  - T inserts timeline clip at mouse
+- Tracks
+  - cmd-t inserts new track after track at mouse
+  - cmd-T inserts new track before track at mouse
+  - cmd-delete deletes track at mouse
+- Seletion
+  - cmd-a select all clips
+  - cmd-i inserts selected time
+  - shift-cmd-delete deletes selected time
+- cmd-z undo
+- cmd-Z redo
 
 If you do try it out, I would love to know your thoughts, ideas, critiques, and if you find bugs etc please report them on the github issue page with steps to reproduce.
