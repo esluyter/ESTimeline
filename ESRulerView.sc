@@ -75,7 +75,7 @@ ESRulerView : UserView {
     }).mouseUpAction_({ |view, x, y, mods|
       // if the mouse didn't move during the click, move the playhead to the click point:
       if (clickPoint == (x@y)) {
-        timeline.now = clickTime;
+        timeline.now = if (timeline.snapToGrid) { clickTime.round(1 / timeline.gridDivision) } { clickTime };
       };
 
       clickPoint = nil;
