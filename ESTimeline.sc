@@ -17,6 +17,7 @@ ESTimeline {
   snapToGrid_ { |val| snapToGrid = val; this.changed(\snapToGrid); }
 
   storeArgs { ^[tracks, this.tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid] }
+  defaultUndoPoint { ^[[ESTrack([])], 1, nil, nil, true, true, false, 4, false].asESArray }
 
   *new { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = false, gridDivision = 4, snapToGrid = false|
     //var clock = TempoClock(tempo).permanent_(true);
@@ -241,6 +242,11 @@ ESTimeline {
       this.init;
       this.changed(\restoreUndoPoint);
     }.fork(AppClock)
+  }
+
+  new { |clearUndoStack = false|
+    this.restoreUndoPoint(this.defaultUndoPoint, clearUndoStack);
+    this.changed(\new);
   }
 
   undo {
