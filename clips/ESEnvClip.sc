@@ -1,7 +1,7 @@
 ESEnvClip : ESClip {
   var <env, <bus, <>target, <>addAction, <min, <max, <>curve, <>isExponential, <makeBus = false, <>makeBusRate, <useLiveInput, <>liveInput, <>ccNum, <armed;
   var <synth;
-  var <recordedLevels, <recordedTimes, <oscFunc;
+  var <recordedLevels, <recordedTimes, <oscFunc, <recordedOffset;
 
   //classvar <buses;  // event format name -> [bus, nClips] -- when nClips becomes 0 bus should be freed.
 
@@ -206,9 +206,14 @@ ESEnvClip : ESClip {
       {
         (Server.default.latency * 2).wait; // make sure all OSC messages have been recieved
         oscFunc.free;
+        if (recordedLevels.size == 1) {
+          recordedLevels = recordedLevels.add(recordedLevels[0]);
+          recordedTimes = [duration];
+        };
         this.env = Env(recordedLevels, recordedTimes, 0);
         this.armed = false;
         this.useLiveInput = false;
+        this.offset = recordedOffset;
       }.fork(SystemClock);
     };
   }
@@ -246,24 +251,27 @@ ESEnvClip : ESClip {
           var prevPointTime;
           recordedLevels = [];
           recordedTimes = [];
+          recordedOffset = startOffset * -1;
 
           oscFunc = OSCFunc({ |msg|
             var thisId, time, level;
-            #thisId, time, level = msg[2..].postln;
+            #thisId, time, level = msg[2..];
             if (id == thisId) {
               if (level != prevLevel) {
                 if (recordedLevels.size == 0) {
                   recordedLevels = [level];
                 } {
-                  recordedLevels = recordedLevels.add(prevLevel);
-                  recordedTimes = recordedTimes.add(prevTime - prevPointTime);
+                  if (prevTime > prevPointTime) {
+                    recordedLevels = recordedLevels.add(prevLevel);
+                    recordedTimes = recordedTimes.add(prevTime - prevPointTime);
+                  };
                   recordedLevels = recordedLevels.add(level);
                   recordedTimes = recordedTimes.add(time - prevTime);
                 };
                 prevPointTime = time;
-                prevTime = time;
-                prevLevel = level;
               };
+              prevTime = time;
+              prevLevel = level;
             };
           }, "/mouse");
         };
