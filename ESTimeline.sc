@@ -1,18 +1,26 @@
 ESTimeline {
-  var <tracks, <clock, <>initFunc, <>cleanupFunc, <>bootOnInit, <>useEnvir, <>optimizeView;
+  var <tracks, <tempo, <>initFunc, <>cleanupFunc, <>bootOnInit, <>useEnvir, <>optimizeView;
   var <isPlaying = false;
   var <playbar = 0.0;
   var playBeats, playStartTime, playClock;
   var dependantFunc;
   var <>undoStack, <>redoStack, <>currentState;
   var <envir;
+  var <>parentClip;
+  var <clock;
+
+  //tempo { ^clock.tempo; }
+  tempo_ { |val| tempo = val; if (clock.notNil) { clock.tempo_(val) }; this.changed(\tempo, val); }
+  tempoBPM { ^tempo * 60 }
+  tempoBPM_ { |val| this.tempo_(val / 60); }
 
   storeArgs { ^[tracks, this.tempo, initFunc, cleanupFunc, bootOnInit, useEnvir, optimizeView] }
 
   *new { |tracks, tempo = 1, initFunc, cleanupFunc, bootOnInit = true, useEnvir = true, optimizeView = false|
-    var clock = TempoClock(tempo).permanent_(true);
+    //var clock = TempoClock(tempo).permanent_(true);
+
     tracks = tracks ?? [ESTrack()];
-    ^super.newCopyArgs(tracks, clock, initFunc, cleanupFunc, bootOnInit, useEnvir, optimizeView).initEnvir.initDependantFunc.init(true);
+    ^super.newCopyArgs(tracks, tempo, initFunc, cleanupFunc, bootOnInit, useEnvir, optimizeView).initEnvir.initDependantFunc.init(true);
   }
 
   initEnvir {
@@ -84,12 +92,15 @@ ESTimeline {
       tracks.do(_.stop);
     };
 
+    if (clock.notNil) { clock.stop; clock = nil };
+
     //playbar = this.now;
     isPlaying = false;
     this.changed(\isPlaying, false);
   }
 
   play { |startTime, altClock|
+
     // stop if playing
     if (isPlaying) { this.stop };
     isPlaying = true;
@@ -99,35 +110,30 @@ ESTimeline {
       playbar = startTime;
     };
 
+    if (clock.notNil) { clock.stop; clock = nil };
 
-    // override default clock
-    playClock = altClock ?? clock;
+    if (parentClip.notNil and: { parentClip.useParentClock }) {
+      playClock = parentClip.track.timeline.clock;
+    } {
+      playClock = altClock ?? { clock = TempoClock(tempo); };
+    };
 
     // save the starting conditions
-    playClock = clock;
-    playBeats = clock.beats;
+    //playClock = clock;
+    playBeats = playClock.beats;
     playStartTime = playbar;
 
     if (useEnvir) {
       envir.use {
-        tracks.do(_.play(playbar, clock));
+        tracks.do(_.play(playbar, playClock));
       };
     } {
-      tracks.do(_.play(playbar, clock));
+      tracks.do(_.play(playbar, playClock));
     }
   }
 
   togglePlay {
     if (this.isPlaying) { this.stop } { this.play }
-  }
-
-  tempo {
-    ^clock.tempo;
-  }
-
-  tempo_ { |val|
-    clock.tempo_(val);
-    this.changed(\tempo, val);
   }
 
   addTrack { |index, track|
@@ -156,14 +162,21 @@ ESTimeline {
     };
   }
 
-  restoreUndoPoint { |undoPoint|
-    var tempo;
+  restoreUndoPoint { |undoPoint, clearUndoStack = false|
+    var thisTempo;
     currentState = undoPoint;
-    this.prFree;
-    #tracks, tempo, initFunc, cleanupFunc, bootOnInit = currentState.interpret;
-    clock = TempoClock(tempo).permanent_(true);
-    this.init;
-    this.changed(\restoreUndoPoint);
+    {
+      this.prFree;
+      Server.default.sync;
+      #tracks, thisTempo, initFunc, cleanupFunc, bootOnInit, useEnvir, optimizeView = currentState.interpret;
+      this.tempo = thisTempo;
+      if (clearUndoStack) {
+        undoStack = [];
+        redoStack = [];
+      };
+      this.init;
+      this.changed(\restoreUndoPoint);
+    }.fork(AppClock)
   }
 
   undo {
@@ -199,7 +212,6 @@ ESTimeline {
   prFree {
     this.cleanup;
     tracks.do(_.free);
-    clock.stop;// why is this making newly created timelines crash bc their clock is stopped?
   }
 
   free {

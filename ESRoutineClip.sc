@@ -76,6 +76,7 @@ ESRoutineClip : ESClip {
       var lines = string.split($\n);
       var font = Font.monospace(10);
       var funcHeight = lines.size * 10;
+      var strTop;
       lines.do { |line, i|
         while { max(0, width - 5) < (QtGUI.stringBounds(line, font).width) } {
           if (line.size == 1) {
@@ -84,11 +85,16 @@ ESRoutineClip : ESClip {
             line = line[0..line.size-2];
           };
         };
-        Pen.stringAtPoint(line, (left+3.5)@(top+20+(i * 10)), font, Color.gray(1.0, 0.6));
+        strTop = 20 + (i * 10);
+        if (strTop < height) {
+          Pen.stringAtPoint(line, (left+3.5)@(top+strTop), font, Color.gray(1.0, 0.6));
+        };
       };
-      Pen.addRect(Rect(left, top + 25 + funcHeight, width / 2, 1));
-      Pen.color = Color.gray(1.0, 0.15);
-      Pen.fill;
+      if (25 + funcHeight < height) {
+        Pen.addRect(Rect(left, top + 25 + funcHeight, width / 2, 1));
+        Pen.color = Color.gray(1.0, 0.15);
+        Pen.fill;
+      };
       string = this.cleanupFuncString;
       lines = string.split($\n);
       lines.do { |line, i|
@@ -99,7 +105,10 @@ ESRoutineClip : ESClip {
             line = line[0..line.size-2];
           };
         };
-        Pen.stringAtPoint(line, (left+3.5)@(top+30+funcHeight+(i * 10)), font, Color.gray(1.0, 0.4));
+        strTop = 30 + funcHeight + (i * 10);
+        if (strTop < height) {
+          Pen.stringAtPoint(line, (left+3.5)@(top+strTop), font, Color.gray(1.0, 0.4));
+        };
       };
     };
     ^"Routine"

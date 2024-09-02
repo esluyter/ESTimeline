@@ -16,21 +16,7 @@ ESEnvClip : ESClip {
 
   storeArgs { ^[startTime, duration, env, bus, target, addAction, min, max, curve, isExponential, color, offset] }
 
-  *new { |startTime, duration, env, bus, target, addAction = 'addToHead', min = 0, max = 1, curve = 0, isExponential = false, color, offset = 0|
-    ^super.new(startTime, duration, color).init(env, bus, offset, target, addAction, min, max, curve, isExponential);
-  }
-
-  init { |argEnv, argBus, argOffset, argTarget, argAddAction, argMin, argMax, argCurve, argExp|
-    env = argEnv;
-    bus = argBus;
-    offset = argOffset;
-    target = argTarget;
-    addAction = argAddAction;
-    min = argMin;
-    max = argMax;
-    curve = argCurve;
-    isExponential = argExp;
-
+  *initClass {
     ServerBoot.add {
       SynthDef('ESEnvClip_internal_kr', { |out, gate = 1, tempo = 1, min = 0, max = 1, curve = 0|
         var env = \env.kr(Env(0.dup(1000), 1.dup(999), 0.dup(999)));
@@ -60,6 +46,22 @@ ESEnvClip : ESClip {
     };
   }
 
+  *new { |startTime, duration, env, bus, target, addAction = 'addToHead', min = 0, max = 1, curve = 0, isExponential = false, color, offset = 0|
+    ^super.new(startTime, duration, color).init(env, bus, offset, target, addAction, min, max, curve, isExponential);
+  }
+
+  init { |argEnv, argBus, argOffset, argTarget, argAddAction, argMin, argMax, argCurve, argExp|
+    env = argEnv;
+    bus = argBus;
+    offset = argOffset;
+    target = argTarget;
+    addAction = argAddAction;
+    min = argMin;
+    max = argMax;
+    curve = argCurve;
+    isExponential = argExp;
+  }
+
   prStop {
     Server.default.bind { synth.release };
     synth = nil;
@@ -70,7 +72,7 @@ ESEnvClip : ESClip {
       var defName = if (this.rate == 'control') { 'ESEnvClip_internal_kr' } { 'ESEnvClip_internal_ar' };
       if (this.isExponential) { defName = (defName ++ "_exp").asSymbol };
       Server.default.bind {
-        synth = Synth(defName, [env: this.envToPlay(startOffset), out: bus.value, tempo: track.timeline.tempo, min: min, max: max, curve: curve], target.value, addAction.value);
+        synth = Synth(defName, [env: this.envToPlay(startOffset), out: bus.value, tempo: clock.tempo, min: min, max: max, curve: curve], target.value, addAction.value);
         //synth = Synth(defName.value, this.prArgsValue(clock), target.value, addAction.value)
       };
     };
@@ -84,6 +86,7 @@ ESEnvClip : ESClip {
     var maxString = max.asString;
     var minWidth, maxWidth;
     var font = Font.monospace(10);
+
     Pen.use {
       // TODO: make a good envelope drawing that doesn't freeze gui
       /*
@@ -126,9 +129,10 @@ ESEnvClip : ESClip {
         prevY = thisY;
       };
 
-      Pen.color = Color.gray(1, 0.5);
+      Pen.color = Color.gray(1, 0.8);
       Pen.fill;
     };
+
     if (editingMode) {
       var thisEnv = this.envToPlay;
       var points = this.envBreakPoints(thisEnv, left, top, width, height);
@@ -145,7 +149,7 @@ ESEnvClip : ESClip {
       };
     };
 
-    if (editingMode.not) {
+    if (editingMode.not and: (height > 50)) {
       while { max(0, width - 5) < (QtGUI.stringBounds(line, font).width) } {
         if (line.size == 1) {
           line = "";
@@ -153,7 +157,9 @@ ESEnvClip : ESClip {
           line = line[0..line.size-2];
         };
       };
-      Pen.stringAtPoint(line, (left+3.5)@(top+20+(0 * 10)), font, Color.gray(1.0, 0.8));
+      if (20 < height) {
+        Pen.stringAtPoint(line, (left+3.5)@(top+20+(0 * 10)), font, Color.gray(1.0, 0.5));
+      };
     };
 
     if (width > 50) {
