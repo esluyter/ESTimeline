@@ -46,7 +46,8 @@ ESDrawEnvClip : ESDrawClip {
       Pen.drawImage(left@top, image);
       image.free;
     } {
-      Pen.stringAtPoint(ESStringShortener.trim("live", width + 5, Font.sansSerif(height / 3)), (left + 3.5)@(top + (height / 2)), Font.sansSerif(height / 3), Color.gray(1, 0.2));
+      var thisFont = Font.sansSerif(min(height / 3 + 10, 100));
+      Pen.stringAtPoint(ESStringShortener.trim(["Mouse X", "Mouse Y", "CC " ++ clip.ccNum, "Pitch Bend", "Note", "Mono Note", "Velocity", "Gated Velocity"][clip.liveInput], width + 5, thisFont), (left + 3.5)@(top + (height / 2)), thisFont, Color.gray(1, 0.2));
     };
 
     if (editingMode) {

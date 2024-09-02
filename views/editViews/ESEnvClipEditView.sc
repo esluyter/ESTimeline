@@ -2,7 +2,7 @@ ESEnvClipEditView : ESClipEditView {
 
   *new { |clip, timeline|
     var panelFont = Font("Helvetica", 16);
-    var busView, makeBusBox, makeBusRateMenu, targetView, addActionView, useLiveInputBox, liveInputMenu, ccNumField, recordArmButt, codeView, minView, maxView, curveView, isExponentialBox, keepBreakpointValuesBox;
+    var busView, makeBusBox, makeBusRateMenu, targetView, addActionView, useLiveInputBox, liveInputMenu, ccNumField, channelMenu, channelText, recordArmButt, codeView, minView, maxView, curveView, isExponentialBox, keepBreakpointValuesBox;
     var adjustBg = {
       busView.background_(if (makeBusBox.value) { Color.gray(0.8) } { Color.white });
     };
@@ -20,10 +20,11 @@ ESEnvClipEditView : ESClipEditView {
         clip.duration =  durationView.string.interpret;
         clip.offset = offsetView.string.interpret;
 
+        clip.armed = recordArmButt.value.asBoolean;
         clip.useLiveInput = useLiveInputBox.value;
         clip.liveInput = liveInputMenu.value;
         clip.ccNum = ccNumField.string.interpret;
-        clip.armed = recordArmButt.value.asBoolean;
+        clip.midiChannel = channelMenu.value;
 
         if (keepBreakpointValuesBox.value.not) {
           // keep Env the same but change breakpoint values bc of range adjustment.
@@ -83,17 +84,27 @@ ESEnvClipEditView : ESClipEditView {
 
     View(editorWindow, Rect(535, 20, 1, 160)).background_(Color.gray(0.5, 0.3));
 
-    useLiveInputBox = CheckBox(editorWindow, Rect(555, 30, 20, 20)).value_(clip.useLiveInput);
+    useLiveInputBox = CheckBox(editorWindow, Rect(555, 30, 20, 20)).value_(clip.useLiveInput).action_({ |view| recordArmButt.visible_(view.value) });
     StaticText(editorWindow, Rect(580, 30, 180, 20)).string_("use live input:").font_(panelFont);
-    ccNumField = TextField(editorWindow, Rect(720, 50, 80, 30)).string_(clip.ccNum).visible_(false);
-    liveInputMenu = PopUpMenu(editorWindow, Rect(555, 50, 160, 30)).items_(["Mouse X", "Mouse Y", "MIDI Control #", "MIDI Pitch", "MIDI Notes", "MIDI Velocity", "MIDI Gate"]).action_({ |view|
+    recordArmButt = Button(editorWindow, Rect(690, 25, 100, 25)).states_([["record arm"], ["record armed", Color.gray(1), Color.hsv(0, 0.75, 0.75)]]).font_(Font.sansSerif(13)).value_(clip.armed).visible_(clip.useLiveInput);
+
+    channelText = StaticText(editorWindow, Rect(555, 100, 160, 30)).string_("MIDI Channel #").align_(\right);
+    channelMenu = PopUpMenu(editorWindow, Rect(720, 100, 80, 30)).items_((0..15) ++ \all).value_(clip.midiChannel);
+    ccNumField = TextField(editorWindow, Rect(720, 65, 80, 30)).string_(clip.ccNum).visible_(false);
+    liveInputMenu = PopUpMenu(editorWindow, Rect(555, 65, 160, 30)).items_(["Mouse X", "Mouse Y", "MIDI Control #", "MIDI Pitch Bend", "MIDI Note", "MIDI Mono Note", "MIDI Velocity", "MIDI Gated Velocity"]).action_({ |view|
       if (view.value == 2) {
-        ccNumField.visible_(true);
+        ccNumField.visible = true;
       } {
-        ccNumField.visible_(false);
+        ccNumField.visible = false;
       };
+      if (view.value >= 2) {
+        channelText.visible = true;
+        channelMenu.visible = true;
+      } {
+        channelText.visible = false;
+        channelMenu.visible = false;
+      }
     }).valueAction_(clip.liveInput);
-    recordArmButt = Button(editorWindow, Rect(555, 90, 120, 25)).states_([["record arm"], ["record armed", Color.gray(1), Color.hsv(0, 0.75, 0.75)]]).font_(Font.sansSerif(13)).value_(clip.armed);
 
     StaticText(editorWindow, Rect(20, 175, 50, 20)).string_("env").font_(panelFont);
     StaticText(editorWindow, Rect(50, 177, 480, 20)).string_("... edit code if you must or use cmd-e for mouse breakpoint editor mode").font_(Font.sansSerif(13));

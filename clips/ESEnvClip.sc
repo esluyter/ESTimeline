@@ -1,5 +1,5 @@
 ESEnvClip : ESClip {
-  var <env, <bus, <>target, <>addAction, <min, <max, <>curve, <>isExponential, <makeBus = false, <makeBusRate, <useLiveInput, <>liveInput, <>ccNum, <armed;
+  var <env, <bus, <>target, <>addAction, <min, <max, <>curve, <>isExponential, <makeBus = false, <makeBusRate, <useLiveInput, <>liveInput, <>ccNum, <armed, <>midiChannel;
   var <synth, envPlayRout;
   var <recordedLevels, <recordedTimes, <oscFunc, <recordedOffset;
 
@@ -129,19 +129,19 @@ ESEnvClip : ESClip {
     };
   }
 
-  *new { |startTime, duration, offset = 0, color, name, env, bus, target, addAction = 'addToHead', min = 0, max = 1, curve = 0, isExponential = false, makeBus = true, makeBusRate = \audio, mute = false, useLiveInput = false, liveInput = 0, ccNum = 0, armed = false, prep = false|
+  *new { |startTime, duration, offset = 0, color, name, env, bus, target, addAction = 'addToHead', min = 0, max = 1, curve = 0, isExponential = false, makeBus = true, makeBusRate = \audio, mute = false, useLiveInput = false, liveInput = 0, ccNum = 0, armed = false, midiChannel = 16, prep = false|
     env = env ?? Env([0.5, 0.5], [0], [0]);
-    ^super.new(startTime, duration, offset, color, name, mute: mute).init(env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate, mute, useLiveInput, liveInput, ccNum, armed, prep);
+    ^super.new(startTime, duration, offset, color, name, mute: mute).init(env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate, mute, useLiveInput, liveInput, ccNum, armed, midiChannel, prep);
   }
 
-  storeArgs { ^[startTime, duration, offset, color, name, env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate, mute, useLiveInput, liveInput, ccNum, armed] }
+  storeArgs { ^[startTime, duration, offset, color, name, env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate, mute, useLiveInput, liveInput, ccNum, armed, midiChannel] }
 /*
   duplicate {
     //this.asCompileString.interpret.track_(track);
     ^this.class.new(*(this.storeArgs)).track_(track).prep;
   }
 */
-  init { |argEnv, argBus, argTarget, argAddAction, argMin, argMax, argCurve, argExp, argMakeBus, argMakeBusRate, argMute, argUseLiveInput, argLiveInput, argCcNum, argArmed, prep|
+  init { |argEnv, argBus, argTarget, argAddAction, argMin, argMax, argCurve, argExp, argMakeBus, argMakeBusRate, argMute, argUseLiveInput, argLiveInput, argCcNum, argArmed, argMidiChannel, prep|
     env = argEnv;
     bus = argBus;
     target = argTarget;
@@ -156,6 +156,7 @@ ESEnvClip : ESClip {
     liveInput = argLiveInput;
     ccNum = argCcNum;
     armed = argArmed;
+    midiChannel = argMidiChannel;
 
     this.sanitizeEnv;
     if (prep) { this.prep };
