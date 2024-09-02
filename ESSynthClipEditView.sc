@@ -132,7 +132,9 @@ ESArgsView : ScrollView {
       };
       argPairs = argPairs.add([
         StaticText(this, Rect(10, 2.5 + (i * 30), 140, 25)).string_(key).align_(\right).mouseDownAction_(action),
-        TextField(this, Rect(160, 2.5 + (i * 30), this.bounds.width - 165, 25)).string_(val.asESDisplayString).font_(Font.monospace(14))
+        TextField(this, Rect(160, 2.5 + (i * 30), this.bounds.width - 165, 25)).string_(val.asESDisplayString).font_(Font.monospace(14)).keyUpAction_({ |view|
+          args[index + 1] = ("{" ++ view.string ++ "}").interpret;
+        })
       ]);
       i = i + 1;
     };
