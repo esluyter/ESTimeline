@@ -73,7 +73,7 @@ ESTimelineController {
             isExponential = (spec.warp.class == ExponentialWarp);
           };
           if (addTrack) {
-            timeline.addTrack(thisTrackIndex, ESTrack([], false, \env, false));
+            timeline.addTrack(thisTrackIndex, ESTrack([], false, ((clip.track.name ?? "") ++ " envelope").asSymbol, false));
           };
 
           arr.sort({ |a, b| a.startTime < b.startTime }).do { |thisClip|
