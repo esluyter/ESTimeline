@@ -608,7 +608,7 @@ ESTimelineView : UserView {
               var leftOffset = this.absoluteTimeToPixels(clip.startTime + startTime - clip.offset);
               // sounding playhead in black
               left = this.absoluteTimeToPixels(clip.timeline.soundingNow) + leftOffset;
-              Pen.addRect(Rect(left, top, 2, trackHeights[i]));
+              Pen.addRect(Rect(left, top, 2, trackHeight/*trackHeights[i]*/));
               Pen.color = Color.black;
               Pen.fill;
 
@@ -616,9 +616,19 @@ ESTimelineView : UserView {
               if (clip.timeline.now < (clip.offset + clip.duration)) {
                 Pen.color = Color.gray(0.5, 0.5);
                 left = this.absoluteTimeToPixels(clip.timeline.now) + leftOffset;
-                Pen.addRect(Rect(left, top, 2, trackHeights[i]));
+                Pen.addRect(Rect(left, top, 2, trackHeight/*trackHeights[i]*/));
                 Pen.fill;
               };
+
+              // also draw timeline playhead for envelopes
+              left = this.absoluteTimeToPixels(timeline.soundingNow);
+              Pen.addRect(Rect(left, top + trackHeight, 2, trackHeights[i] - trackHeight));
+              Pen.color = Color.black;
+              Pen.fill;
+              Pen.color = Color.gray(0.5, 0.5);
+              left = this.absoluteTimeToPixels(timeline.now);
+              Pen.addRect(Rect(left, top + trackHeight, 2, trackHeights[i] - trackHeight));
+              Pen.fill;
             };
             if (timeline.now > clip.endTime) {
               // "scheduling playhead" in gray
