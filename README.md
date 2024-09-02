@@ -17,6 +17,9 @@ Note that this is a work in progress and all is subject to revision.
   http://www.youtube.com/watch?v=8jcxcfvS_08
 </details>
 
+<details>
+  <summary>Features, hypothetical features, and issues</summary>
+  
 ## Features
 - **Non-prescriptive:** no server architecture is forced on you, possible to disable timeline-specific clock and environment so as to interact with the timeline as part of a larger project; the basic goal is only to "execute this code at this particular time"
 - **DAW-like GUI** for editing and playback (see below for mouse and key commands lists)
@@ -43,13 +46,20 @@ Note that this is a work in progress and all is subject to revision.
   - Indeterminacy: probability for clips not to play?
   - Clock follow: e.g. sync up with an Ableton timeline or midi show control
 - Track/clips
+  - More clip types (e.g. OSCdef, loop, audio file)
   - Set default params per track (e.g. pan: -1)
   - Reference clips to create clones that all change together
 - Envelopes
+  - Ability to draw freehand with mouse 
   - More live interaction - e.g. map a controller to a bus and record its movements to an envelope
   - Higher dimensional envelopes - e.g. movement through x/y space
+  - Timeline tempo envelopes (this is already possible but kind of annoying, using an Env clip and a Routine clip)
 - Playback and record audio files
   - easily access this Buffer for further manipulation
+- More types of sequencing
+  - Piano roll with flexible scale and steps per octave
+    - ...which could be midi-capable....
+  - Drum machine type step sequencer with multiple lanes for different instruments
 - Library integration
   - ddwPlug -- simplify bus routing for modulation
   - jitlib -- ditto
@@ -64,6 +74,11 @@ Note that this is a work in progress and all is subject to revision.
 3. There is a limit to the complexity of a timeline created using SCLang (i.e. by evaluating `ESTimeline([ESTrack([....`) -- it may only contain max 256 functions.
   - to avoid this I have created a light custom file format that compiles complex timeline structures from the inside out
 
+</details>
+
+<details>
+  <summary>Getting started</summary>
+  
 ## Installing
 Download or clone this repository into your SuperCollider Extensions directory. To see where this is, go to `File > Open user support directory` and find the `Extensions` directory, or evaluate:
 ```
@@ -225,7 +240,11 @@ loop {
 - you can use a comment clip (shift-C) for this dummy "next" clip -- the first line of the comment is its name
 - you can also goto a number, which will be interpreted as beat number.
 
+</details>
 
+<details>
+  <summary>Keyboard and mouse actions</summary>
+  
 ## Mouse interaction
 - drag middle of clip to move
 - drag edges of clip to resize
@@ -273,5 +292,6 @@ loop {
   - shift-cmd-delete deletes selected time
 - cmd-z undo
 - cmd-Z redo
+</details>
 
 If you do try it out, I would love to know your thoughts, ideas, critiques, and if you find bugs etc please report them on the github issue page with steps to reproduce.
