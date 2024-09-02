@@ -17,36 +17,24 @@ ESDrawEnvClip : ESDrawClip {
     var minWidth, maxWidth;
     var font = Font.monospace(10);
 
-    Pen.use {
-      // TODO: make a good envelope drawing that doesn't freeze gui
+    var thisEnv = clip.env.value;
+    var image = Image((width.asInteger)@((height + 1).asInteger));
+    width.asInteger.do { |x|
+      var x2time = { |x| x * pratio + clip.offset };
+      var val2y = { |val| ((1 - val) * height).asInteger };
+      var time = x2time.(x);
+      var nextTime = x2time.(x + 1);
+      var val = thisEnv[time];
+      var nextVal = thisEnv[nextTime];
+      var y = val2y.(val);
+      var nextY = val2y.(nextVal);
+      var thisTop = min(y, nextY);
+      var thisHeight = max(1, abs(y - nextY));
+      image.setPixels(Int32Array.fill(thisHeight, {Image.colorToPixel(Color.gray(1, 0.8))}), Rect(x, thisTop, 1, thisHeight));
+    };
+    Pen.drawImage(left@top, image);
+    image.free;
       /*
-      var n = min(duration * 30, width);
-      var points = this.envToPlay.discretize(n);
-      Pen.moveTo(left@(top + ((1 - env[offset]) * height)));
-      points.do { |level, i|
-        Pen.lineTo((left + i.linlin(0, n, 0, width))@(top + ((1 - level) * height)));
-      };
-      */
-      /*
-      var scale = ((height) / 50).asInteger.max(1);
-      scale.postln;
-      Pen.moveTo(left@(top + ((1 - env[offset]) * height)));
-      (width / scale).asInteger.do { |i|
-        i = i * scale;
-        Pen.lineTo((left + i)@(top + ((1 - env[offset + (i * pratio)]) * height)));
-      };
-      */
-      /*
-      var thisEnv = this.envToPlay;
-      var time = 0;
-      Pen.moveTo(left@(top + ((1 - env[offset]) * height)));
-      thisEnv.levels.do { |level, i|
-        Pen.lineTo((left + (time * tratio))@(top + ((1 - level) * height)));
-        if (i < thisEnv.times.size) {
-          time = time + thisEnv.times[i];
-        };
-      };
-      */
       var n = (width / (height / 50).max(1)).asInteger;
       var nratio = width / n;
       var firstI, lastI, prevY;
@@ -65,7 +53,7 @@ ESDrawEnvClip : ESDrawClip {
 
       Pen.color = Color.gray(1, 0.8);
       Pen.fill;
-    };
+      */
 
     if (editingMode) {
       var thisEnv = clip.envToPlay;
