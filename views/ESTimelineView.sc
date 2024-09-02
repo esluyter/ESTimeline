@@ -470,9 +470,24 @@ ESTimelineView : UserView {
       // m - mute clip
       if (char == $m) { timelineController.toggleMuteClips(hoverClip, this.selectedClips); };
       // a - arm clip
-      if (char == $a) { if (hoverClip.class == ESEnvClip) { hoverClip.armed = hoverClip.armed.not; }; };
+      if (char == $a) {
+        if (hoverClip.class == ESEnvClip) { hoverClip.armed = hoverClip.armed.not;
+          this.selectedClips.do { |clip|
+            if (clip.class == ESEnvClip) {
+              clip.armed = hoverClip.armed;
+            };
+          };
+        };
+      };
       // i - use live input
-      if (char == $i) { if (hoverClip.class == ESEnvClip) { hoverClip.useLiveInput = hoverClip.useLiveInput.not; }; };
+      if (char == $i) { if (hoverClip.class == ESEnvClip) {
+        hoverClip.useLiveInput = hoverClip.useLiveInput.not;
+        this.selectedClips.do { |clip|
+          if (clip.class == ESEnvClip) {
+            clip.useLiveInput = hoverClip.useLiveInput
+          };
+        };
+      }; };
       if (char == $S) { timelineController.newSynthClip(hoverTrack, newClipStartTime, newClipDuration); };
       if (char == $T) {
         if (this.selectedClips.size == 0) {

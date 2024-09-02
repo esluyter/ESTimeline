@@ -9,8 +9,8 @@ ESEnvClip : ESClip {
   max_ { |val| max = val; this.changed(\max); }
   env_ { |val| env = val; this.sanitizeEnv; this.changed(\env); }
   bus_ { |val| bus = val; this.changed(\bus); }
-  armed_ { |val| armed = val; this.changed(\armed); }
-  useLiveInput_ { |val| useLiveInput = val; this.changed(\useLiveInput) }
+  armed_ { |val| armed = val; if (armed) { useLiveInput = true }; this.changed(\armed); }
+  useLiveInput_ { |val| useLiveInput = val; if (useLiveInput.not) { armed = false }; this.changed(\useLiveInput) }
   rate { ^this.bus.value.rate }
   makeBus_ { |val|
     if (val != makeBus) {
