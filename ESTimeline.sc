@@ -116,8 +116,11 @@ ESTimeline {
   storeArgs { ^[tracks, this.tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames] }
   defaultUndoPoint { ^[[ESTrack([])], 1, nil, nil, bootOnPrep, useEnvir, optimizeView, 4, false, useMixerChannel, (), [\master]].asESArray }
 
-  *newInitMixerChannels { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = true, gridDivision = 4, snapToGrid = false, useMixerChannel = true, mixerChannelTemplates, globalMixerChannelNames|
-    //var clock = TempoClock(tempo).permanent_(true);
+  *newInitMixerChannels { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = true, gridDivision = 4, snapToGrid = false, useMixerChannel = true, mixerChannelTemplates, globalMixerChannelNames, initMidi = true|
+    if (initMidi) {
+      MIDIClient.init;
+      MIDIIn.connectAll;
+    };
 
     tracks = tracks ?? [ESTrack()];
 
@@ -129,7 +132,12 @@ ESTimeline {
     ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames).initId.initEnvir.initDependantFunc.init(true);
   }
 
-  *new { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = false, gridDivision = 4, snapToGrid = false, useMixerChannel = false, mixerChannelTemplates, globalMixerChannelNames|
+  *new { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = false, gridDivision = 4, snapToGrid = false, useMixerChannel = false, mixerChannelTemplates, globalMixerChannelNames, initMidi = true|
+    if (initMidi) {
+      MIDIClient.init;
+      MIDIIn.connectAll;
+    };
+
     tracks = tracks ?? [ESTrack()];
 
     mixerChannelTemplates = mixerChannelTemplates ?? ();
