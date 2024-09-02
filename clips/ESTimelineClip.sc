@@ -30,9 +30,16 @@ ESTimelineClip : ESClip {
     */
   }
 
-  refreshTimelineNow {
-    timeline.now = track.timeline.now - startTime + offset;
-    timeline.clips.select({ |clip| clip.class == ESTimelineClip }).do(_.refreshTimelineNow);
+  refreshChildNow {
+    timeline.now_(track.timeline.now - startTime + offset, propagate: false);
+    timeline.clips.select({ |clip| clip.class == ESTimelineClip }).do(_.refreshChildNow);
+  }
+
+  refreshParentNow {
+    track.timeline.now_(timeline.now + startTime - offset, propagate: false);
+    if (track.timeline.parentClip.notNil) {
+      track.timeline.parentClip.refreshParentNow;
+    };
   }
 
   update { |argTimeline, what, val|
