@@ -234,8 +234,12 @@ ESTimeline {
     var undoPoint = this.asUndoPoint;
     if (undoPoint != currentState) {
       undoStack = undoStack.add(currentState);
+      if (undoStack.size > 100) {
+        undoStack = undoStack[1..];
+      };
       currentState = undoPoint;
       redoStack = [];
+      this.changed(\addUndoPoint, currentState)
     };
   }
 
