@@ -77,7 +77,6 @@ Also note that because timelines are built to execute user-supplied code they ar
 - Track/clips
   - Streamlined Synth/SynthDef/Envelope editing flow
   - More clip types (e.g. OSCdef, loop, audio file, midi/piano/drum roll, VST)
-  - Optional default MixerChannel per track? and modifiable per clip
   - Reference clips to create clones that all change together
 - Envelopes
   - Ability to draw freehand with mouse 
