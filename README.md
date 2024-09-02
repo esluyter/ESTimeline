@@ -9,7 +9,7 @@ The distant goal is that anything you can do in SuperCollider could be sequenced
 ## Features
 - Comment, Synth, Pattern, Routine, and Env clips
 - Tracks can contain all clip types, and can be muted/soloed
-- Non-prescriptive: no server architecture is forced on you, possible to disable timeline-specific clock and environment so as to interact with the timeline as part of a larger project
+- Non-prescriptive: no server architecture is forced on you, possible to disable timeline-specific clock and environment so as to interact with the timeline as part of a larger project; the goal is only to "execute this code at this particular time"
 - Gray playhead is "scheduling playhead" and black playhead is "sounding playhead" -- to take into account server latency. Routines can be played with additional latency so non-sounding events line up with the sounding playhead.
 - Most fields can take a Function, so playback params can be generated on the fly
 - Pattern, Routine, and Env clips can "fast forward" to start playing in the middle
