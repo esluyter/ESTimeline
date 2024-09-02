@@ -28,6 +28,7 @@ The distant goal is that anything you can do in SuperCollider could be sequenced
 - Playback and record audio files
 - Non-linearity: loop points, wait points, etc.
 - ddwPlug integration -- simplify bus routing for modulation
+- clothesline integration -- put whole .scd files on the timeline
 
 ## Issues
 - Although I've tried to make it pleasant, the GUI based code editing environment does not syntax highlight, autocomplete, etc -- for this reason I've added "Open in IDE" / "Copy from IDE" buttons as necessary.
