@@ -227,9 +227,9 @@ SynthDef(\sin, { |out, freq = 440, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
   - shift-click to add breakpoints,
   - select multiple breakpoints to move them together
   - option-click to remove them
-  - to adjust the envelope range, right click, clip actions > env actions > "set env range keeping breakpoint values"
-    - now you can change the frequency range of the envelope, say min `100` max `5000`
-    - ok to save changes -- this will keep your values intact so long as they fall within the new range    
+  - to adjust the envelope range, double click on the envelope to open the editor window
+    - change the frequency range of the envelope, say min `100` max `5000`
+    - hit save to save changes -- this will keep your values intact so long as they fall within the new range    
 - hit cmd-e again to leave envelope breakpoint editor mode
 
 ### Bulk edit Synths -- To make this envelope affect all your Synths:
