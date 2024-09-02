@@ -87,7 +87,7 @@ ESTimelineView : UserView {
         var envHeight = trackHeight * timeline.envHeightMultiplier;
 
         Pen.addRect(Rect(0, 0, this.bounds.width, envHeight));
-        Pen.color = Color.gray(0.8, 0.2);
+        Pen.color = Color.gray(0.8, 0.3);
         Pen.fill;
 
         // draw envelope
