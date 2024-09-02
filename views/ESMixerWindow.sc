@@ -325,7 +325,7 @@ ESMixerWindow {
     if (mixerChannels == [nil]) { ^false }; // this will happen if server not booted
 
     channelIndexMap = ();
-    mixerChannelsFlat.do { |arr, i| var mc = arr[0]; /*if (mc.notNil) { */channelIndexMap[mc.inbus.index] = i /*}*/ };
+    mixerChannelsFlat.do { |arr, i| var mc = arr[0]; /* if (mc.notNil) { */ channelIndexMap[mc.inbus.index] = i /* } */ };
 
     // in case of problem just don't throw infinite error messages..
     //try {

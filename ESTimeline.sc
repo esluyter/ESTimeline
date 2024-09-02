@@ -634,20 +634,6 @@ ESTimeline {
 
     mc = mixerChannels[mcName];
 
-    // update mixer templates so all track settings stay as they were
-    tracks[index..].do { |thisTrack|
-      if (thisTrack.useMixerChannel and: thisTrack.mixerChannelName.isInteger) {
-        mixerChannelTemplates[thisTrack.mixerChannelName] = mixerChannelTemplates[thisTrack.mixerChannelName + 1];
-        mixerChannelTemplates[thisTrack.mixerChannelName + 1] = nil;
-
-        mixerChannels[thisTrack.mixerChannelName] = mixerChannels[thisTrack.mixerChannelName + 1];
-        mixerChannels[thisTrack.mixerChannelName + 1] = nil;
-      };
-    };
-    //if (doMcInit) {
-      //this.initMixerChannels;
-    //};
-
     tracks.do { |t|
       if (t.mixerChannelName == mcName) {
         hasSameMcName = true;
@@ -665,6 +651,20 @@ ESTimeline {
       mixerChannelTemplates[mcName].releaseDependants;
       mixerChannelTemplates[mcName] = nil;
     };
+
+    // update mixer templates so all track settings stay as they were
+    tracks[index..].do { |thisTrack|
+      if (thisTrack.useMixerChannel and: thisTrack.mixerChannelName.isInteger) {
+        mixerChannelTemplates[thisTrack.mixerChannelName] = mixerChannelTemplates[thisTrack.mixerChannelName + 1];
+        mixerChannelTemplates[thisTrack.mixerChannelName + 1] = nil;
+
+        mixerChannels[thisTrack.mixerChannelName] = mixerChannels[thisTrack.mixerChannelName + 1];
+        mixerChannels[thisTrack.mixerChannelName + 1] = nil;
+      };
+    };
+    //if (doMcInit) {
+      //this.initMixerChannels;
+    //};
 
     this.changed(\tracks);
   }

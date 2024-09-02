@@ -499,7 +499,7 @@ ESTimelineView : UserView {
           if (mods.isShift) {
             timelineController.deleteTime(timeSelection);
           } {
-            if (hoverTrack.notNil) {
+            if (hoverTrack.notNil and: hoverTrack.index.notNil) {
               var index = hoverTrack.index;
               timeline.removeTrack(index);
               hoverTrack = timeline.tracks[min(index, timeline.tracks.size - 1)];
