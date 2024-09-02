@@ -247,6 +247,7 @@ ESTimelineView : UserView {
       var xDelta = x - clickPoint.x;
       var doTimeSelectionOverEnv, doTimeSelectionOverEnvClip, mouseOverTempoEnv = false;
       var envOffset = if (timeline.tempoEnv.notNil) { 1 } { 0 };
+      var currentHoverTrack = this.trackAtY(y);
 
       if (editingMode.not) {
         switch (hoverCode)
@@ -297,8 +298,6 @@ ESTimelineView : UserView {
           if (mods.isCmd) {
             hoverClip.offset = hoverClipOffset - this.pixelsToRelativeTime(xDelta);
           } {
-            var currentHoverTrack = this.trackAtY(y);
-
             // if clips have been duplicated, insert them into appropriate tracks and then select and move.
             if (duplicatedClips.notNil) {
               duplicatedClips.do { |duplicatedClip|
@@ -342,7 +341,7 @@ ESTimelineView : UserView {
               };
             };
             // move clips between tracks
-            if (currentHoverTrack.index != hoverTrack.index) {
+            if ((currentHoverTrack.notNil and: hoverTrack.notNil) and: { currentHoverTrack.index != hoverTrack.index }) {
               var trackDelta = currentHoverTrack.index - hoverTrack.index;
               var clips;
               if (this.selectedClips.includes(hoverClip)) {
@@ -405,8 +404,10 @@ ESTimelineView : UserView {
             if (mods.isShift.not) {
               clipSelection = Set[];
             };
-            stagedClipSelection = Set.newFrom(timeline.clipsInRange(this.trackAtY(clickPoint.y).index, this.trackAtY(y).index, timeA, timeB));
-            this.changed(\selectedClips);
+            if (hoverTrack.notNil and: currentHoverTrack.notNil) {
+              stagedClipSelection = Set.newFrom(timeline.clipsInRange(hoverTrack.index, currentHoverTrack.index, timeA, timeB));
+              this.changed(\selectedClips);
+            };
           } {
             stagedClipSelection = Set[];
           };
@@ -430,7 +431,11 @@ ESTimelineView : UserView {
       var envOffset = if (timeline.tempoEnv.notNil) { 1 } { 0 };
       var top = timeline.envHeightMultiplier * trackHeight * envOffset;
       # hoverClip, i, j, hoverCode = this.clipAtPoint(x@y);
-      hoverTrack = timeline.tracks[i];
+      if (i.notNil) {
+        hoverTrack = timeline.tracks[i];
+      } {
+        hoverTrack = nil;
+      };
       hoverTime = this.pixelsToAbsoluteTime(x);
       i.do { |j| top = top + trackHeights[j + envOffset] };
 
@@ -809,7 +814,7 @@ ESTimelineView : UserView {
 
   clipAtPoint { |point|
     var track = this.trackAtY(point.y, true);
-    if (track.isInteger) {
+    if (track.isInteger or: track.isNil) {
       ^[nil, track, nil, nil];
     } {
       ^this.clipAtX(track, point.x, track.index);
@@ -820,6 +825,8 @@ ESTimelineView : UserView {
     var trackHeights = this.trackHeights;
     var envOffset = if (timeline.tempoEnv.notNil) { 1 } { 0 };
     var top = timeline.envHeightMultiplier * trackHeight * envOffset;
+
+    if (y < top) { ^nil };
 
     timeline.tracks.do { |track, i|
       var bottom = top + trackHeights[i + envOffset];

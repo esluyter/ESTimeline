@@ -36,9 +36,9 @@ ESTimelineController {
 
   addTempoEnv {
     if (timeline.tempoEnv.isNil) {
-      var spec = [30, 1000].asSpec;
+      var spec = [30, 1000, 4].asSpec;
       var unmappedLevel = spec.unmap(timeline.tempoBPM);
-      timeline.tempoEnv = ESMixerChannelEnv(Env(unmappedLevel.dup(2), [0], [0]), spec.minval, spec.maxval);
+      timeline.tempoEnv = ESMixerChannelEnv(Env(unmappedLevel.dup(2), [0], [0]), spec.minval, spec.maxval, 4);
       timeline.addUndoPoint;
     };
   }
