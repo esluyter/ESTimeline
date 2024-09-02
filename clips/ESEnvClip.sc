@@ -73,11 +73,11 @@ ESEnvClip : ESClip {
     };
   }
 
-  *new { |startTime, duration, offset = 0, color, name, env, bus, target, addAction = 'addToHead', min = 0, max = 1, curve = 0, isExponential = false, makeBus = true, makeBusRate = \audio, prep = false|
-    ^super.new(startTime, duration, offset, color, name).init(env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate, prep);
+  *new { |startTime, duration, offset = 0, color, name, env, bus, target, addAction = 'addToHead', min = 0, max = 1, curve = 0, isExponential = false, makeBus = true, makeBusRate = \audio, mute = false, prep = false|
+    ^super.new(startTime, duration, offset, color, name, mute: mute).init(env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate, prep);
   }
 
-  storeArgs { ^[startTime, duration, offset, color, name, env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate] }
+  storeArgs { ^[startTime, duration, offset, color, name, env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate, mute] }
 
   duplicate {
     //this.asCompileString.interpret.track_(track);
@@ -266,8 +266,10 @@ ESEnvClip : ESClip {
       Pen.stringAtPoint(minString, (left + width - minWidth - 2)@(top + height - 11), font, Color.gray(1.0, 0.5));
     };
 
-    ^"Env"
+    ^this.prTitle;
   }
+
+  prTitle { ^"Env" }
 
   prMouseMove { |x, y, xDelta, yDelta, mods, left, top, width, height|
     var thisEnv = this.envToPlay;

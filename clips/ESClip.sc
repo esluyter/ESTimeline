@@ -1,14 +1,16 @@
 ESClip {
-  var <startTime, <duration, <offset, >color, <name, <comment;
+  var <startTime, <duration, <offset, >color, <name, <comment, <mute;
   var <>track;
   var <isPlaying = false;
   var playRout;
 
-  storeArgs { ^[startTime, duration, offset, color, name, comment] }
+  storeArgs { ^[startTime, duration, offset, color, name, comment, mute] }
 
-  *new { |startTime, duration, offset = 0, color, name, comment = ""|
-    ^super.newCopyArgs(startTime, duration, offset, color, name, comment);
+  *new { |startTime, duration, offset = 0, color, name, comment = "", mute = false|
+    ^super.newCopyArgs(startTime, duration, offset, color, name, comment, mute);
   }
+
+  mute_ { |val| mute = val; this.changed(\mute, val) }
 
   startTime_ { |val, adjustOffset = false|
     //val = max(val, 0);
@@ -72,76 +74,84 @@ ESClip {
       this.stop;
     };
 
-    // set isPlaying to true
-    isPlaying = true;
+    if (mute.not) {
+      // set isPlaying to true
+      isPlaying = true;
 
-    // play the clip on a new Routine on this clock
-    playRout = {
-      // set "thisTimeline" environment var
-      ~thisTimeline = track.timeline;
+      // play the clip on a new Routine on this clock
+      playRout = {
+        // set "thisTimeline" environment var
+        ~thisTimeline = track.timeline;
 
-      // start the clip from specified start offset
-      this.prStart(startOffset, clock);
+        // start the clip from specified start offset
+        this.prStart(startOffset, clock);
 
-      // wait the appropriate time, then stop
-      (duration - startOffset).wait;
-      this.stop;
-    }.fork(clock);
+        // wait the appropriate time, then stop
+        (duration - startOffset).wait;
+        this.stop;
+      }.fork(clock);
+    };
   }
 
   // draw this clip on a UserView using Pen
   draw { |left, top, width, height, editingMode = false, clipLeft, clipWidth, selected = false, drawBorder = true| // these last two are for ESTimelineClips
+    var font = Font("Helvetica", 14, true);
+
     if (track.shouldPlay) {
-      Pen.color = this.color(selected, editingMode);
+      Pen.color = this.color(selected, editingMode).alpha_(if (mute) { if (selected) { 0 } { 0.1 } } { 1.0 });
     } {
-      Pen.color = Color.white.lighten(this.color(selected, editingMode), 0.5);
+      Pen.color = Color.white.lighten(this.color(selected, editingMode), 0.5).alpha_(if (mute) { if (selected) { 0 } { 0.2 } } { 1.0 });
     };
     Pen.strokeColor = Color.cyan;
     Pen.width = 2;
     Pen.addRect(Rect(left, top, width, height));
     if (selected and: drawBorder) { Pen.fillStroke } { Pen.fill };
 
-    if (editingMode and: this.hasEditingMode) {
-      Pen.addRect(Rect(left, top, width, height));
-      Pen.strokeColor = Color.white;
-      Pen.width = 3;
-      Pen.stroke;
-    };
+    if (mute) {
+      var title = ESStringShortener.trim(this.prTitle, width - 3.5, font);
+      Pen.stringAtPoint(title, (left + 3.5)@(top + 2), font, this.color.alpha_(0.3));
+    } {
+      if (editingMode and: this.hasEditingMode) {
+        Pen.addRect(Rect(left, top, width, height));
+        Pen.strokeColor = Color.white;
+        Pen.width = 3;
+        Pen.stroke;
+      };
 
-    Pen.color = Color.gray(0.8, 0.5);
-    Pen.addRect(Rect(left + width - 1, top, 1, height));
-    Pen.fill;
+      Pen.color = Color.gray(0.8, 0.5);
+      Pen.addRect(Rect(left + width - 1, top, 1, height));
+      Pen.fill;
 
-    // if it's more than 5 pixels wide and high, call the prDraw function
-    if ((width > 5) and: (height > 10)) {
-      var font = Font("Helvetica", 14, true);
-      var title;
-      try {
-        if (track.timeline.useEnvir) {
-          track.timeline.envir.use {
+      // if it's more than 5 pixels wide and high, call the prDraw function
+      if ((width > 5) and: (height > 10)) {
+        var title;
+        try {
+          if (track.timeline.useEnvir) {
+            track.timeline.envir.use {
+              ~thisTimeline = this.track.timeline;
+              title = this.prDraw(left, top, width, height, editingMode, clipLeft, clipWidth, selected, drawBorder);
+            }
+          } {
             ~thisTimeline = this.track.timeline;
             title = this.prDraw(left, top, width, height, editingMode, clipLeft, clipWidth, selected, drawBorder);
-          }
+          };
         } {
-          ~thisTimeline = this.track.timeline;
-          title = this.prDraw(left, top, width, height, editingMode, clipLeft, clipWidth, selected, drawBorder);
+          title = ""
         };
-      } {
-        title = ""
-      };
 
-      if (name.notNil and: (this.class != ESClip)) { title = name.asCompileString ++ " (" ++ title ++ ")" };
+        if (name.notNil and: (this.class != ESClip)) { title = name.asCompileString ++ " (" ++ title ++ ")" };
 
-      if (left < 0) {
-        width = width + left;
-        left = 0;
+        if (left < 0) {
+          width = width + left;
+          left = 0;
+        };
+        if (clipLeft.notNil and: { left < clipLeft }) {
+          width = width - (clipLeft - left);
+          left = clipLeft;
+        };
+        title = ESStringShortener.trim(title, width - 3.5, font);
+        Pen.stringAtPoint(title, (left + 3.5)@(top + 2), font, Color.gray(1, 0.6));
       };
-      if (clipLeft.notNil and: { left < clipLeft }) {
-        width = width - (clipLeft - left);
-        left = clipLeft;
-      };
-      title = ESStringShortener.trim(title, width - 3.5, font);
-      Pen.stringAtPoint(title, (left + 3.5)@(top + 2), font, Color.gray(1, 0.6));
     };
   }
 
@@ -176,8 +186,9 @@ ESClip {
     Pen.color = Color.gray(0.7);
     Pen.addRect(left, top, width, height);
     Pen.stroke;
-    ^""
+    ^this.prTitle;
   }
+  prTitle { ^"" }
   prTempoChanged { |tempo| } // so far this is just so env clips follow tempo changes
   defaultColor { ^Color.gray(1); }
 

@@ -6,10 +6,10 @@ ESTimelineClip : ESClip {
     timeline.changed(\useParentClock, val);
   }
 
-  storeArgs { ^[startTime, duration, offset, color, name, timeline, useParentClock] }
+  storeArgs { ^[startTime, duration, offset, color, name, timeline, useParentClock, mute] }
 
-  *new { |startTime, duration, offset = 0, color, name, timeline, useParentClock = true|
-    ^super.new(startTime, duration, offset, color, name).init(timeline, useParentClock);
+  *new { |startTime, duration, offset = 0, color, name, timeline, useParentClock = true, mute = false|
+    ^super.new(startTime, duration, offset, color, name, mute: mute).init(timeline, useParentClock);
   }
 
   init { |argTimeline, argUseParentClock|
@@ -157,6 +157,8 @@ ESTimelineClip : ESClip {
       Pen.stroke;
     };
   }
+
+  prTitle { ^"Timeline" }
 
   defaultColor { ^if (timeline.useEnvir) { Color.gray(0.96, 0.5) } { Color.clear  } }
 
