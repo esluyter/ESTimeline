@@ -1,6 +1,6 @@
 ESTimelineWindow : Window {
   var <timeline;
-  var <topPanel, <topPlug, <tempoKnob, <newButt, <saveIDEButt, <loadIDEButt, <undoButt, <redoButt, <funcEditButt, <useParentClockBox, <snapToGridBox, <gridDivisionBox, <useMixerChannelBox;
+  var <topPanel, <topPlug, <tempoKnob, <newButt, <saveIDEButt, <loadIDEButt, <undoButt, <redoButt, <funcEditButt, <useParentClockBox, <snapToGridBox, <gridDivisionBox, <useMixerChannelBox, <newTimelineClipButt;
   var <scrollView, <timelineView, <trackPanelView, <rulerView;
   var playheadRout;
 
@@ -62,11 +62,15 @@ ESTimelineWindow : Window {
         rulerView.refresh;
         timelineView.focus;
       });
-      StaticText(this, Rect(815, 10, 120, 20)).string_("useParentClock").font_(Font.sansSerif(16));
+      StaticText(this, Rect(815, 10, 120, 20)).string_("useParentClock").font_(Font.sansSerif(13));
     } {  //925
-      Button(this, Rect(795, 5, 200, 30)).states_([["Open as clip in new timeline"]]).action_({
-        timeline.encapsulateSelf;
-        timelineView.editingMode = false;
+      newTimelineClipButt = Button(this, Rect(790, 5, 205, 30)).states_([["Open as clip in new timeline"]]).action_({
+        if (timelineView.selectedClips.size > 0) {
+          timelineView.timelineController.newTimelineClipFromSelected;
+        } {
+          timeline.encapsulateSelf;
+          timelineView.editingMode = false;
+        };
       })
     };
 
@@ -274,7 +278,12 @@ ESTimelineWindow : Window {
       { \makeTrackViews } { trackPanelView.makeTrackViews }
       { \editingMode } { timelineView.refresh }
       { \timeSelection } { timelineView.refresh; rulerView.refresh }
-      { \selectedClips } { timelineView.refresh }
+      { \selectedClips } {
+        timelineView.refresh;
+        if (newTimelineClipButt.notNil) {
+          newTimelineClipButt.states_([[if (timelineView.selectedClips.size > 0) { "New timelineClip from selection" } { "Open as clip in new timeline" }]])
+        };
+      }
       { \mouseMove } { rulerView.refresh }
       { \mouseUp } { timeline.tracks.do(_.sortClips); timelineView.refresh; rulerView.refresh }
     });

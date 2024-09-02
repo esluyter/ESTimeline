@@ -362,7 +362,7 @@ ESTimelineView : UserView {
       };
 
       // select time/clips if start dragging from empty area
-      if ((hoverClip.isNil or: { doTimeSelectionOverEnvClip }) and: (hoverEnv.isNil or: { doTimeSelectionOverEnv })) {
+      if ((hoverClip.isNil or: { doTimeSelectionOverEnvClip ? false }) and: (hoverEnv.isNil or: { doTimeSelectionOverEnv ? false })) {
         if (xDelta.abs > 1) {
           var timeA = this.pixelsToAbsoluteTime(clickPoint.x);
           var timeB = this.pixelsToAbsoluteTime(x);

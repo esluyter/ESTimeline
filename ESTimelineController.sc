@@ -30,7 +30,78 @@ ESTimelineController {
   }
 
   newTimelineClip { |track, startTime, duration|
-    track.addClip(ESTimelineClip(startTime, duration ?? 10, timeline: ESTimeline.newInitMixerChannels(bootOnPrep: timeline.bootOnPrep, useEnvir: timeline.useEnvir, optimizeView: timeline.optimizeView, gridDivision: timeline.gridDivision, snapToGrid: timeline.snapToGrid, useMixerChannel: timeline.useMixerChannel, globalMixerChannelNames: [])));
+    track.addClip(
+      ESTimelineClip(
+        startTime, duration ?? 10,
+        timeline: ESTimeline.newInitMixerChannels(
+          bootOnPrep: timeline.bootOnPrep,
+          useEnvir: timeline.useEnvir,
+          optimizeView: timeline.optimizeView,
+          gridDivision: timeline.gridDivision,
+          snapToGrid: timeline.snapToGrid,
+          useMixerChannel: timeline.useMixerChannel,
+          globalMixerChannelNames: [])));
+  }
+
+  newTimelineClipFromSelected { |track|
+    var oldTracks = [];
+    var newTracks = [];
+    var newMixerChannelTemplates = ();
+    var selectedClips = timelineView.selectedClips;
+    var startTime = inf, endTime = 0;
+    var index;
+
+    timeline.tracks.do { |thisTrack|
+      var moveTrack = false;
+      var mcName;
+
+      thisTrack.clips.do { |thisClip|
+        if (selectedClips.includes(thisClip)) {
+          moveTrack = true;
+        };
+      };
+      if (moveTrack) {
+        var newTrack = ESTrack([], thisTrack.mute, thisTrack.name, thisTrack.useMixerChannel);
+        oldTracks = oldTracks.add(thisTrack);
+        newTracks = newTracks.add(newTrack);
+        mcName = newTrack.name ? newTracks.indexOf(newTrack);
+
+        newMixerChannelTemplates[mcName] = timeline.mixerChannelTemplates[thisTrack.mixerChannelName];
+
+        thisTrack.clips.reverse.do { |thisClip|
+          if (selectedClips.includes(thisClip)) {
+            thisClip.track.removeClip(thisClip.index, false);
+            newTrack.addClip(thisClip);
+            if (thisClip.startTime < startTime) { startTime = thisClip.startTime };
+            if (thisClip.endTime > endTime) { endTime = thisClip.endTime };
+          };
+        };
+      };
+    };
+
+    index = oldTracks[0].index;
+    oldTracks.reverse.do { |thisTrack|
+      if (thisTrack.clips.size == 0) {
+        timeline.removeTrack(thisTrack.index, true, false, true);
+      };
+    };
+    if (track.isNil) {
+      track = timeline.addTrack(index);
+    };
+    track.addClip(
+      ESTimelineClip(
+        startTime, endTime - startTime, startTime,
+        timeline: ESTimeline.newInitMixerChannels(
+          newTracks,
+          timeline.tempo,
+          bootOnPrep: timeline.bootOnPrep,
+          useEnvir: timeline.useEnvir,
+          optimizeView: timeline.optimizeView,
+          gridDivision: timeline.gridDivision,
+          snapToGrid: timeline.snapToGrid,
+          useMixerChannel: timeline.useMixerChannel,
+          mixerChannelTemplates: newMixerChannelTemplates,
+          globalMixerChannelNames: [])));
   }
 
   newCommentClip { |track, startTime, duration|

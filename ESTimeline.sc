@@ -622,13 +622,15 @@ ESTimeline {
     };
 
     this.changed(\tracks);
+
+    ^track;
   }
 
-  removeTrack { |index, doFree = true, doMcInit = true|
+  removeTrack { |index, doFree = true, doMcInit = true, allowRemoveLastTrack = false|
     var track = tracks.at(index);
     var mc, mcName = track.mixerChannelName, hasSameMcName = false;
 
-    if (tracks.size <= 1) { ^false };
+    if ((tracks.size <= 1) and: allowRemoveLastTrack.not){ ^false };
 
     tracks.removeAt(index);
 
