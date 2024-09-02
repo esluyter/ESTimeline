@@ -631,6 +631,10 @@ ESTimeline {
       mc.free;
     };
 
+    if (hasSameMcName.not) {
+      mixerChannelTemplates[mcName] = nil;
+    };
+
     this.changed(\tracks);
   }
 
