@@ -1,7 +1,7 @@
 ESEnvClip : ESClip {
   var <env, <bus, <>target, <>addAction, <min, <max, <>curve, <>isExponential, <makeBus = false, <>makeBusRate;
   var <synth;
-  var <hoverIndex, <editingFirst;
+  var <hoverIndex, <editingFirst, <originalCurve, <curveIndex;
 
   min_ { |val| min = val; this.changed(\min); }
   max_ { |val| max = val; this.changed(\max); }
@@ -218,17 +218,19 @@ ESEnvClip : ESClip {
     ^"Env"
   }
 
-  prMouseMove { |x, y, xDelta, yDelta, left, top, width, height|
+  prMouseMove { |x, y, xDelta, yDelta, mods, left, top, width, height|
+    var thisEnv = this.envToPlay;
+    var points;
     if (hoverIndex == 0) {
-      var thisEnv = this.envToPlay;
       env = Env([thisEnv.levels[0]] ++ thisEnv.levels, [0] ++ thisEnv.times, if (thisEnv.curves.isArray) { [thisEnv.curves[0]] ++ thisEnv.curves } { thisEnv.curves });
       offset = 0;
       hoverIndex = 1;
       editingFirst = true;
+      thisEnv = this.envToPlay;
     };
+    points = this.envBreakPoints(thisEnv, left, top, width, height);
     if (hoverIndex.notNil) {
-      var thisEnv = this.envToPlay;
-      var points = this.envBreakPoints(thisEnv, left, top, width, height);
+      // adjust breakpoint
       var prevPoint = points[max(0, hoverIndex - 1)];
       var nextPoint = if (hoverIndex < (points.size - 1)) { points[hoverIndex + 1] } { (left + width)@0 };
       var adjustedX = x.clip(prevPoint.x, nextPoint.x).clip(left, left + width);
@@ -237,11 +239,26 @@ ESEnvClip : ESClip {
       if (editingFirst) { points[0] = left@adjustedY; };
       #env, offset = this.envFromBreakPoints(points, left, top, width, height);
       this.changed(\env);
+    } {
+      // adjust curve if not over breakpoint and no modifiers
+      if (mods == 0) {
+        var curves = if (thisEnv.curves.isArray) { thisEnv.curves } { thisEnv.curves.dup(thisEnv.times.size) };
+        curveIndex = curveIndex ?? this.segmentIndex(points, x@y);
+        originalCurve = originalCurve ?? curves[curveIndex];
+        if (originalCurve.isNumber) {
+          var slope = thisEnv.levels[curveIndex + 1] - thisEnv.levels[curveIndex];
+          curves[curveIndex] = originalCurve + (yDelta * 0.1 * slope.sign);
+          env = Env(thisEnv.levels, thisEnv.times, curves);
+          this.changed(\env);
+        };
+      };
     };
   }
 
   prMouseDown { |x, y, mods, buttNum, clickCount, left, top, width, height|
     editingFirst = false;
+    originalCurve = nil;
+    curveIndex = nil;
 
     if (mods.isShift) {
       var pratio = duration / width;
@@ -434,6 +451,12 @@ ESEnvClip : ESClip {
       };
     };
     ^nearestIndex;
+  }
+
+  segmentIndex { |points, thisPoint|
+    points[1..].do { |point, i|
+      if ((points[i].x < thisPoint.x) and: (point.x > thisPoint.x)) { ^i };
+    };
   }
 
   valueNow {

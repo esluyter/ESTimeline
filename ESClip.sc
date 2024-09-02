@@ -227,7 +227,7 @@ ESClip {
 
   prHover { |x, y, hoverTime, left, top, width, height| }
   prHoverLeave {}
-  prMouseMove { |x, y, xDelta, yDelta, left, top, width, height| }
+  prMouseMove { |x, y, xDelta, yDelta, mods, left, top, width, height| }
   prMouseDown { |x, y, mods, buttNum, clickCount, left, top, width, height| }
 
   hasEditingMode { ^false }
