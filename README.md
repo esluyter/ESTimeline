@@ -3,8 +3,9 @@ A hypothetical general purpose SuperCollider timeline
 
 The distant goal is that anything you can do in SuperCollider could be sequenced on a timeline...
 
-![screenshot](img/ss.png)
-<img src="img/rss.png" width="700" /><img src="img/fss.png" width="700" />
+![screenshot](img/ss1.png)
+<img src="img/sse.png" width="500" />
+<img src="img/sss.png" width="400" /><img src="img/rss.png" width="400" /><img src="img/fss.png" width="400" />
 
 ## Features
 - Comment, Synth, Pattern, Routine, and Env clip types
