@@ -104,11 +104,12 @@ ESDrawEnvClip : ESDrawClip {
     var points;
     var ret = false;
     if (hoverIndex == 0) {
-      clip.env = Env([thisEnv.levels[0]] ++ thisEnv.levels, [0] ++ thisEnv.times, if (thisEnv.curves.isArray) { [thisEnv.curves[0]] ++ thisEnv.curves } { thisEnv.curves });
+      clip.env = Env([thisEnv.levels[0]] ++ thisEnv.levels, [0] ++ thisEnv.times, if (thisEnv.curves.isArray) { [thisEnv.curves[0]] ++ thisEnv.curves } { thisEnv.curves }).postcs;
       clip.offset = 0;
       hoverIndex = 1;
       editingFirst = true;
-      thisEnv = clip.envToPlay;
+      thisEnv = clip.envToPlay.postcs;
+      breakPointCache = this.envBreakPoints(thisEnv, left, top, width, height);
     };
     points = breakPointCache.copy;//this.envBreakPoints(thisEnv, left, top, width, height);
     if (hoverIndex.notNil) {
