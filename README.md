@@ -27,7 +27,7 @@ Timelines inside of timelines with optionally separate play clocks:
   - Each timeline (and timeline clip) has an init / free hook for e.g. allocating and freeing resources
 - Tracks can contain all clip types, and can be muted/soloed
 - Gray playhead is "scheduling playhead" and black playhead is "sounding playhead" -- to take into account server latency. Routines can be played with additional latency so non-sounding events line up with the sounding playhead.
-- DAW-like GUI for editing and playback
+- DAW-like GUI for editing and playback (see below for mouse and key commands lists)
 - Undo and redo at each timeline level
 - Easy to export timeline to IDE as plain text and load it back again
 
@@ -95,6 +95,7 @@ Platform.userExtensionDir
 - P inserts pattern clip at mouse
 - R inserts routine clip at mouse
 - E inserts env clip at mouse
+- T inserts timeline clip at mouse
 - cmd-t inserts new track after track at mouse
 - cmd-T inserts new track before track at mouse
 - cmd-delete deletes track at mouse
