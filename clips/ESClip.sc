@@ -189,6 +189,7 @@ ESClip {
     ^this.prTitle;
   }
   prTitle { ^"" }
+  prHasOffset { ^false } // whether to show offset parameter for editing
   prTempoChanged { |tempo| } // so far this is just so env clips follow tempo changes
   defaultColor { ^Color.gray(1); }
 

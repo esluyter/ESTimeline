@@ -553,6 +553,8 @@ ESEnvClip : ESClip {
 
   asMap { ^bus.asMap }
 
+  prHasOffset { ^true } // whether to show offset parameter for editing
+
   /*
   embedInStream { |inval|
     ^this.asMap.embedInStream(inval);

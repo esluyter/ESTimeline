@@ -87,6 +87,8 @@ ESSynthClip : ESClip {
     ^defName.value.asString ++ ": Synth"
   }
 
+  prHasOffset { ^false } // whether to show offset parameter for editing
+
   defaultColor { ^Color.hsv(0.85, 0.45, 0.5) }
 
   guiClass { ^ESSynthClipEditView }

@@ -39,6 +39,8 @@ ESPatternClip : ESClip {
     drawData = nil;
   }
 
+  prHasOffset { ^true } // whether to show offset parameter for editing
+
   randSeed_ { |val|
     randSeed = val;
     drawData = nil;
