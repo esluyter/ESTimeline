@@ -96,8 +96,20 @@ ESArgsView : ScrollView {
           };
         };
         defaultArgs = defaultArgs.add([
-          StaticText(this, Rect(10, 2.5 + (i * 30), 140, 25)).string_(cn.name).align_(\right).font_(Font().italic_(true)).stringColor_(Color.gray(0.5)).mouseDownAction_(action),
-          StaticText(this, Rect(160, 2.5 + (i * 30), this.bounds.width - 165, 25)).string_(cn.defaultValue).stringColor_(Color.gray(0.5)).mouseDownAction_(action)
+          StaticText(this, Rect(10, 2.5 + (i * 30), 140, 25)).string_(cn.name).align_(\right).font_(Font().italic_(true)).stringColor_(Color.gray(0.5)).mouseDownAction_(action).setContextMenuActions(
+            MenuAction("Add Env for Synth argument", {
+              clip.track.timeline.timelineController.prAddEnvForSynth(clip, cn.name);
+              this.free;
+              this.init(clip.args.copy, clip.argControls, clip);
+            })
+          ),
+          StaticText(this, Rect(160, 2.5 + (i * 30), this.bounds.width - 165, 25)).string_(cn.defaultValue).stringColor_(Color.gray(0.5)).mouseDownAction_(action).setContextMenuActions(
+            MenuAction("Add Env for Synth argument", {
+              clip.track.timeline.timelineController.prAddEnvForSynth(clip, cn.name);
+              this.free;
+              this.init(clip.args.copy, clip.argControls, clip);
+            })
+          )
         ]);
         i = i + 1;
       };
@@ -128,7 +140,13 @@ ESArgsView : ScrollView {
         ),
         TextField(this, Rect(160, 2.5 + (i * 30), this.bounds.width - 165, 25)).string_(val.asESDisplayString).font_(Font.monospace(14)).keyUpAction_({ |view|
           args[index + 1] = ("{" ++ view.string ++ "}").interpret;
-        })
+        }).setContextMenuActions(
+          MenuAction("Add Env for Synth argument", {
+            clip.track.timeline.timelineController.prAddEnvForSynth(clip, key);
+            this.free;
+            this.init(clip.args.copy, clip.argControls, clip);
+          })
+        )
       ]);
       i = i + 1;
     };
