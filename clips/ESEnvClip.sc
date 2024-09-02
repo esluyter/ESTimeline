@@ -360,8 +360,9 @@ ESEnvClip : ESClip {
                   level = val;
                   time = track.timeline.soundingNow;
                   if (level != prevLevel) {
-                    if ((prevTime - prevPointTime) > 0.1) {
-                      prevTime = prevTime - 0.1;
+                    var smoothThresh = if (liveInput == 2) { 0.1 } { 0 };
+                    if ((prevTime - prevPointTime) > smoothThresh) {
+                      prevTime = prevTime - smoothThresh;
                       recordedLevels = recordedLevels.add(prevLevel);
                       recordedTimes = recordedTimes.add(prevTime - prevPointTime);
                     } {
