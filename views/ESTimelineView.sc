@@ -555,20 +555,24 @@ ESTimelineView : UserView {
         MenuAction("New Env Clip (E)", { timelineController.newEnvClip(hoverTrack, hoverTime) }),
         MenuAction("New Timeline Clip (T)", { timelineController.newTimelineClip(hoverTrack, hoverTime) })
       ).title_("New Clip"),
+      MenuAction.separator(""),
       Menu(
         Menu(
           MenuAction("Set Env range keeping breakpoint values", { timelineController.setEnvRange(hoverClip, this.selectedClips) }),
         ).title_("Env actions"),
         Menu(
           MenuAction("Add Env for Synth argument", { timelineController.addEnvForSynth(hoverClip, this.selectedClips) }),
-        ).title_("Synth actions"),
-        Menu(
-          MenuAction("Bulk edit selected clips", { timelineController.bulkEditSelectedClips(hoverClip, this.selectedClips) }),
           MenuAction.separator(""),
           MenuAction("Bulk edit Synth defName", { timelineController.bulkEditSynthDefName(hoverClip, this.selectedClips) }),
           MenuAction("Bulk edit (change) Synth arguments", { timelineController.bulkEditSynthArgs(hoverClip, this.selectedClips) }),
-          MenuAction("Bulk adjust (modify) Synth arguments", { timelineController.bulkAdjustSynthArgs(hoverClip, this.selectedClips) }),
-        ).title_("Bulk actions"),
+          MenuAction("Bulk adjust (modify) Synth arguments", { timelineController.bulkAdjustSynthArgs(hoverClip, this.selectedClips) })
+        ).title_("Synth actions"),
+        Menu(
+          MenuAction("Expand timeline clip", { timelineController.expandTimelineClip(hoverClip, this.selectedClips) }),
+        ).title_("Timeline actions"),
+        MenuAction.separator(""),
+        MenuAction("Bulk edit selected clips", { timelineController.bulkEditSelectedClips(hoverClip, this.selectedClips) }),
+        MenuAction.separator(""),
         MenuAction("Edit Clip (e)", { timelineController.editClip(hoverClip) }),
         MenuAction("Split Clip (s)", { if (hoverClip.notNil) { timelineController.splitClip(hoverClip, hoverTime) } }),
         MenuAction("Mute/unmute Clip (m)", { timelineController.toggleMuteClips(hoverClip, this.selectedClips) }),
