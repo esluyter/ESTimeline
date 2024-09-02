@@ -127,7 +127,7 @@ Platform.userExtensionDir
 ```
 - by default, this boots the default server. You can make it not do this by going into "Prep / Cleanup funcs" and unchecking `bootOnPrep`.
 
-SynthDefs:
+### SynthDefs:
 - put your SynthDef in the timeline's prep function (click the "edit prep/cleanup funcs" button) e.g.
 ```
 SynthDef(\sin, { |out, freq = 100, gate = 1, amp = 0.1, preamp = 1.5, attack = 0.001, release = 0.01, pan, verbbus, verbamt, vibrato = 0.2|
@@ -144,7 +144,7 @@ SynthDef(\sin, { |out, freq = 100, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
 ```
 - hit save when you're done to save the prepFunc and load it.
 
-Clips:
+### Synth Clips:
 - create a bunch of Synth clips (point the mouse where you want it and press shift-S, or use right click menu)
   - drag them around to move them
   - drag their edges to resize them
@@ -154,11 +154,11 @@ Clips:
   - double-click in an empty area to remove selection
   - play again and you hear this has happened
 
-Envelopes for Synth parameters:
+### Envelopes for Synth parameters:
 - right click a Synth clip, "clip actions > add env for synth argument"
 - pick "freq" from the list and hit OK
 
-Editing Envelopes:
+### Editing Envelopes:
 - cmd-scroll to zoom in and out
   - scroll left and right or click and drag ruler at the top
 - cmd-e to enter envelope breakpoint editor mode
@@ -168,7 +168,7 @@ Editing Envelopes:
 - to rescale, right click, clip actions > "set env range keeping breakpoint values"
 - hit cmd-e again to leave envelope breakpoint editor mode
 
-To make this envelope affect all your Synths:
+### To make this envelope affect all your Synths:
 - drag the edges of the envelope clip to resize it
 - click and drag to select all the Synth clips, right click, "clip actions > bulk edit synth arguments"
 - assign the freq of all the clips to 
@@ -177,11 +177,11 @@ To make this envelope affect all your Synths:
 - you should see all their freqs change to `a4` -- this is the audio rate bus that the Env clip has created for you (you can override this behavior)
 - you should hear it is now controlling all the synths' pitches
 
-Random panning:
+### Random panning:
 - Select all your Synth clips, right click > clip actions > bulk edit synth arguments, and for `pan` put in `rrand(-1.0, 1.0)` and check the "hard coded" box
   - this will generate a random hard-coded pan per clip. (if you want it to be newly random every time you play it, uncheck the box)
 
-Reverb and environment variables:
+### Reverb and environment variables:
 - add to your timeline prep func:
 ```
 SynthDef(\verb, { |out, verbbus, gate = 1, amp = 1|
@@ -215,7 +215,7 @@ SynthDef(\verb, { |out, verbbus, gate = 1, amp = 1|
   - now when you play you will hear they all are affected by the reverb Synth.
 - you could now make an envelope to control the amplitude of this reverb, like an overall send level.
 
-Pattern Clips:
+### Pattern Clips:
 - make a new track and shift-P to make a pattern clip
 - double click to edit, e.g.:
 ```
@@ -238,12 +238,12 @@ Pbind(
   \pan, ~thisTimeline[\pan0],
 ```
     
-Timeline clips:
+### Timeline clips:
 - above the main timeline, click "Open as clip in new timeline"
 Now this little system, the synths, buses and envelopes, are all encapsulated in this timeline clip, which won't interfere with e.g. another ~verbbus that you happen to use elsewhere. (in fact you can duplicate the timeline clip by option-dragging onto a new track, and the two will play simultanously each using its own environment and bus.)
   - you can also resize the clips, move the mouse cursor over the clip and use the s key to split it into two separate timeline clips, etc.
 
-Using Routine clips:
+### Using Routine clips:
 - shift-R to make a Routine clip, double click to edit
 - it's important to use `s.bind` for server operations inside of routines, otherwise the timing is off.
 ```
