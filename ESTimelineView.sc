@@ -341,7 +341,9 @@ ESTimelineView : UserView {
           };
 
           if (mods.isCmd.not) {
-            this.timeSelection = [timeA, timeB].sort;
+            var arr = [timeA, timeB].sort;
+            if (timeline.snapToGrid) { arr = arr.round(1 / timeline.gridDivision) };
+            this.timeSelection = arr;
           };
         };
       };
@@ -356,6 +358,18 @@ ESTimelineView : UserView {
           } {
             hoverClip.startTime_(this.pixelsToAbsoluteTime(x), true);
           };
+          // snap to grid, optionally
+          if (timeline.snapToGrid and: (this.relativeTimeToPixels((hoverClip.startTime.round(1 / timeline.gridDivision) - hoverClip.startTime).abs) < 10)) {
+            var adjust = hoverClip.startTime.round(1 / timeline.gridDivision) - hoverClip.startTime;
+            if (this.selectedClips.includes(hoverClip)) {
+              this.selectedClips.do { |clip, i|
+                clip.startTime_(clip.startTime + adjust, true);
+              };
+            } {
+              hoverClip.startTime_(hoverClip.startTime + adjust, true);
+            };
+          };
+          // adjust red bar position
           dragView.bounds_(dragView.bounds.left_(this.absoluteTimeToPixels(hoverClip.startTime)));
         }
         {2} { // drag right edge
@@ -365,6 +379,17 @@ ESTimelineView : UserView {
             };
           } {
             hoverClip.endTime = this.pixelsToAbsoluteTime(x);
+          };
+          // snap to grid, optionally
+          if (timeline.snapToGrid and: (this.relativeTimeToPixels((hoverClip.endTime.round(1 / timeline.gridDivision) - hoverClip.endTime).abs) < 10)) {
+            var adjust = hoverClip.endTime.round(1 / timeline.gridDivision) - hoverClip.endTime;
+            if (this.selectedClips.includes(hoverClip)) {
+              this.selectedClips.do { |clip, i|
+                clip.endTime = clip.endTime + adjust;
+              };
+            } {
+              hoverClip.endTime = hoverClip.endTime + adjust;
+            };
           };
           dragView.bounds_(dragView.bounds.left_(this.absoluteTimeToPixels(hoverClip.endTime) - 2));
         }
