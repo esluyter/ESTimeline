@@ -15,7 +15,7 @@ Timelines inside of timelines with optionally separate play clocks:
 
 ## Features
 - Comment, Synth, Pattern, Routine, and Env clip types
-- Timeline Clip -- embed one timeline in another! This is encouraged, to avoid issue#2 below
+- Timeline Clip -- embed one timeline in another!
   - Each timeline clip can optionally use its own TempoClock, and optionally use its own Environment
 - Tracks can contain all clip types, and can be muted/soloed
 - Non-prescriptive: no server architecture is forced on you, possible to disable timeline-specific clock and environment so as to interact with the timeline as part of a larger project; the basic goal is only to "execute this code at this particular time"
@@ -27,7 +27,7 @@ Timelines inside of timelines with optionally separate play clocks:
 - Each timeline (and timeline clip) has an init / free hook for e.g. allocating and freeing resources
 - DAW-like GUI with key commands for editing and playback
 - Undo and redo at each timeline level
-- Easy to export timeline to IDE as compile string and load it back again
+- Easy to export timeline to IDE as plain text and load it back again
 
 ## Hypothetical features
 - Set default params per track (e.g. pan: -1)
@@ -51,9 +51,7 @@ Timelines inside of timelines with optionally separate play clocks:
 ## Issues
 1. Although I've tried to make it pleasant, the GUI based code editing environment does not syntax highlight, autocomplete, etc -- for this reason I've added "Open in IDE" / "Copy from IDE" buttons as necessary.
   - Solution would be to someday add a Qt code view to core SC
-2. When the timeline gets too big, it can't be saved / restored from a SCLang text format.
-  - Solution would be to make some kind of custom file format, or optimize the way functions are stored/loaded.
-3. When there are lots of quick zig-zags, high-resolution envelope drawing makes the GUI freeze up
+2. When there are lots of quick zig-zags, high-resolution envelope drawing makes the GUI freeze up
   - to avoid this I have extremely pixelated the envelope drawing when zoomed in. Still looking for a good solution for this.
 
 ## Installing
