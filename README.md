@@ -96,7 +96,7 @@ Also note that because timelines are built to execute user-supplied code they ar
 1. Although I've tried to make it pleasant, the GUI based code editing environment does not syntax highlight, autocomplete, etc -- for this reason I've added "Open in IDE" / "Copy from IDE" buttons as necessary.
     - Solution would be to someday add a Qt code view to core SC
 2. When there are lots of quick zig-zags, high-resolution envelope drawing makes the GUI freeze up
-    - to avoid this I have extremely pixelated the envelope drawing when zoomed in. Solution would be to someday at a better Qt envelope view to core sc.
+    - to avoid this I have extremely pixelated the envelope drawing when zoomed in. Solution would be to someday add a better Qt envelope view to core sc.
 3. There is a limit to the complexity of a timeline created using SCLang (i.e. by evaluating `ESTimeline([ESTrack([....`) -- it may only contain max 256 functions.
     - to avoid this I have created a light custom file format that compiles complex timeline structures from the inside out
 
