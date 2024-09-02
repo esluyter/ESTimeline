@@ -113,8 +113,8 @@ ESTrack {
     this.release;
   }
 
-  mixerChannelName {
-    ^if (name.isNil) { this.index.asSymbol } { name.asSymbol };
+  mixerChannelName { // this will either be an integer or a symbol
+    ^if (name.isNil) { this.index } { name.asSymbol };
   }
 
   mixerChannel {
