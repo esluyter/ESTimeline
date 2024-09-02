@@ -397,9 +397,16 @@ ESTimeline {
 
   prStop {
     isPlaying = false;
-    mixerChannels.do { |mc|
-      //mc.synthgroup.freeAll;
+    // stop effects
+    mixerChannelTemplates.keysValuesDo { |name, template|
+      var mc = mixerChannels[name];
       mc.effectgroup.release;
+      if (template.envs.pan.notNil) {
+        mc.stopAuto(\pan);
+      };
+      if (template.envs.level.notNil) {
+        mc.stopAuto(\level);
+      };
     };
     this.changed(\isPlaying, false);
     this.changed(\playbar);
