@@ -58,6 +58,8 @@ ESTimelineWindow : Window {
     if (timeline.parentClip.notNil) {
       useParentClockBox = CheckBox(this, Rect(795, 10, 20, 20)).value_(timeline.parentClip.useParentClock).action_({ |view|
         timeline.parentClip.useParentClock = view.value;
+        tempoKnob.value = timeline.tempoBPM;
+        rulerView.refresh;
         timelineView.focus;
       });
       StaticText(this, Rect(815, 10, 120, 20)).string_("useParentClock").font_(Font.sansSerif(16));
@@ -156,6 +158,7 @@ ESTimelineWindow : Window {
           }
           { \tempo } {
             tempoKnob.value_(timeline.tempoBPM);
+            rulerView.refresh;
           }
           { \track } {
             if (args[2] == \clip) {
