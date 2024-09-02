@@ -134,6 +134,7 @@ ESTimelineWindow : Window {
             playheadRout = {
               inf.do { |i|
                 timelineView.playheadView.refresh;
+                rulerView.playheadView.refresh;
                 if (timeline.optimizeView.not) {
                   timelineView.refresh;
                 };
@@ -142,7 +143,7 @@ ESTimelineWindow : Window {
             }.fork(AppClock) // lower priority clock for GUI updates
           } {
             playheadRout.stop;
-            defer { timelineView.refresh };
+            defer { timelineView.refresh; rulerView.playheadView.refresh };
           };
         }
         { \tempo } {
