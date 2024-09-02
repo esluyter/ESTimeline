@@ -14,7 +14,7 @@ ESFxSynth : ESSynthClip {
       */
       Environment.new.use {
         var def = SynthDef.new(this.autoDefName, { |out|
-          var result, rate, env;
+          var result, rate;
           ~out = out;
           result = SynthDef.wrap(func).asUGenInput;
           rate = result.rate;
@@ -23,9 +23,11 @@ ESFxSynth : ESSynthClip {
             result
           } {
             var gate = NamedControl.kr(\gate, 1);
-            result = result * EnvGen.kr(Env.asr(0.01, 1, 0.02, 0), gate, doneAction: 2);
-            ReplaceOut.replaceZeroesWithSilence(result.asArray);
-            ReplaceOut.multiNewList([rate, out]++result);
+            var env = EnvGen.kr(Env.asr(0.1, 1, 0.1, 0), gate, doneAction: 2).sqrt;
+            result = result * env;
+            XOut.ar(out, env, result);
+            //ReplaceOut.replaceZeroesWithSilence(result.asArray);
+            //ReplaceOut.multiNewList([rate, out]++result);
           };
         });
         def.add;

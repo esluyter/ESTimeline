@@ -11,7 +11,6 @@ ESTrackPanelView : UserView {
     timeline = timelineView.timeline;
     this.mouseOverAction = { |view, x, y|
       timelineView.hoverTrack = timelineView.trackAtY(y);
-      timelineView.hoverTrack.index.postln;
     };
     this.keyDownAction = { |view, char, mods, unicode, keycode, key|
       // cmd-delete - remove track
