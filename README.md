@@ -6,7 +6,7 @@ The distant goal is that anything you can do in SuperCollider could be sequenced
 ![screenshot](img/ss2.png)
 <img src="img/sse.png" width="500" />
 
-<img src="img/ssee.png" width="400" /><img src="img/sss.png" width="400" /><img src="img/rss.png" width="400" /><img src="img/ssep.png" width="400" />
+<img src="img/ssee1.png" width="400" /><img src="img/sss1.png" width="400" /><img src="img/rss.png" width="400" /><img src="img/ssep.png" width="400" />
 <img src="img/fss.png" width="400" />
 
 Timelines inside of timelines with optionally separate play clocks:
