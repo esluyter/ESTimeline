@@ -34,7 +34,7 @@ ESTimelineView : UserView {
     stagedClipSelection = Set[];
 
     timeline = argtimeline;
-    timelineController = ESTimelineController(timeline);
+    timelineController = ESTimelineController(timeline, this);
 
     this.makeTrackViews;
     this.makeContextMenu;
@@ -389,7 +389,7 @@ ESTimelineView : UserView {
       var snappedHoverTime = if (timeline.snapToGrid) { hoverTime.round(1 / timeline.gridDivision) } { hoverTime };
       var newClipStartTime = if (timeSelection.notNil) { timeSelection[0] } { snappedHoverTime };
       var newClipDuration = if (timeSelection.notNil) { timeSelection[1] - timeSelection[0] } { nil }; // override with default later
-      //key.postln;
+      key.postln;
       // space is play
       if (char == $ ) { timelineController.togglePlay };
       // enter goes to beginning
@@ -407,6 +407,9 @@ ESTimelineView : UserView {
           timelineController.splitClip(hoverClip, snappedHoverTime);
         };
       };
+      // cmd-s save cmd-o open
+      if ((key == 83) and: (mods.isCmd)) { timelineController.saveAsDialog };
+      if ((key == 79) and: (mods.isCmd)) { timelineController.openDialog };
       // m - mute clip
       if (char == $m) { timelineController.toggleMuteClips(hoverClip, this.selectedClips); };
       if (char == $S) { timelineController.newSynthClip(hoverTrack, newClipStartTime, newClipDuration); };
