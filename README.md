@@ -265,7 +265,7 @@ Pbind(
 ### Mixer channels:
 This will now assume you have ddwMixerChannel installed.
 - check the `useMixerChannel` box
-- show the mixer window:
+- show the mixer window: evaluate this in the IDE
 ```
 ~mixerWindow = ESMixerWindow(~timeline, ~window);
 ```
