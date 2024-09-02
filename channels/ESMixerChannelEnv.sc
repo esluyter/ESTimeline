@@ -58,7 +58,9 @@ ESMixerChannelEnv {
     points.do { |point, i|
       if (i == hoverIndex) {
         var val = this.valueAtIndex(i);
-        Pen.stringAtPoint(val.asString, point.x@(if (point.y - 20 < top) { point.y + 20 } { point.y - 20 }), Font.sansSerif(15), Color.gray(0.5));
+        // this is a real hack
+        var valString = (if (min == 0) { val.ampdb.round(0.01).asString ++ " dB" } { val.asString });
+        Pen.stringAtPoint(valString, point.x@(if (point.y - 20 < top) { point.y + 20 } { point.y - 20 }), Font.sansSerif(15), Color.gray(0.5));
         Pen.fillColor = Color.white;
         Pen.strokeColor = Color.gray(0.5);
         Pen.addOval(Rect(point.x - 2.5, point.y - 2.5, 6, 6));
@@ -100,7 +102,7 @@ ESMixerChannelEnv {
       var level;
       thisEnv.times.do { |timeDiff, i|
         curve = if (thisEnv.curves.isArray) { thisEnv.curves[i] } { thisEnv.curves };
-        level = thisEnv.levels[i + 1];
+        level = thisEnv.levels[i + 1] ?? level;
         if (inserted.not) {
           if ((time + timeDiff) > thisTime) {
             var ratio = (thisTime - time) / timeDiff;
