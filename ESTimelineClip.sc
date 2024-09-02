@@ -41,7 +41,7 @@ ESTimelineClip : ESClip {
       this.prStart(startOffset, clock);
 
       // wait the appropriate time, then stop
-      (duration - startOffset).wait;
+      (duration - startOffset + (Server.default.latency * clock.tempo)).wait;
       this.stop;
     }.fork(clock);
   }
@@ -56,7 +56,7 @@ ESTimelineClip : ESClip {
     timeline.play(startOffset, makeClock: false);
   }
 
-  prDraw { |left, top, width, height, editingMode|
+  prDraw { |left, top, width, height, editingMode, clipLeft, clipWidth|
     var tracks = timeline.tracks;
     var tratio = width / duration;
     var pratio = tratio.reciprocal;
@@ -65,8 +65,12 @@ ESTimelineClip : ESClip {
     var thisLeft;
     var division;
 
+    clipLeft = clipLeft ?? left;
+    clipWidth = clipWidth ?? width;
+
+
     Pen.use {
-      Pen.addRect(Rect(left, top, width, height));
+      Pen.addRect(Rect(clipLeft, top, clipWidth, height));
       Pen.clip;
 
       rulerHeight = ((height + 400) / 60).clip(10, 20);
@@ -107,7 +111,15 @@ ESTimelineClip : ESClip {
             var thisWidth = (clip.duration * tratio);
             var thisTop = top + rulerHeight + (trackHeight * i) + 2;
             var thisHeight = trackHeight - 3;
-            clip.draw(thisLeft, thisTop, thisWidth, thisHeight);
+
+            // this stuff is all just for ESTimelineClips:
+            var thisClipLeft = max(left, thisLeft);
+            var thisClipWidth = thisWidth - (thisClipLeft - thisLeft);
+            if ((thisClipLeft + thisClipWidth) > (left + width)) {
+              thisClipWidth = (left + width) - thisClipLeft;
+            };
+
+            clip.draw(thisLeft, thisTop, thisWidth, thisHeight, false, thisClipLeft, thisClipWidth);
           };
         };
       };

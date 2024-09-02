@@ -75,7 +75,7 @@ ESClip {
   }
 
   // draw this clip on a UserView using Pen
-  draw { |left, top, width, height, editingMode = false|
+  draw { |left, top, width, height, editingMode = false, clipLeft, clipWidth| // these last two are for ESTimelineClips
     if (track.shouldPlay) {
       Pen.color = this.color;
     } {
@@ -95,10 +95,10 @@ ESClip {
       try {
         if (track.timeline.useEnvir) {
           track.timeline.envir.use {
-            title = this.prDraw(left, top, width, height, editingMode);
+            title = this.prDraw(left, top, width, height, editingMode, clipLeft, clipWidth);
           }
         } {
-          title = this.prDraw(left, top, width, height, editingMode);
+          title = this.prDraw(left, top, width, height, editingMode, clipLeft, clipWidth);
         };
       } {
         title = ""
@@ -107,6 +107,10 @@ ESClip {
       if (left < 0) {
         width = width + left;
         left = 0;
+      };
+      if (clipLeft.notNil and: { left < clipLeft }) {
+        width = width - (clipLeft - left);
+        left = clipLeft;
       };
       while { max(0, width - 3.5) < (QtGUI.stringBounds(title, font).width) } {
         if (title.size == 1) {

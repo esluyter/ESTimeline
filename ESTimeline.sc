@@ -102,8 +102,6 @@ ESTimeline {
   prMakeClock { |altClock|
     // stop if playing
     if (isPlaying) { this.stop };
-    isPlaying = true;
-    this.changed(\isPlaying, true);
 
     if (clock.notNil) { clock.stop; clock = nil };
 
@@ -136,7 +134,11 @@ ESTimeline {
       };
     } {
       tracks.do(_.play(playbar, playClock));
-    }
+    };
+
+
+    isPlaying = true;
+    this.changed(\isPlaying, true);
   }
 
   togglePlay {
