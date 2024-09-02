@@ -242,7 +242,7 @@ ESTimelineWindow : Window {
       { \timeSelection } { timelineView.refresh; rulerView.refresh }
       { \selectedClips } { timelineView.refresh }
       { \mouseMove } { rulerView.refresh }
-      { \mouseUp } { rulerView.refresh }
+      { \mouseUp } { timeline.tracks.do(_.sortClips); timelineView.refresh; rulerView.refresh }
     });
   }
 }
