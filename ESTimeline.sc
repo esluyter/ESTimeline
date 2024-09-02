@@ -56,7 +56,7 @@ ESTimeline {
   }
 
   defaultMixerChannelTemplate {
-    ^(inChannels: 2, outChannels: 2, level: 1, pan: 0, fx: [], preSends: [], postSends: [], envs: (level: Env([1, 1], [1]), pan: nil, fx: [], preSends: [], postSends: []));
+    ^(inChannels: 2, outChannels: 2, level: 1, pan: 0, fx: [], preSends: [], postSends: [], envs: (level: nil, pan: nil, fx: [], preSends: [], postSends: []));
   }
 
   storeArgs { ^[tracks, this.tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames] }

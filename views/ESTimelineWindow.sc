@@ -229,6 +229,9 @@ ESTimelineWindow : Window {
           { \snapToGrid } {
             snapToGridBox.value = timeline.snapToGrid;
             timelineView.refresh;
+          }
+          { \useMixerChannel } {
+            timelineView.makeTrackViews;
           };
         };
       };

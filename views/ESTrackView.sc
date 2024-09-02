@@ -23,6 +23,13 @@ ESTrackView : UserView {
             };
           };
         };
+        track.envs.do { |val, i|
+          var envHeight = timelineView.trackHeight * timeline.envHeightMultiplier;
+          //[key, val, i, envHeight].postln;
+          Pen.addRect(Rect(0, timelineView.trackHeight + (envHeight * i), this.bounds.width, 1));
+          Pen.color = Color.gray(0.85);
+          Pen.fill;
+        };
         if (track.shouldPlay.not) {
           Pen.addRect(Rect(0, 0, this.bounds.width, this.bounds.height));
           Pen.color_(Color.gray(0.5, 0.25));

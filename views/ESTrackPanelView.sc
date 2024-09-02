@@ -52,6 +52,13 @@ ESTrackPanelView : UserView {
           Pen.addRect(Rect(0, 33, width, trackHeights[i] - 36));
           Pen.fill;
         };
+        track.envs.do { |val, i|
+          var envHeight = timelineView.trackHeight * timeline.envHeightMultiplier;
+          //[key, val, i, envHeight].postln;
+          Pen.addRect(Rect(0, timelineView.trackHeight + (envHeight * i), this.bounds.width, 1));
+          Pen.color = Color.gray(0.7);
+          Pen.fill;
+        };
       })
       .mouseMoveAction_({
         view.beginDrag;
@@ -109,6 +116,12 @@ ESTrackPanelView : UserView {
           timelineView.focus;
         }).value_(track.solo),
       );
+      track.envs.do { |assoc, i|
+        var envHeight = timelineView.trackHeight * timeline.envHeightMultiplier;
+        var key = assoc.key;
+        //[key, val, i, envHeight].postln;
+        StaticText(view, Rect(5, timelineView.trackHeight + (envHeight * i) + 4, width - 10, envHeight)).string_(key).align_(\topRight).stringColor_(Color.gray(0.6));
+      };
       trackButts = trackButts.add(ev);
       top = top + trackHeights[i];
       view;
