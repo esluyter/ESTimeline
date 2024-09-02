@@ -10,7 +10,14 @@ ESTimeline {
   var clock; // this specifically refers to the internal clock to this specific timeline
 
   //tempo { ^clock.tempo; }
-  tempo_ { |val| tempo = val; if (clock.notNil) { clock.tempo_(val) }; this.changed(\tempo, val); }
+  tempo_ { |val|
+    tempo = val;
+    if (clock.notNil) {
+      clock.tempo_(val);
+      this.currentClips.do(_.prTempoChanged(val));
+    };
+    this.changed(\tempo, val);
+  }
   tempoBPM { ^tempo * 60 }
   tempoBPM_ { |val| this.tempo_(val / 60); }
   gridDivision_ { |val| gridDivision = val; this.changed(\gridDivision); }
@@ -332,6 +339,10 @@ ESTimeline {
 
   clips {
     ^tracks.collect(_.clips).flat;
+  }
+
+  currentClips {
+    ^tracks.collect(_.currentClips).flat;
   }
 
   at { |name|

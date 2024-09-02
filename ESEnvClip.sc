@@ -97,6 +97,14 @@ ESEnvClip : ESClip {
     };
   }
 
+  prTempoChanged { |tempo|
+    if (synth.notNil) {
+      Server.default.bind {
+        synth.set(\tempo, tempo);
+      };
+    };
+  }
+
   prDraw { |left, top, width, height, editingMode, clipLeft, clipWidth|
     var pratio = duration / width;
     var tratio = pratio.reciprocal;
