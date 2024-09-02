@@ -175,6 +175,7 @@ ESMixerChannelEnv {
         endI = env.times.size - 1;
       };
       if (endI.isNil) { endI = env.times.size };
+      if (startI.isNil) { startI = endI };
       indexSelection = [startI, endI];
       breakPointCache = this.envBreakPoints;
     } {
@@ -186,6 +187,7 @@ ESMixerChannelEnv {
   prMouseMove { |x, y, xDelta, yDelta, mods, timeSelection|
     var thisEnv = env;
     var points;
+    var ret = false;
     if (hoverIndex == 0) {
       env = Env([thisEnv.levels[0]] ++ thisEnv.levels, [0] ++ thisEnv.times, if (thisEnv.curves.isArray) { [thisEnv.curves[0]] ++ thisEnv.curves } { thisEnv.curves });
       hoverIndex = 1;
@@ -208,8 +210,8 @@ ESMixerChannelEnv {
         this.env = this.envFromBreakPoints(points);
       };
     } {
-      // adjust curve if not over breakpoint and no modifiers
-      if (mods == 0) {
+      // adjust curve if not over breakpoint and alt key pressed
+      if (mods.isAlt) {
         var curves = if (thisEnv.curves.isArray) { thisEnv.curves } { thisEnv.curves.dup(thisEnv.times.size) };
         curveIndex = curveIndex ?? this.segmentIndex(points, x@y);
         originalCurve = originalCurve ?? curves[curveIndex];
@@ -218,9 +220,12 @@ ESMixerChannelEnv {
           curves[curveIndex] = originalCurve + (yDelta * 0.1 * slope.sign);
           this.env = Env(thisEnv.levels, thisEnv.times, curves);
         };
+      } {
+        ret = true;
       };
     };
     template.changed(\env);
+    ^ret;
   }
 
   envBreakPoints {

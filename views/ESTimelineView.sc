@@ -217,30 +217,7 @@ ESTimelineView : UserView {
     this.mouseMoveAction = { |view, x, y, mods|
       var yDelta = y - clickPoint.y;
       var xDelta = x - clickPoint.x;
-
-      // select time/clips if start dragging from empty area
-      if (hoverClip.isNil and: hoverEnv.isNil) {
-        if (xDelta.abs > 1) {
-          var timeA = this.pixelsToAbsoluteTime(clickPoint.x);
-          var timeB = this.pixelsToAbsoluteTime(x);
-
-          if (mods.isAlt.not) {
-            if (mods.isShift.not) {
-              clipSelection = Set[];
-            };
-            stagedClipSelection = Set.newFrom(timeline.clipsInRange(this.trackAtY(clickPoint.y).index, this.trackAtY(y).index, timeA, timeB));
-            this.changed(\selectedClips);
-          } {
-            stagedClipSelection = Set[];
-          };
-
-          if (mods.isCmd.not) {
-            var arr = [timeA, timeB].sort;
-            if (timeline.snapToGrid) { arr = arr.round(1 / timeline.gridDivision) };
-            this.timeSelection = arr;
-          };
-        };
-      };
+      var doTimeSelectionOverEnv;
 
       if (editingMode.not) {
         switch (hoverCode)
@@ -381,56 +358,78 @@ ESTimelineView : UserView {
         var top = 0;
         var i = hoverTrack.index;
         i.do { |j| top = top + trackHeights[j] };
-        hoverEnv.prMouseMove(x, y - top, xDelta, yDelta, mods, this.timeSelection);
+        doTimeSelectionOverEnv = hoverEnv.prMouseMove(x, y - top, xDelta, yDelta, mods, this.timeSelection);
+      };
+
+      // select time/clips if start dragging from empty area
+      if (hoverClip.isNil and: (hoverEnv.isNil or: { doTimeSelectionOverEnv })) {
+        if (xDelta.abs > 1) {
+          var timeA = this.pixelsToAbsoluteTime(clickPoint.x);
+          var timeB = this.pixelsToAbsoluteTime(x);
+
+          if (mods.isAlt.not) {
+            if (mods.isShift.not) {
+              clipSelection = Set[];
+            };
+            stagedClipSelection = Set.newFrom(timeline.clipsInRange(this.trackAtY(clickPoint.y).index, this.trackAtY(y).index, timeA, timeB));
+            this.changed(\selectedClips);
+          } {
+            stagedClipSelection = Set[];
+          };
+
+          if (mods.isCmd.not) {
+            var arr = [timeA, timeB].sort;
+            if (timeline.snapToGrid) { arr = arr.round(1 / timeline.gridDivision) };
+            this.timeSelection = arr;
+          };
+        };
       };
 
       this.changed(\mouseMove);
     };
 
     this.mouseOverAction = { |view, x, y|
-      //try {
-        var i, j;
-        var oldHoverClip = hoverClip;
-        var oldHoverEnv = hoverEnv;
-        var trackHeights = this.trackHeights;
-        var top = 0;
-        # hoverClip, i, j, hoverCode = this.clipAtPoint(x@y);
-        hoverTrack = timeline.tracks[i];
-        hoverTime = this.pixelsToAbsoluteTime(x);
-        i.do { |j| top = top + trackHeights[j] };
+      var i, j;
+      var oldHoverClip = hoverClip;
+      var oldHoverEnv = hoverEnv;
+      var trackHeights = this.trackHeights;
+      var top = 0;
+      # hoverClip, i, j, hoverCode = this.clipAtPoint(x@y);
+      hoverTrack = timeline.tracks[i];
+      hoverTime = this.pixelsToAbsoluteTime(x);
+      i.do { |j| top = top + trackHeights[j] };
 
-        if (editingMode.not) {
-          switch (hoverCode)
-          {1} { // left edge
-            dragView.bounds_(dragView.bounds.origin_(this.absoluteTimeToPixels(hoverClip.startTime)@top));
-            dragView.visible_(true);
-          }
-          {2} { // right edge
-            dragView.bounds_(dragView.bounds.origin_((this.absoluteTimeToPixels(hoverClip.endTime) - 2)@top));
-            dragView.visible_(true);
-          }
-          { // default
-            dragView.visible_(false);
-          };
-        } {
-          if (oldHoverClip.notNil and: (oldHoverClip != hoverClip)) {
-            oldHoverClip.drawClip.prHoverLeave;
-          };
-          if (hoverClip.notNil) {
-            //                  this is bad:
-            hoverClip.drawClip.prHover(x, y - top, hoverTime, *this.clipBounds(hoverClip));
-          };
+      if (editingMode.not) {
+        switch (hoverCode)
+        {1} { // left edge
+          dragView.bounds_(dragView.bounds.origin_(this.absoluteTimeToPixels(hoverClip.startTime)@top));
+          dragView.visible_(true);
+        }
+        {2} { // right edge
+          dragView.bounds_(dragView.bounds.origin_((this.absoluteTimeToPixels(hoverClip.endTime) - 2)@top));
+          dragView.visible_(true);
+        }
+        { // default
+          dragView.visible_(false);
         };
+      } {
+        if (oldHoverClip.notNil and: (oldHoverClip != hoverClip)) {
+          oldHoverClip.drawClip.prHoverLeave;
+        };
+        if (hoverClip.notNil) {
+          //                  this is bad:
+          hoverClip.drawClip.prHover(x, y - top, hoverTime, *this.clipBounds(hoverClip));
+        };
+      };
 
-        // pass hover on to envelope view
-        hoverEnv = this.envAtY(y);
-        if (hoverEnv.notNil) {
-          hoverEnv.prHover(x, (y - top), hoverTime)
-        };
-        if (oldHoverEnv.notNil and: (oldHoverEnv != hoverEnv)) {
-          oldHoverEnv.prHoverLeave;
-        };
-      //};
+      // pass hover on to envelope view
+      hoverEnv = this.envAtY(y);
+      if (hoverEnv.notNil) {
+        hoverEnv.prHover(x, (y - top), hoverTime)
+      };
+      if (oldHoverEnv.notNil and: (oldHoverEnv != hoverEnv)) {
+        oldHoverEnv.prHoverLeave;
+      };
     };
 
     this.keyDownAction = { |view, char, mods, unicode, keycode, key|
