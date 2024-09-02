@@ -553,7 +553,7 @@ ESTimeline {
     if (this.isPlaying) { this.stop(true) } { this.play }
   }
 
-  addTrack { |index, track, mcTemplate|
+  addTrack { |index, track, mcTemplate, mc|
     var initMc = false;
     mcTemplate = mcTemplate ?? ESMixerChannelTemplate();
     index = index ?? tracks.size;
@@ -562,6 +562,9 @@ ESTimeline {
       if (clip.class == ESTimelineClip) {
         initMc = true;
       };
+    };
+    if (mc.notNil) {
+      initMc = false;
     };
     track.addDependant(dependantFunc);
     track.timeline = this;
@@ -584,10 +587,12 @@ ESTimeline {
       this.initMixerChannels;
     } {
       if (track.useMixerChannel and: mixerChannels[track.mixerChannelName].isNil) {
-        mixerChannels[track.mixerChannelName] = MixerChannel(track.mixerChannelName.asSymbol, Server.default, mcTemplate.inChannels, mcTemplate.outChannels, mcTemplate.level, mcTemplate.pan, outbus: mixerChannels[\master] ?? this.defaultOutbus);
+        mixerChannels[track.mixerChannelName] = mc ?? {
+          MixerChannel(track.mixerChannelName.asSymbol, Server.default, mcTemplate.inChannels, mcTemplate.outChannels, mcTemplate.level, mcTemplate.pan, outbus: mixerChannels[\master] ?? this.defaultOutbus);
+        };
       };
 
-      mixerChannelTemplates.do(_.addDependant(templateDependantFunc));
+      mcTemplate.addDependant(templateDependantFunc);
     };
 
     this.changed(\tracks);
@@ -629,9 +634,12 @@ ESTimeline {
     if (track.useMixerChannel and: (mcName.isInteger or: hasSameMcName.not) and: doFree) {
       mc.releaseDependants;
       mc.free;
+      mixerChannels[mcName] = nil;
     };
 
     if (hasSameMcName.not) {
+      // this should release template
+      mixerChannelTemplates[mcName].releaseDependants;
       mixerChannelTemplates[mcName] = nil;
     };
 
@@ -641,8 +649,9 @@ ESTimeline {
   moveTrack { |fromIndex, toIndex|
     var track = tracks[fromIndex];
     var mcTemplate = mixerChannelTemplates[track.mixerChannelName];
+    var mc = mixerChannels[track.mixerChannelName];
     this.removeTrack(fromIndex, false, false);
-    this.addTrack(toIndex, track, mcTemplate);
+    this.addTrack(toIndex, track, mcTemplate, mc);
   }
 
   asUndoPoint { ^this.storeArgs.asESArray }
