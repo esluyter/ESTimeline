@@ -1,6 +1,66 @@
-![screenshot](img/ss.png)
+# ESTimeline
+A hypothetical general purpose SuperCollider timeline
 
-Latest working test code
+The distant goal is that anything you can do in SuperCollider could be sequenced on a timeline...
+
+![screenshot](img/ss.png)
+<img src="img/rss.png" width="500" /><img src="img/fss.png" width="500" />
+
+## Features
+- Comment, Synth, Pattern, Routine, and Env clips
+- Tracks can contain all clip types, and can be muted/soloed
+- Most fields can take a Function, so playback params can be generated on the fly
+- Where possible, clips can start playing in the middle
+- Each Timeline can have its own TempoClock and Environment, and has an init / free hook that save with the timeline
+- DAW-like GUI with key commands for editing and playback
+- Undo and redo
+- Easy to export timeline to IDE as SCLang compile string and load it back again
+
+## Hypothetical features
+- Timeline Clip -- embed one timeline in another!
+- Name clips to access them from other clips
+- Better GUI editing
+  - Selecting / bulk editing clips
+  - Insert / delete time
+- More live interaction - e.g. map a controller to a bus and record its movements to an envelope
+- Higher dimensional envelopes - e.g. movement through x/y space
+- Playback and record audio files
+- Non-linearity: loop points, wait points, etc.
+- ddwPlug integration -- simplify bus routing for modulation
+
+## Issues
+- Although I've tried to make it pleasant, the GUI based code editing environment does not syntax highlight, autocomplete, etc -- for this reason I've added "Open in IDE" / "Copy from IDE" buttons as necessary.
+  - Solution would be to someday add a Qt code view to core SC
+- When the timeline gets too big, it can't be saved / restored from a SCLang text format.
+  - Solution would be to make some kind of custom file format, or optimize the way functions are stored/loaded.
+- When there are lots of quick zig-zags, high-resolution envelope drawing makes the GUI freeze up
+  - to avoid this I have extremely pixelated the envelope drawing when zoomed in. Still looking for a good solution for this.
+
+## Mouse interaction
+- drag middle of clip to move
+- drag edges of clip to resize
+- cmd-scroll zoom horizontally
+- opt-scroll zoom vertically
+- right click to see action menu
+
+## Key commands
+- space toggles play
+- s splits clip at mouse pointer
+- delete deletes clip at mouse pointer
+- e opens edit window for clip at mouse pointer
+- cmd-e toggles mouse editing of envelope breakpoints
+- C inserts comment clip at mouse
+- S inserts synth clip at mouse
+- P inserts pattern clip at mouse
+- R inserts routine clip at mouse
+- E inserts env clip at mouse
+- cmd-t inserts new track after track at mouse
+- cmd-T inserts new track before track at mouse
+- cmd-delete deletes track at mouse
+- cmd-z undo
+- cmd-Z redo
+
+## Latest working test code
 
 ```
 (
