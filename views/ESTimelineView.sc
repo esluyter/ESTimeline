@@ -517,51 +517,55 @@ ESTimelineView : UserView {
 
   makeTrackViews {
     // call this when number of tracks changes
-    var width = this.bounds.width;
-    var height = this.bounds.height;
+    if (this.notNil and: { this.bounds.notNil }) { // wtf?
+      var width = this.bounds.width;
+      var height = this.bounds.height;
 
-    heightRatio = height / this.parent.bounds.height;
+      //[width, height].postln;
 
-    trackViews.do(_.remove);
-    trackHeight = height / timeline.tracks.size;
-    trackViews = timeline.tracks.collect { |track, i|
-      var top = i * trackHeight;
-      ESTrackView(this, Rect(0, top, width, trackHeight), track)
-    };
+      heightRatio = height / this.parent.bounds.height;
 
-    [playheadView, dragView, leftGuideView, rightGuideView].do(_.remove);
-    playheadView = UserView(this, this.bounds.copy.origin_(0@0))
-    .acceptsMouse_(false)
-    .drawFunc_({
-      var left = this.absoluteTimeToPixels(timeline.soundingNow);
-      Pen.use {
-        timeline.tracks.do { |track, i|
-          var clip = this.clipAtX(track, left)[0];
-          if ((clip.class == ESTimelineClip) and: { clip.useParentClock.not } and: { timeline.isPlaying }) {
+      trackViews.do(_.remove);
+      trackHeight = height / timeline.tracks.size;
+      trackViews = timeline.tracks.collect { |track, i|
+        var top = i * trackHeight;
+        ESTrackView(this, Rect(0, top, width, trackHeight), track)
+      };
 
-          } {
-            // sounding playhead in black
-            left = this.absoluteTimeToPixels(timeline.soundingNow);
-            Pen.addRect(Rect(left, i * trackHeight, 2, trackHeight));
-            Pen.color = Color.black;
-            Pen.fill;
+      [playheadView, dragView, leftGuideView, rightGuideView].do(_.remove);
+      playheadView = UserView(this, this.bounds.copy.origin_(0@0))
+      .acceptsMouse_(false)
+      .drawFunc_({
+        var left = this.absoluteTimeToPixels(timeline.soundingNow);
+        Pen.use {
+          timeline.tracks.do { |track, i|
+            var clip = this.clipAtX(track, left)[0];
+            if ((clip.class == ESTimelineClip) and: { clip.useParentClock.not } and: { timeline.isPlaying }) {
 
-            if (timeline.isPlaying) {
-              // "scheduling playhead" in gray
-              Pen.color = Color.gray(0.5, 0.5);
-              left = this.absoluteTimeToPixels(timeline.now);
+            } {
+              // sounding playhead in black
+              left = this.absoluteTimeToPixels(timeline.soundingNow);
               Pen.addRect(Rect(left, i * trackHeight, 2, trackHeight));
+              Pen.color = Color.black;
               Pen.fill;
+
+              if (timeline.isPlaying) {
+                // "scheduling playhead" in gray
+                Pen.color = Color.gray(0.5, 0.5);
+                left = this.absoluteTimeToPixels(timeline.now);
+                Pen.addRect(Rect(left, i * trackHeight, 2, trackHeight));
+                Pen.fill;
+              };
             };
           };
         };
-      };
-    });
-    dragView = View(this, Rect(0, 0, 2, trackHeight)).visible_(false).background_(Color.red).acceptsMouse_(false);
-    leftGuideView = View(this, Rect(0, 0, 1, height)).visible_(false).background_(Color.gray(0.6)).acceptsMouse_(false);
-    rightGuideView = View(this, Rect(0, 0, 1, height)).visible_(false).background_(Color.gray(0.6)).acceptsMouse_(false);
+      });
+      dragView = View(this, Rect(0, 0, 2, trackHeight)).visible_(false).background_(Color.red).acceptsMouse_(false);
+      leftGuideView = View(this, Rect(0, 0, 1, height)).visible_(false).background_(Color.gray(0.6)).acceptsMouse_(false);
+      rightGuideView = View(this, Rect(0, 0, 1, height)).visible_(false).background_(Color.gray(0.6)).acceptsMouse_(false);
 
-    this.changed(\makeTrackViews);
+      this.changed(\makeTrackViews);
+    };
   }
 
   clipAtX { |track, x, i|

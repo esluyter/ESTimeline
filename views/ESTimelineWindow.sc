@@ -111,117 +111,121 @@ ESTimelineWindow : Window {
 
   makeDependant {
     timeline.addDependant { |self, what, args|
-      //[what, args].postln;
-      //timelineView.refresh;
       defer {
-        switch (what)
-        { \init } {
-          timelineView.refresh;
-          tempoKnob.value_(self.tempo * 60);
-        }
-        { \free } {
-          this.close;
-        }
-        { \playbar } {
-          if ((timeline.now < timelineView.startTime) or: (timeline.now > timelineView.endTime)) {
-            timelineView.startTime = timeline.now - (timelineView.duration / 6);
-          };
-          timelineView.refresh;
-          rulerView.refresh;
-        }
-        { \isPlaying } {
-          if (timeline.isPlaying) {
-            var waitTime = 20.reciprocal; // 30 fps
-            playheadRout.stop; // just to make sure
-            playheadRout = {
-              inf.do { |i|
-                if ((timeline.now < timelineView.startTime) or: (timeline.now > timelineView.endTime)) {
-                  timelineView.startTime = timeline.now - (timelineView.duration / 6);
+        if (this.name.notNil) { // wtf?
+          //([this.name] ++ [what, args]).postln;
+
+          //timelineView.refresh;
+
+          switch (what)
+          { \init } {
+            timelineView.refresh;
+            tempoKnob.value_(self.tempo * 60);
+          }
+          { \free } {
+            this.close;
+          }
+          { \playbar } {
+            if ((timeline.now < timelineView.startTime) or: (timeline.now > timelineView.endTime)) {
+              timelineView.startTime = timeline.now - (timelineView.duration / 6);
+            };
+            timelineView.refresh;
+            rulerView.refresh;
+          }
+          { \isPlaying } {
+            if (timeline.isPlaying) {
+              var waitTime = 20.reciprocal; // 20 fps
+              playheadRout.stop; // just to make sure
+              playheadRout = {
+                inf.do { |i|
+                  if ((timeline.now < timelineView.startTime) or: (timeline.now > timelineView.endTime)) {
+                    timelineView.startTime = timeline.now - (timelineView.duration / 6);
+                  };
+                  timelineView.playheadView.refresh;
+                  rulerView.playheadView.refresh;
+                  if (timeline.optimizeView.not) {
+                    timelineView.refresh;
+                  };
+                  waitTime.wait;
                 };
-                timelineView.playheadView.refresh;
-                rulerView.playheadView.refresh;
-                if (timeline.optimizeView.not) {
-                  timelineView.refresh;
+              }.fork(AppClock) // lower priority clock for GUI updates
+            } {
+              playheadRout.stop;
+              timelineView.refresh; rulerView.playheadView.refresh;
+            };
+          }
+          { \tempo } {
+            tempoKnob.value_(timeline.tempoBPM);
+          }
+          { \track } {
+            if (args[2] == \clip) {
+              if (ESClipEditView.thisClip == args[4]) {
+                if (args[5] == \startTime) {
+                  ESClipEditView.startTimeView.string_(args[6].asString);
+                  ESClipEditView.durationView.string_(args[4].duration.asString);
+                  if (ESClipEditView.offsetView.notNil) {
+                    ESClipEditView.offsetView.string_(args[4].offset.asString);
+                  };
                 };
-                waitTime.wait;
-              };
-            }.fork(AppClock) // lower priority clock for GUI updates
-          } {
-            playheadRout.stop;
-            defer { timelineView.refresh; rulerView.playheadView.refresh };
-          };
-        }
-        { \tempo } {
-          tempoKnob.value_(timeline.tempoBPM);
-        }
-        { \track } {
-          if (args[2] == \clip) {
-            if (ESClipEditView.thisClip == args[4]) {
-              if (args[5] == \startTime) {
-                ESClipEditView.startTimeView.string_(args[6].asString);
-                ESClipEditView.durationView.string_(args[4].duration.asString);
-                if (ESClipEditView.offsetView.notNil) {
-                  ESClipEditView.offsetView.string_(args[4].offset.asString);
+                if (args[5] == \duration) {
+                  ESClipEditView.durationView.string_(args[6].asString);
                 };
-              };
-              if (args[5] == \duration) {
-                ESClipEditView.durationView.string_(args[6].asString);
-              };
-              if (args[5] == \offset) {
-                ESClipEditView.offsetView.string_(args[6].asString);
+                if (args[5] == \offset) {
+                  ESClipEditView.offsetView.string_(args[6].asString);
+                };
               };
             };
-          };
 
-          if ((args[2] == \mute) or: (args[2] == \solo) or: (args[2] == \name) or: (args[2] == \useMixerChannel)) {
+            if ((args[2] == \mute) or: (args[2] == \solo) or: (args[2] == \name) or: (args[2] == \useMixerChannel)) {
+              trackPanelView.refresh;
+              timelineView.refresh;
+            } {
+              //args.postcs;
+              timelineView.trackViews[args[0]].refresh;
+              //~window.timelineView.trackViews[]
+            };
+          }
+          { \useMixerChannel } {
             trackPanelView.refresh;
-            timelineView.refresh;
-          } {
-            //args.postcs;
-            timelineView.trackViews[args[0]].refresh;
-            //~window.timelineView.trackViews[]
-          };
-        }
-        { \useMixerChannel } {
-          trackPanelView.refresh;
-        }
-        { \initMixerChannels } {
-          //if (mixer.notNil) { mixer.close };
-          //mixer = MixingBoard("Mixer", nil, timeline.orderedMixerChannels);
-        }
-        { \tracks } {
-          //{
+          }
+          { \initMixerChannels } {
+            //if (mixer.notNil) { mixer.close };
+            //mixer = MixingBoard("Mixer", nil, timeline.orderedMixerChannels);
+          }
+          { \tracks } {
+            //{
             //0.01.wait; // this solves a weird bug?
             timelineView.makeTrackViews;
-          //}.fork(AppClock);
-        }
-        { \addUndoPoint } {
-          timelineView.timelineController.saveBackup;
-        }
-        { \restoreUndoPoint } {
-          //timelineView.timelineController.saveBackup;
-          {
-            timelineView.makeTrackViews;
-            ESClipEditView.closeWindow;
-          }.fork(AppClock);
-        }
-        { \new } {
-          timelineView.duration = 15;
-          timelineView.startTime = -2;
-        }
-        { \encapsulateSelf } {
-          {
-            timelineView.makeTrackViews;
-            ESClipEditView.closeWindow;
-          }.fork(AppClock);
-        }
-        { \gridDivision } {
-          gridDivisionBox.value = timeline.gridDivision;
-          timelineView.refresh;
-        }
-        { \snapToGrid } {
-          snapToGridBox.value = timeline.snapToGrid;
-          timelineView.refresh;
+            //}.fork(AppClock);
+          }
+          { \addUndoPoint } {
+            timelineView.timelineController.saveBackup;
+          }
+          { \restoreUndoPoint } {
+            //timelineView.timelineController.saveBackup;
+            {
+              timelineView.makeTrackViews;
+              ESClipEditView.closeWindow;
+            }.fork(AppClock);
+          }
+          { \new } {
+            timelineView.duration = 15;
+            timelineView.startTime = -2;
+          }
+          { \encapsulateSelf } {
+            {
+              timelineView.makeTrackViews;
+              ESClipEditView.closeWindow;
+            }.fork(AppClock);
+          }
+          { \gridDivision } {
+            gridDivisionBox.value = timeline.gridDivision;
+            timelineView.refresh;
+          }
+          { \snapToGrid } {
+            snapToGridBox.value = timeline.snapToGrid;
+            timelineView.refresh;
+          };
         };
       };
     };
