@@ -373,7 +373,7 @@ ESMixerChannelEnv {
           var curves = if (thisEnv.curves.isArray) { thisEnv.curves[index] } { thisEnv.curves };
           Server.default.bind {
             synth.release;
-            synth = mc.panAuto(this.defName, [env: Env(levels, [time], curves), tempo: clock.tempo, min: min, max: max, curve: curve]);
+            synth = mc.panAuto(this.defName, [env: Env(levels, [time], curves).asArrayForInterpolation.collect(_.reference).unbubble, tempo: clock.tempo, min: min, max: max, curve: curve]);
           };
           time.wait;
         };
@@ -391,7 +391,7 @@ ESMixerChannelEnv {
           var curves = if (thisEnv.curves.isArray) { thisEnv.curves[index] } { thisEnv.curves };
           Server.default.bind {
             synth.release;
-            synth = mc.levelAuto(this.defName, [env: Env(levels, [time], curves), tempo: clock.tempo, min: min, max: max, curve: curve]);
+            synth = mc.levelAuto(this.defName, [env: Env(levels, [time], curves).asArrayForInterpolation.collect(_.reference).unbubble, tempo: clock.tempo, min: min, max: max, curve: curve]);
           };
           time.wait;
         };
@@ -412,7 +412,7 @@ ESMixerChannelEnv {
           var curves = if (thisEnv.curves.isArray) { thisEnv.curves[i] } { thisEnv.curves };
           Server.default.bind {
             synth.release;
-            synth = mc.perform(method)[index].levelAuto(this.defName, [env: Env(levels, [time], curves), tempo: clock.tempo, min: min, max: max, curve: curve]);
+            synth = mc.perform(method)[index].levelAuto(this.defName, [env: Env(levels, [time], curves).asArrayForInterpolation.collect(_.reference).unbubble, tempo: clock.tempo, min: min, max: max, curve: curve]);
           };
           time.wait;
         };
@@ -440,7 +440,7 @@ ESMixerChannelEnv {
           var curves = if (thisEnv.curves.isArray) { thisEnv.curves[i] } { thisEnv.curves };
           Server.default.bind {
             synth.release;
-            synth = Synth(this.defName, [env: Env(levels, [time], curves), tempo: clock.tempo, min: min, max: max, curve: curve, out: bus], mc.effectgroup);
+            synth = Synth(this.defName, [env: Env(levels, [time], curves).asArrayForInterpolation.collect(_.reference).unbubble, tempo: clock.tempo, min: min, max: max, curve: curve, out: bus], mc.effectgroup);
           };
           time.wait;
         };

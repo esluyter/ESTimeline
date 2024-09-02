@@ -1,6 +1,12 @@
 // credit scztt aka Scott Carver
 // Env.fromArray solves IEnvGen problem
 
+// update: it doesn't; problem with curves
+// this is better solved a different way:
+// https://scsynth.org/t/setting-ienvgens-env-on-synth-creation/4814/2
+
+// can probably remove this file
+
 +Env {
 	midicps {
 		var copy;

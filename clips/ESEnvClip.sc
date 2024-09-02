@@ -49,9 +49,10 @@ ESEnvClip : ESClip {
           [\kr, \ar].do { |rate|
             [\curve, \exp].do { |type|
               SynthDef(('ESEnvClip_' ++ rate ++ '_' ++ type ++ '_' ++ n).asSymbol, { |out, gate = 1, tempo = 1, min = 0, max = 1|
-                var env = \env.kr(Env(0.dup(n), 1.dup(n - 1), 0.dup(n - 1)));
+                //var env = \env.kr(Env(0.dup(n), 1.dup(n - 1), 0.dup(n - 1)));
+                var env = \env.kr(Env.newClear(n).asArray);
                 var index = Sweep.perform(rate, 0, tempo);
-                var sig = IEnvGen.perform(rate, Env.fromArray(env), index);
+                var sig = IEnvGen.perform(rate, env/*Env.fromArray(env)*/, index);
                 //var sig = EnvGen.perform(rate, env, timeScale: tempo.reciprocal);
 
                 switch (type)
@@ -162,7 +163,7 @@ ESEnvClip : ESClip {
       var defName = if (this.rate == 'control') { 'ESEnvClip_kr' } { 'ESEnvClip_ar' };
       defName = (defName ++ if (this.isExponential) { "_exp_" } { "_curve_" } ++ size).asSymbol;
       Server.default.bind {
-        synth = Synth(defName, [env: thisEnv, out: bus.value, tempo: clock.tempo, min: min, max: max, curve: curve], target.value, addAction.value);
+        synth = Synth(defName, [env: thisEnv.asArrayForInterpolation.collect(_.reference).unbubble, out: bus.value, tempo: clock.tempo, min: min, max: max, curve: curve], target.value, addAction.value);
       };
     };
   }
