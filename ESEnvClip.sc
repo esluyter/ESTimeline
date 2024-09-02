@@ -81,7 +81,7 @@ ESEnvClip : ESClip {
   prDraw { |left, top, width, height, editingMode|
     var pratio = duration / width;
     var tratio = pratio.reciprocal;
-    var line = this.busString ++ "  -> " ++ bus.value.asCompileString;
+    var line = this.bus.asESDisplayString ++ "  -> " ++ bus.value.asCompileString;
     var minString = min.asString;
     var maxString = max.asString;
     var minWidth, maxWidth;
@@ -281,36 +281,6 @@ ESEnvClip : ESClip {
   defaultColor { ^Color.hsv(0.58, 0.45, 0.65, 0.7) }
 
   guiClass { ^ESEnvClipEditView }
-
-  busString {
-    if (bus.isFunction) {
-      var cs = bus.asCompileString;
-      if (cs.size == 2) { ^"" };
-      ^cs[1..cs.size-2];
-    };
-    ^bus.asCompileString;
-  }
-
-  targetString {
-    if (target.isFunction) {
-      var cs = target.asCompileString;
-      if (cs.size == 2) { ^"" };
-      ^cs[1..cs.size-2];
-    };
-    if (target.isNil) {
-      ^"";
-    };
-    ^target.asCompileString;
-  }
-
-  addActionString {
-    if (addAction.isFunction) {
-      var cs = addAction.asCompileString;
-      if (cs.size == 2) { ^"" };
-      ^cs[1..cs.size-2];
-    };
-    ^addAction.asCompileString;
-  }
 
   envToPlay { |startOffset = 0|
     var playOffset = offset + startOffset;

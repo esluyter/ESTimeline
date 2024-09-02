@@ -250,24 +250,6 @@ ESTimeline {
     }
   }
 
-  initFuncString {
-    if (initFunc.isFunction) {
-      var cs = initFunc.asCompileString;
-      if (cs.size == 2) { ^"" };
-      ^cs[1..cs.size-2];
-    };
-    ^"";
-  }
-
-  cleanupFuncString {
-    if (cleanupFunc.isFunction) {
-      var cs = cleanupFunc.asCompileString;
-      if (cs.size == 2) { ^"" };
-      ^cs[1..cs.size-2];
-    };
-    ^"";
-  }
-
   hasSolo {
     tracks.do { |track|
       if (track.solo) { ^true }

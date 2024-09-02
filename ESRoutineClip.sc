@@ -114,24 +114,6 @@ ESRoutineClip : ESClip {
     ^"Routine"
   }
 
-  funcString {
-    if (func.isFunction) {
-      var cs = func.asCompileString;
-      if (cs.size == 2) { ^"" };
-      ^cs[1..cs.size-2];
-    };
-    ^"";
-  }
-
-  cleanupFuncString {
-    if (cleanupFunc.isFunction) {
-      var cs = cleanupFunc.asCompileString;
-      if (cs.size == 2) { ^"" };
-      ^cs[1..cs.size-2];
-    };
-    ^"";
-  }
-
   guiClass { ^ESRoutineClipEditView }
 
   defaultColor { ^Color.hsv(0.5, 0.4, 0.4) }
