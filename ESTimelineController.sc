@@ -30,7 +30,7 @@ ESTimelineController {
   }
 
   newTimelineClip { |track, startTime, duration|
-    track.addClip(ESTimelineClip(startTime, duration ?? 10, timeline: ESTimeline(bootOnPrep: timeline.bootOnPrep)));
+    track.addClip(ESTimelineClip(startTime, duration ?? 10, timeline: ESTimeline(bootOnPrep: timeline.bootOnPrep, useEnvir: timeline.useEnvir, optimizeView: timeline.optimizeView, gridDivision: timeline.gridDivision, snapToGrid: timeline.snapToGrid, useMixerChannel: timeline.useMixerChannel, globalMixerChannelNames: [])));
   }
 
   newCommentClip { |track, startTime, duration|

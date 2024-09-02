@@ -39,7 +39,7 @@ ESTimeline {
   storeArgs { ^[tracks, this.tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames] }
   defaultUndoPoint { ^[[ESTrack([])], 1, nil, nil, bootOnPrep, useEnvir, optimizeView, 4, false, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames].asESArray }
 
-  *new { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = false, gridDivision = 4, snapToGrid = false, useMixerChannel = true, mixerChannelTemplates, globalMixerChannelNames|
+  *new { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = true, gridDivision = 4, snapToGrid = false, useMixerChannel = true, mixerChannelTemplates, globalMixerChannelNames|
     //var clock = TempoClock(tempo).permanent_(true);
 
     tracks = tracks ?? [ESTrack()];
@@ -122,21 +122,36 @@ ESTimeline {
   orderedMixerChannels {
     var globalRet = [];
     var ret = [];
+
+    if (useMixerChannel.not) { ^[] };
+
     globalMixerChannelNames.do { |name|
       var mc = mixerChannels[name];
       if (globalRet.includes(mc).not) {
         globalRet = globalRet.add(mc);
       };
     };
-    tracks.do { |track|
+    // reverse so that grouped buses appear before the track that contains them
+    tracks.reverse.do { |track|
+      var timelineClips;
+
+      // add track channel if applicable
       if (track.useMixerChannel) {
         var mc = mixerChannels[track.mixerChannelName];
         if (ret.includes(mc).not and: globalRet.includes(mc).not) {
           ret = ret.add(mc);
         };
       };
+
+      // add channels for sub-timelines
+      timelineClips = track.nowClips.select({ |clip| clip.class == ESTimelineClip });
+      if (timelineClips.notNil) {
+        timelineClips.do { |timelineClip|
+          ret = ret.add(timelineClip.timeline.orderedMixerChannels);
+        };
+      };
     };
-    ^ret ++ globalRet;
+    ^ret.reverse ++ globalRet;
   }
 
   orderedMixerChannelNames {

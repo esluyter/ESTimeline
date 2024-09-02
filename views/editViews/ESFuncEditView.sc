@@ -76,6 +76,7 @@ ESFuncEditView : ESClipEditView {
         timeline.cleanupFunc = cleanupFunc;
         timeline.bootOnPrep = bootBox.value;
         timeline.useEnvir = envirBox.value;
+        timeline.optimizeView = optimizeBox.value;
 
         timeline.init(cleanupFirst: true);
         timeline.addUndoPoint;

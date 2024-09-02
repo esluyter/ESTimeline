@@ -26,13 +26,18 @@ ESTrack {
   sortClips {
     // good to call this before assuming they are ordered
     clips.sort { |a, b|
-      a.startTime < b.startTime
+      a.startTime < b.startTime;
     };
   }
 
   currentClips {
     // returns all playing clips
-    ^clips.select(_.isPlaying)
+    ^clips.select(_.isPlaying);
+  }
+
+  nowClips {
+    // returns all clips at "now", whether or not playing
+    ^clips.select({ |clip| ((clip.startTime <= timeline.now) and: (clip.endTime >= timeline.now)) });
   }
 
   stop { |hard = false|
