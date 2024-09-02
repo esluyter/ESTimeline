@@ -1,8 +1,10 @@
 ESEnvClip : ESClip {
-  var <env, <bus, <>target, <>addAction, <>min, <>max, <>curve, <>isExponential, <makeBus = false, <>makeBusRate;
+  var <env, <bus, <>target, <>addAction, <min, <max, <>curve, <>isExponential, <makeBus = false, <>makeBusRate;
   var <synth;
   var <hoverIndex, <editingFirst;
 
+  min_ { |val| min = val; this.changed(\min); }
+  max_ { |val| max = val; this.changed(\max); }
   env_ { |val| env = val; this.changed(\env); }
   bus_ { |val| bus = val; this.changed(\bus); }
   rate { ^this.bus.value.rate }
@@ -443,11 +445,19 @@ ESEnvClip : ESClip {
     ^this.prValueScale(this.envToPlay.at(time));
   }
 
-  prValueScale { |val|
+  prValueScale { |level|
     if (isExponential) {
-      ^val.linexp(0.0, 1.0, min, max);
+      ^level.linexp(0.0, 1.0, min, max);
     } {
-      ^val.lincurve(0.0, 1.0, min, max, curve);
+      ^level.lincurve(0.0, 1.0, min, max, curve);
+    };
+  }
+
+  prValueUnscale { |value|
+    if (isExponential) {
+      ^value.explin(min, max, 0.0, 1.0);
+    } {
+      ^value.curvelin(min, max, 0.0, 1.0, curve);
     };
   }
 }

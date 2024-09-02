@@ -43,10 +43,45 @@ ESTimelineView : UserView {
         MenuAction("Add Env Clip (E)", { timeline.tracks[hoverTrack].addClip(ESEnvClip(hoverTime, 5, env: Env([0, 1, 0], [2.5, 2.5], \sin), prep: true)); }),
         MenuAction("Add Timeline Clip (T)", { timeline.tracks[hoverTrack].addClip(ESTimelineClip(hoverTime, 10, timeline: ESTimeline())); })
       ).title_("Add Clip"),
-      MenuAction("Edit Clip (e)", { hoverClip.guiClass.new(hoverClip, timeline) }),
       Menu(
-        MenuAction("Bulk edit synth arguments", {
+        MenuAction("Set Env range keeping breakpoint values", {
+          var minDefault = 0, maxDefault = 1, curveDefault = 0, isExponentialDefault = false;
+          if (hoverClip.class == ESEnvClip) {
+            minDefault = hoverClip.min;
+            maxDefault = hoverClip.max;
+            curveDefault = hoverClip.curve;
+            isExponentialDefault = hoverClip.isExponential;
+          };
+          ESBulkEditWindow.keyValue(
+            "Set Env range keeping breakpoint values",
+            "min", minDefault, "max", maxDefault, "isExponential", isExponentialDefault, true, "curve", curveDefault,
+            callback: { |min, max, isExponential, curve|
+              min = min.interpret;
+              max = max.interpret;
+              curve = curve.interpret;
+              if ((isExponential and: ((min.sign != max.sign))).not) {
+                var arr = if (this.selectedClips.includes(hoverClip)) { this.selectedClips } { [hoverClip] };
+                arr.do { |clip|
+                  if (clip.class == ESEnvClip) {
+                    var oldLevels = clip.env.levels;
+                    var values = oldLevels.collect(clip.prValueScale(_));
+                    var newLevels;
+                    clip.min = min;
+                    clip.max = max;
+                    clip.curve = curve;
+                    clip.isExponential = isExponential;
+                    newLevels = values.collect(clip.prValueUnscale(_));
+                    clip.env = Env(newLevels, clip.env.times, clip.env.curves);
+                  };
+                };
+              };
+            }
+          );
+        }),
+        MenuAction("Bulk edit Synth arguments", {
           ESBulkEditWindow.keyValue(callback: { |key, val, hardCode|
+            key = key.asSymbol;
+            val = ("{" ++ val ++ "}").interpret;
             this.selectedClips.do { |clip|
               if (clip.class == ESSynthClip) {
                 clip.setArg(key, if (hardCode) { val.value } { val });
@@ -54,7 +89,7 @@ ESTimelineView : UserView {
             };
           });
         }),
-        MenuAction("Bulk edit synth defName", {
+        MenuAction("Bulk edit Synth defName", {
           ESBulkEditWindow.value(callback: { |val|
             this.selectedClips.do { |clip|
               if (clip.class == ESSynthClip) {
@@ -62,13 +97,17 @@ ESTimelineView : UserView {
               };
             };
           });
-        })
-      ).title_("Bulk edit selected clips"),
-      MenuAction("Split Clip (s)", { if (hoverClip.notNil) { timeline.tracks[hoverTrack].splitClip(hoverClipIndex, hoverTime) } }),
-      MenuAction("Delete Clip (⌫)", { if (hoverClipIndex.notNil) { timeline.tracks[hoverTrack].removeClip(hoverClipIndex) } }),
+        }),
+        MenuAction.separator(""),
+        MenuAction("Edit Clip (e)", { hoverClip.guiClass.new(hoverClip, timeline) }),
+        MenuAction("Split Clip (s)", { if (hoverClip.notNil) { timeline.tracks[hoverTrack].splitClip(hoverClipIndex, hoverTime) } }),
+        MenuAction("Delete Clip (⌫)", { if (hoverClipIndex.notNil) { timeline.tracks[hoverTrack].removeClip(hoverClipIndex) } }),
+      ).title_("Clip actions"),
       MenuAction.separator(""),
-      MenuAction("Insert Time (Cmd+i)", { if (timeSelection.notNil) { timeline.insertTime(*timeSelection); }; }),
-      MenuAction("Delete Time (Shift+Cmd+⌫)", { if (timeSelection.notNil) { timeline.deleteTime(*timeSelection); }; }),
+      Menu(
+        MenuAction("Insert Time (Cmd+i)", { if (timeSelection.notNil) { timeline.insertTime(*timeSelection); }; }),
+        MenuAction("Delete Time (Shift+Cmd+⌫)", { if (timeSelection.notNil) { timeline.deleteTime(*timeSelection); }; }),
+      ).title_("Time actions"),
       MenuAction.separator(""),
       MenuAction("Add Track Before (Cmd+T)", { timeline.addTrack(hoverTrack) }),
       MenuAction("Add Track After (Cmd+t)", { timeline.addTrack(hoverTrack + 1) }),
@@ -267,10 +306,6 @@ ESTimelineView : UserView {
                 clip.track.removeClip(clip.index, false);
                 timeline.tracks[newTrack].addClip(clip);
               };
-              /*
-              timeline.tracks[hoverTrack].removeClip(timeline.tracks[hoverTrack].clips.indexOf(hoverClip), false);
-              timeline.tracks[currentHoverTrack].addClip(hoverClip);
-              */
               hoverTrack = currentHoverTrack;
               hoverClipIndex = timeline.tracks[hoverTrack].clips.indexOf(hoverClip);
             };

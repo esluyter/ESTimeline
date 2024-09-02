@@ -1,26 +1,29 @@
 ESBulkEditWindow {
   classvar editorWindow;
 
-  *keyValue { |title = "Set all selected Synth Clip parameter" keyDefault = \freq, valDefault = 440, callback|
+  *keyValue { |title = "Set all selected Synth Clip parameter", keyLabel = "key", keyDefault = \freq, valLabel = "val", valDefault = 440, checkLabel = "hard coded", checkDefault = false, showExtraField = false, extraFieldLabel = "", extraFieldDefault = "", callback|
     var width = 600, height = 300;
     var left = ((Window.availableBounds.width - width) / 2);
     var top = Window.availableBounds.height - height - 200;
-    var keyField, valField, hardCodeBox;
+    var keyField, valField, checkBox, extraField;
     editorWindow !? { editorWindow.close };
     editorWindow = Window(title, Rect(left, top, width, height)).front;
-    StaticText(editorWindow, Rect(100, 30, 400, 20)).string_(title).font_(Font.sansSerif(20));
-    StaticText(editorWindow, Rect(0, 80, 90, 40)).align_(\right).string_("key").font_(Font.sansSerif(16));
+    StaticText(editorWindow, Rect(100, 30, 500, 20)).string_(title).font_(Font.sansSerif(20));
+    StaticText(editorWindow, Rect(0, 80, 90, 40)).align_(\right).string_(keyLabel).font_(Font.sansSerif(16));
     keyField = TextField(editorWindow, Rect(100, 80, 400, 40)).string_(keyDefault).font_(Font.monospace(16));
-    StaticText(editorWindow, Rect(0, 130, 90, 40)).align_(\right).string_("value").font_(Font.sansSerif(16));
+    StaticText(editorWindow, Rect(0, 130, 90, 40)).align_(\right).string_(valLabel).font_(Font.sansSerif(16));
     valField = TextField(editorWindow, Rect(100, 130, 400, 40)).string_(valDefault).font_(Font.monospace(16));
 
-    hardCodeBox = CheckBox(editorWindow, Rect(100, 180, 20, 20));
-    StaticText(editorWindow, Rect(120, 180, 200, 20)).string_("hard coded").font_(Font.sansSerif(16));
+    checkBox = CheckBox(editorWindow, Rect(100, 180, 20, 20)).value_(checkDefault);
+    StaticText(editorWindow, Rect(120, 180, 200, 20)).string_(checkLabel).font_(Font.sansSerif(16));
+
+    StaticText(editorWindow, Rect(250, 180, 90, 20)).string_(extraFieldLabel).align_(\right).font_(Font.sansSerif(16));
+    extraField = TextField(editorWindow, Rect(350, 175, 150, 30)).string_(extraFieldDefault).visible_(showExtraField);
 
     Button(editorWindow, Rect(100, 220, 197.5, 40)).string_("OK").font_(Font.sansSerif(14)).action_({
-      var key = keyField.string.asSymbol;
-      var val = ("{" ++ valField.string ++ "}").interpret;
-      callback.(key, val, hardCodeBox.value);
+      //var key = keyField.string.asSymbol;
+      //var val = ("{" ++ valField.string ++ "}").interpret;
+      callback.(keyField.string, valField.string, checkBox.value, extraField.string);
       editorWindow.close;
     });
     Button(editorWindow, Rect(302.5, 220, 197.5, 40)).string_("Cancel").font_(Font.sansSerif(14)).action_({ editorWindow.close });
