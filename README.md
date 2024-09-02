@@ -29,21 +29,21 @@ Also note that because timelines are built to execute user-supplied code they ar
   
 ## Features
 - **Non-prescriptive:**
-  - for the moment just real-time but some of this could be translated easily to work NRT
-    - there are certain things impossible in NRT, i.e. to do with real-time input
   - the basic goal is only to "execute this code at this particular time"
     - although the competing goal is to make it easy to do the things you want to do, which is subjective
-  - as little architecture as possible is forced on you,
+  - for the moment just real-time but some of this could be translated easily to work NRT
+    - there are certain things impossible in NRT, i.e. to do with real-time input
+  - as little architecture as possible is forced on you
     - possible to disable timeline-specific clock and environment so as to interact with the timeline as part of a larger project
-    - I am building in optional use of ddwMixerChannel, but
-      - ddwMixerChannel is not required
-      - possible to play clips with any bus, target, addAction, etc. for full flexibility
+    - possible to play clips with any bus, target, addAction, etc. for full flexibility
 - **DAW-like GUI** for editing and playback
   - Keyboard and mouse interface to full extent of Timeline capabilities, with built-in code editing
-  - Snap to grid optional
+    - Snap to grid optional
+  - Optional full GUI mixing interface using ddwMixerChannel
+    - track insert FX, pre fade sends and post fade sends
+    - automate mixer channel parameters (level, pan, sends, insert fx parameters) with envelopes
   - Gray playhead is "scheduling playhead" and black playhead is "sounding playhead" -- to take into account server latency.
-    - Routines can be played with additional latency so non-sounding events line up with the sounding playhead. The goal is an accurate visual representation of what you are hearing / when the code is executed.
-  - If using ddwMixerChannel, there is a GUI mixer window with track insert FX, pre fade sends and post fade sends.
+    - Routines can be played with additional latency so non-sounding events line up with the sounding playhead. The goal is an accurate visual representation of what you are hearing / when the code is executed
 - **Non-linear:** "goto" command to jump to a clip or a point in time enabling complex real-time behaviors (variable-length looping, conditional branching...)
 - **Tracks** can contain all clip types
   - tracks can be muted/soloed and rearranged
@@ -72,24 +72,25 @@ Also note that because timelines are built to execute user-supplied code they ar
   - Once you have saved, the timeline will update a backup file every time you add an undo point, in case of crash
 
 ## Hypothetical features
+These are all things I would like to implement someday:
 - Time features
   - Clock follow: e.g. sync up with an Ableton timeline or midi show control
-- Track/clips
-  - More clip types (e.g. OSCdef, loop, audio file, midi/piano/drum roll, VST)
-  - Reference clips to create clones that all change together
+- More clip types
+  - audio file
+  - loop
+  - OSCdef
+  - midi/piano/drum roll
+  - "clones" that change with their parents
 - Envelopes
   - Ability to draw freehand with mouse 
   - More live interaction - e.g. map a controller to a bus and record its movements to an envelope
   - Higher dimensional envelopes - e.g. movement through x/y space
   - Timeline tempo envelopes (this is already possible but kind of annoying, using an Env clip and a Routine clip)
-  - Automate mixer channel parameters (level, pan, sends, insert fx parameters) with envelopes
-- Playback and record audio files
-  - easily access this Buffer for further manipulation
+- Record audio clip in real time and/or offline bounce
 - MIDI integration
-  - not sure how DAW-like I want to make this.....
 - Library integration
+  - VSTPlugin for adding VST effects to mixing chain
   - ddwPlug -- simplify bus routing for modulation
-  - VSTPlugin, somehow..... this could be a can of worms
   - clothesline -- put whole .scd files on the timeline
 
 ## Issues
