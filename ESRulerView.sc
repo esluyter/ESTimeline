@@ -41,6 +41,20 @@ ESRulerView : UserView {
           }
         };
       };
+
+      if (timeline.parentClip.notNil) {
+        if (timeline.parentClip.offset > this.startTime) {
+          Pen.addRect(Rect(0, 0, this.absoluteTimeToPixels(timeline.parentClip.offset), this.bounds.height));
+          Pen.color = (Color.gray(0.5, 0.5));
+          Pen.fill;
+        };
+        if (timeline.parentClip.offset + timeline.parentClip.duration < this.endTime) {
+          var left = this.absoluteTimeToPixels(timeline.parentClip.offset + timeline.parentClip.duration);
+          Pen.addRect(Rect(left, 0, this.bounds.width, this.bounds.height));
+          Pen.color = (Color.gray(0.5, 0.5));
+          Pen.fill;
+        };
+      };
     }).mouseWheelAction_({ |view, x, y, mods, xDelta, yDelta|
       var xTime = timelineView.pixelsToAbsoluteTime(x);
       timelineView.duration = timelineView.duration * (-1 * yDelta).linexp(-100, 100, 0.5, 2, nil);

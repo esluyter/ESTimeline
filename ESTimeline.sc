@@ -237,6 +237,19 @@ ESTimeline {
     this.release;
   }
 
+  encapsulateSelf {
+    var duration = this.duration;
+    if (duration > 0) {
+      var newTimeline = ESTimeline().restoreUndoPoint(currentState);
+      this.prFree;
+      tracks = [ESTrack([ESTimelineClip(0, duration, newTimeline)])];
+      initFunc = {};
+      cleanupFunc = {};
+      this.init;
+      this.changed(\encapsulateSelf);
+    }
+  }
+
   initFuncString {
     if (initFunc.isFunction) {
       var cs = initFunc.asCompileString;
