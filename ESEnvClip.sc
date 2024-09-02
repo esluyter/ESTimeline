@@ -78,7 +78,7 @@ ESEnvClip : ESClip {
     };
   }
 
-  prDraw { |left, top, width, height, editingMode|
+  prDraw { |left, top, width, height, editingMode, clipLeft, clipWidth|
     var pratio = duration / width;
     var tratio = pratio.reciprocal;
     var line = this.bus.asESDisplayString ++ "  -> " ++ bus.value.asCompileString;
@@ -147,6 +147,15 @@ ESEnvClip : ESClip {
         Pen.width = 2;
         Pen.fillStroke;
       };
+    };
+
+    if (left < 0) {
+      width = width + left;
+      left = 0;
+    };
+    if (clipLeft.notNil and: { left < clipLeft }) {
+      width = width - (clipLeft - left);
+      left = clipLeft;
     };
 
     if (editingMode.not and: (height > 50)) {

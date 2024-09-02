@@ -32,35 +32,13 @@ ESSynthClip : ESClip {
     };
   }
 
-  prDraw { |left, top, width, height|
+  prDraw { |left, top, width, height, editingMode, clipLeft, clipWidth|
     var font = Font.monospace(10);
     var argsValue = this.prArgsValue;
     var freqIndex = argsValue.indexOf(\freq);
     var ampIndex = argsValue.indexOf(\amp);
     var strTop;
     var displayFreq;
-
-    if (left < 0) {
-      width = width + left;
-      left = 0;
-    };
-
-    if ((height > 30) and: (width > 15)) {
-      argsValue.pairsDo { |key, val, i|
-        var line = "" ++ key ++ ":  " ++ val.value;
-        while { max(0, width - 5) < (QtGUI.stringBounds(line, font).width) } {
-          if (line.size == 1) {
-            line = "";
-          } {
-            line = line[0..line.size-2];
-          };
-        };
-        strTop = 22 + (i * 6);
-        if (strTop < height) {
-          Pen.stringAtPoint(line, (left+3.5)@(top + strTop), font, Color.gray(1.0, 0.55));
-        };
-      };
-    };
 
     displayFreq = SynthDescLib.at(defName.value).controlDict[\freq];
     if (displayFreq.notNil) {
@@ -81,6 +59,32 @@ ESSynthClip : ESClip {
       Pen.addRect(Rect(left, y, width, 2));
       Pen.color = Color.gray(1, if (amp.isNumber) { amp.ampdb.linexp(-60.0, 0.0, 0.05, 1.0) } { 0.5 });
       Pen.fill;
+    };
+
+    if (left < 0) {
+      width = width + left;
+      left = 0;
+    };
+    if (clipLeft.notNil and: { left < clipLeft }) {
+      width = width - (clipLeft - left);
+      left = clipLeft;
+    };
+
+    if ((height > 30) and: (width > 15)) {
+      argsValue.pairsDo { |key, val, i|
+        var line = "" ++ key ++ ":  " ++ val.value;
+        while { max(0, width - 5) < (QtGUI.stringBounds(line, font).width) } {
+          if (line.size == 1) {
+            line = "";
+          } {
+            line = line[0..line.size-2];
+          };
+        };
+        strTop = 22 + (i * 6);
+        if (strTop < height) {
+          Pen.stringAtPoint(line, (left+3.5)@(top + strTop), font, Color.gray(1.0, 0.55));
+        };
+      };
     };
     ^defName.value.asString ++ ": Synth";
   }
