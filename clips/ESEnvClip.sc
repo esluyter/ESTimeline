@@ -1,7 +1,7 @@
 ESEnvClip : ESClip {
   var <env, <bus, <>target, <>addAction, <min, <max, <>curve, <>isExponential, <makeBus = false, <makeBusRate, <useLiveInput, <>liveInput, <>ccNum, <armed, <>midiChannel;
   var <synth, envPlayRout;
-  var <recordedLevels, <recordedTimes, <oscFunc, <recordedOffset;
+  var <recordedLevels, <recordedTimes, <oscFunc, <recordedOffset, <midiFunc;
 
   //classvar <buses;  // event format name -> [bus, nClips] -- when nClips becomes 0 bus should be freed.
 
@@ -81,9 +81,7 @@ ESEnvClip : ESClip {
         [\kr, \ar].do { |rate|
           [\curve, \exp].do { |type|
             SynthDef(('ESEnvClip_' ++ rate ++ '_' ++ type ++ '_mouseX').asSymbol, { |out, gate = 1, tempo = 1, min = 0, max = 1, id|
-              //var env = \env.kr(Env.newClear(n).asArray);
               var index = Sweep.perform(rate, 0, tempo);
-              //var sig = IEnvGen.perform(rate, env/*Env.fromArray(env)*/, index);
               var sig = MouseX.kr;
               SendReply.kr(Impulse.kr(20), "/mouse", [index, sig], id);
               if (rate == \ar) {
@@ -102,14 +100,32 @@ ESEnvClip : ESClip {
               Out.perform(rate, out, sig);
             }).add;
             SynthDef(('ESEnvClip_' ++ rate ++ '_' ++ type ++ '_mouseY').asSymbol, { |out, gate = 1, tempo = 1, min = 0, max = 1, id|
-              //var env = \env.kr(Env.newClear(n).asArray);
               var index = Sweep.perform(rate, 0, tempo);
-              //var sig = IEnvGen.perform(rate, env/*Env.fromArray(env)*/, index);
               var sig = MouseY.kr;
               SendReply.kr(Impulse.kr(20), "/mouse", [index, sig], id);
               if (rate == \ar) {
                 sig = K2A.ar(sig);
               };
+
+              switch (type)
+              {\curve} {
+                sig = sig.lincurve(0, 1, min, max, \curve.kr(0));
+              }
+              {\exp} {
+                sig = sig.linexp(0, 1, min, max);
+              };
+              FreeSelf.kr(gate <= 0);
+
+              Out.perform(rate, out, sig);
+            }).add;
+            SynthDef(('ESEnvClip_' ++ rate ++ '_' ++ type ++ '_midi').asSymbol, { |out, gate = 1, tempo = 1, min = 0, max = 1, val|
+              var sig = val;
+
+              if (rate == \ar) {
+                sig = K2A.ar(sig);
+              };
+
+              sig = Lag2.perform(rate, sig, 0.1);
 
               switch (type)
               {\curve} {
@@ -207,7 +223,7 @@ ESEnvClip : ESClip {
   prStop {
     if (envPlayRout.notNil) { envPlayRout.stop; envPlayRout = nil; };
     Server.default.bind { synth.release };
-    synth = nil;
+    { Server.default.latency.wait; synth = nil; midiFunc.free; midiFunc = nil; }.fork(SystemClock);
 
     if (useLiveInput and: armed) {
       if (liveInput < 2) { // mouse input
@@ -307,7 +323,25 @@ ESEnvClip : ESClip {
             }, "/mouse");
           };
         } { // midi input
-          "MIDI input not yet implemented".warn;
+          var chan = if (midiChannel == 16) { nil } { midiChannel };
+
+          defName = (defName ++ "midi").asSymbol;
+          Server.default.bind {
+            // TODO: how to get the last input value, if it exists
+            // this might require a dedicated midi listening class :(
+            synth = Synth(defName, [out: bus.value, min: min, max: max, curve: curve], target.value, addAction.value);
+          };
+
+          {
+            Server.default.latency.wait;
+            switch (liveInput)
+            { 2 } { // cc
+              midiFunc = MIDIFunc.cc({ |val|
+                synth.set(\val, val.linlin(0, 127, 0.0, 1.0))
+              }, ccNum, chan);
+            }
+            { "This MIDI input not yet implemented".warn; };
+          }.fork(SystemClock);
         };
       };
     };
