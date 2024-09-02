@@ -628,6 +628,8 @@ ESTimeline {
     var track = tracks.at(index);
     var mc, mcName = track.mixerChannelName, hasSameMcName = false;
 
+    if (tracks.size <= 1) { ^false };
+
     tracks.removeAt(index);
 
     track.removeDependant(dependantFunc);
