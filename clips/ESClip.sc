@@ -3,11 +3,16 @@ ESClip {
   var <>track;
   var <isPlaying = false;
   var playRout;
+  var <drawClip; // handles drawing on TimelineView
 
   storeArgs { ^[startTime, duration, offset, color, name, comment, mute] }
 
   *new { |startTime, duration, offset = 0, color, name, comment = "", mute = false|
-    ^super.newCopyArgs(startTime, duration, offset, color, name, comment, mute);
+    ^super.newCopyArgs(startTime, duration, offset, color, name, comment, mute).makeDrawClip;
+  }
+
+  makeDrawClip {
+    drawClip = this.drawClass.new(this);
   }
 
   mute_ { |val| mute = val; this.changed(\mute, val) }
@@ -54,9 +59,6 @@ ESClip {
     this.changed(\comment, val);
   }
 
-  prep {}
-  cleanup {}
-
   stop { |hard = false|
     // stop the clip
     this.prStop(hard);
@@ -93,68 +95,6 @@ ESClip {
     };
   }
 
-  // draw this clip on a UserView using Pen
-  draw { |left, top, width, height, editingMode = false, clipLeft, clipWidth, selected = false, drawBorder = true| // these last two are for ESTimelineClips
-    var font = Font("Helvetica", 14, true);
-
-    if (track.shouldPlay) {
-      Pen.color = this.color(selected, editingMode).alpha_(if (mute) { if (selected) { 0 } { 0.1 } } { 1.0 });
-    } {
-      Pen.color = Color.white.lighten(this.color(selected, editingMode), 0.5).alpha_(if (mute) { if (selected) { 0 } { 0.2 } } { 1.0 });
-    };
-    Pen.strokeColor = Color.cyan;
-    Pen.width = 2;
-    Pen.addRect(Rect(left, top, width, height));
-    if (selected and: drawBorder) { Pen.fillStroke } { Pen.fill };
-
-    if (mute) {
-      var title = ESStringShortener.trim(this.prTitle, width - 3.5, font);
-      Pen.stringAtPoint(title, (left + 3.5)@(top + 2), font, this.color.alpha_(0.3));
-    } {
-      if (editingMode and: this.hasEditingMode) {
-        Pen.addRect(Rect(left, top, width, height));
-        Pen.strokeColor = Color.white;
-        Pen.width = 3;
-        Pen.stroke;
-      };
-
-      Pen.color = Color.gray(0.8, 0.5);
-      Pen.addRect(Rect(left + width - 1, top, 1, height));
-      Pen.fill;
-
-      // if it's more than 5 pixels wide and high, call the prDraw function
-      if ((width > 5) and: (height > 10)) {
-        var title;
-        try {
-          if (track.timeline.useEnvir) {
-            track.timeline.envir.use {
-              ~thisTimeline = this.track.timeline;
-              title = this.prDraw(left, top, width, height, editingMode, clipLeft, clipWidth, selected, drawBorder);
-            }
-          } {
-            ~thisTimeline = this.track.timeline;
-            title = this.prDraw(left, top, width, height, editingMode, clipLeft, clipWidth, selected, drawBorder);
-          };
-        } {
-          title = ""
-        };
-
-        if (name.notNil and: (this.class != ESClip)) { title = name.asCompileString ++ " (" ++ title ++ ")" };
-
-        if (left < 0) {
-          width = width + left;
-          left = 0;
-        };
-        if (clipLeft.notNil and: { left < clipLeft }) {
-          width = width - (clipLeft - left);
-          left = clipLeft;
-        };
-        title = ESStringShortener.trim(title, width - 3.5, font);
-        Pen.stringAtPoint(title, (left + 3.5)@(top + 2), font, Color.gray(1, 0.6));
-      };
-    };
-  }
-
   free {
     this.cleanup;
     this.prFree;
@@ -162,36 +102,18 @@ ESClip {
   }
 
   // override these in subclasses
+  prep {}
+  cleanup {}
   prFree { }
   prStart { }
   prStop { }
-  prDraw { |left, top, width, height|
-    // default clip is a comment clip
-    var lines = comment.split($\n);
-    var font = Font.sansSerif(14);
-    var strTop;
-    if (left < 0) {
-      width = width + left;
-      left = 0;
-    };
-    lines = [if (name.isNil) { "" } { name.asString }] ++ lines;
-    lines.do { |line, i|
-      var thisFont = if (i > 0) { font } { font.copy.size_(17) };
-      line = ESStringShortener.trim(line, width - 5, thisFont);
-      strTop = (2+(i * 16));
-      if (strTop < height) {
-        Pen.stringAtPoint(line, (left+3.5)@(strTop + top), thisFont, Color.gray(0.0, 0.7));
-      };
-    };
-    Pen.color = Color.gray(0.7);
-    Pen.addRect(left, top, width, height);
-    Pen.stroke;
-    ^this.prTitle;
-  }
   prTitle { ^"" }
   prHasOffset { ^false } // whether to show offset parameter for editing
   prTempoChanged { |tempo| } // so far this is just so env clips follow tempo changes
   defaultColor { ^Color.gray(1); }
+  guiClass { ^ESClipEditView }
+  drawClass { ^ESDrawClip }
+  hasEditingMode { ^false }
 
   // helper methods
   endTime { ^startTime + duration }
@@ -226,12 +148,4 @@ ESClip {
     ^track.clips.indexOf(this);
   }
 
-  guiClass { ^ESClipEditView }
-
-  prHover { |x, y, hoverTime, left, top, width, height| }
-  prHoverLeave {}
-  prMouseMove { |x, y, xDelta, yDelta, mods, left, top, width, height| }
-  prMouseDown { |x, y, mods, buttNum, clickCount, left, top, width, height| }
-
-  hasEditingMode { ^false }
 }
