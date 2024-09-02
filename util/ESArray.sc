@@ -83,3 +83,9 @@
     ^[$(, this.class, this.storeArgs.collect(_.asESArray), $)].flatIf(_.isString.not);
   }
 }
+
++ Env { // this is necessary because string length is limited to 8189 characters?
+  asESArray {
+    ^[$(, this.class, this.storeArgs.collect(_.asESArray), $)].flatIf(_.isString.not);
+  }
+}

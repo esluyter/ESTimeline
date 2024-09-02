@@ -1,6 +1,6 @@
 ESEnvClip : ESClip {
   var <env, <bus, <>target, <>addAction, <min, <max, <>curve, <>isExponential, <makeBus = false, <>makeBusRate, <useLiveInput, <>liveInput, <>ccNum, <armed;
-  var <synth;
+  var <synth, envPlayRout;
   var <recordedLevels, <recordedTimes, <oscFunc, <recordedOffset;
 
   //classvar <buses;  // event format name -> [bus, nClips] -- when nClips becomes 0 bus should be freed.
@@ -52,11 +52,9 @@ ESEnvClip : ESClip {
           [\kr, \ar].do { |rate|
             [\curve, \exp].do { |type|
               SynthDef(('ESEnvClip_' ++ rate ++ '_' ++ type ++ '_' ++ n).asSymbol, { |out, gate = 1, tempo = 1, min = 0, max = 1|
-                //var env = \env.kr(Env(0.dup(n), 1.dup(n - 1), 0.dup(n - 1)));
                 var env = \env.kr(Env.newClear(n).asArray);
                 var index = Sweep.perform(rate, 0, tempo);
-                var sig = IEnvGen.perform(rate, env/*Env.fromArray(env)*/, index);
-                //var sig = EnvGen.perform(rate, env, timeScale: tempo.reciprocal);
+                var sig = IEnvGen.perform(rate, env, index);
 
                 switch (type)
                 {\curve} {
@@ -67,7 +65,7 @@ ESEnvClip : ESClip {
                 };
                 FreeSelf.kr(gate <= 0);
 
-                Out.perform(rate, out, sig);
+                ReplaceOut.perform(rate, out, sig);
               }).add;
               0.1.wait;
             };
@@ -199,6 +197,7 @@ ESEnvClip : ESClip {
   }
 
   prStop {
+    if (envPlayRout.notNil) { envPlayRout.stop; envPlayRout = nil; };
     Server.default.bind { synth.release };
     synth = nil;
 
@@ -225,11 +224,8 @@ ESEnvClip : ESClip {
   prStart { |startOffset = 0.0, clock|
     if (useLiveInput.not) {
       var thisEnv = this.envToPlay(startOffset, true);
+      /*
       var size = thisEnv.levels.size.nextPowerOfTwo;
-      /*if (size > 8190) {
-      "Envelope can have max 8190 points. Please adjust.".warn;
-      size = 8190;
-      };*/
       if (size > 512) {
         "WARNING: Envelope can have max 512 points. Please adjust.".postln;
         size = 512;
@@ -240,6 +236,54 @@ ESEnvClip : ESClip {
         Server.default.bind {
           synth = Synth(defName, [env: thisEnv.asArrayForInterpolation.collect(_.reference).unbubble, out: bus.value, tempo: clock.tempo, min: min, max: max, curve: curve], target.value, addAction.value);
         };
+      };
+      */
+      if (bus.value.notNil) {
+        var defName = if (this.rate == 'control') { 'ESEnvClip_kr' } { 'ESEnvClip_ar' } ++ if (this.isExponential) { "_exp_" } { "_curve_" };
+        var envs = [];
+        var levels = thisEnv.levels;
+        var times = thisEnv.times;
+        var curves = thisEnv.curves;
+        if (curves.isArray.not) { curves = curves.dup(times.size) };
+        while { levels.size > 512 } {
+          var thisLevels = levels[0..511];
+          var thisTimes = times[0..510];
+          var thisCurves = curves[0..510];
+          levels = levels[511..];
+          times = times[511..];
+          curves = curves[511..];
+          envs = envs.add(Env(thisLevels, thisTimes, thisCurves));
+        };
+        envs = envs.add(Env(levels, times, curves));
+
+        //defName = (defName ++ 2).asSymbol;
+        envPlayRout = {
+          envs.do { |e|
+            var size = e.levels.size.nextPowerOfTwo;
+            var time = e.duration;
+            if (size > 512) {
+              ("ERROR: Envelope should have max 512 points. This envelope needs " ++ size) .error;
+            };
+            Server.default.bind {
+              synth.release;
+              synth = Synth((defName ++ size).asSymbol, [env: e.asArrayForInterpolation.collect(_.reference).unbubble, out: bus.value, tempo: clock.tempo, min: min, max: max, curve: curve], target.value, addAction.value);
+            };
+            time.wait;
+          };
+          /*
+          thisEnv.times.do { |time, i|
+            if (time > 0) {
+              var levels = thisEnv.levels[i..i+1];
+              var curves = if (thisEnv.curves.isArray) { thisEnv.curves[i] } { thisEnv.curves };
+              Server.default.bind {
+                synth.release;
+                synth = Synth(defName, [env: Env(levels, [time], curves).asArrayForInterpolation.collect(_.reference).unbubble, out: bus.value, tempo: clock.tempo, min: min, max: max, curve: curve], target.value, addAction.value);
+              };
+              time.wait;
+            };
+          };
+          */
+        }.fork(clock);
       };
     } { // useLiveInput
       if (bus.value.notNil) {
