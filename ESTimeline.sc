@@ -1,5 +1,5 @@
 ESTimeline {
-  var <tracks, <tempo, <>prepFunc, <>cleanupFunc, <>bootOnPrep, <>useEnvir, <>optimizeView, <gridDivision, <snapToGrid;
+  var <tracks, <tempo, <>prepFunc, <>cleanupFunc, <>bootOnPrep, <>useEnvir, <>optimizeView, <gridDivision, <snapToGrid, <useMixerChannel;
   var <isPlaying = false;
   var <playbar = 0.0;
   var playBeats, playStartTime, <playClock;
@@ -9,6 +9,7 @@ ESTimeline {
   var <>parentClip;
   var clock; // this specifically refers to the internal clock to this specific timeline
   var <buses;
+  var <mixerChannels;
 
   //tempo { ^clock.tempo; }
   tempo_ { |val|
@@ -29,15 +30,19 @@ ESTimeline {
     this.init;
     this.changed(\tracks);
   }
+  useMixerChannel_ { |val|
+    useMixerChannel = val;
+    this.changed(\useMixerChannel);
+  }
 
-  storeArgs { ^[tracks, this.tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid] }
-  defaultUndoPoint { ^[[ESTrack([])], 1, nil, nil, bootOnPrep, useEnvir, optimizeView, 4, false].asESArray }
+  storeArgs { ^[tracks, this.tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel] }
+  defaultUndoPoint { ^[[ESTrack([])], 1, nil, nil, bootOnPrep, useEnvir, optimizeView, 4, false, useMixerChannel].asESArray }
 
-  *new { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = false, gridDivision = 4, snapToGrid = false|
+  *new { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = false, gridDivision = 4, snapToGrid = false, useMixerChannel = true|
     //var clock = TempoClock(tempo).permanent_(true);
 
     tracks = tracks ?? [ESTrack()];
-    ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid).initEnvir.initDependantFunc.init(true);
+    ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel).initEnvir.initDependantFunc.init(true);
   }
 
   initEnvir {
@@ -45,6 +50,7 @@ ESTimeline {
       ~timeline = this;
     };
     buses = ();
+    mixerChannels = ();
   }
 
   initDependantFunc {

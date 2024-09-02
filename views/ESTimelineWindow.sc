@@ -1,6 +1,6 @@
 ESTimelineWindow : Window {
   var <timeline;
-  var <topPanel, <topPlug, <tempoKnob, <newButt, <saveIDEButt, <loadIDEButt, <undoButt, <redoButt, <funcEditButt, <useParentClockBox, <snapToGridBox, <gridDivisionBox;
+  var <topPanel, <topPlug, <tempoKnob, <newButt, <saveIDEButt, <loadIDEButt, <undoButt, <redoButt, <funcEditButt, <useParentClockBox, <snapToGridBox, <gridDivisionBox, <useMixerChannelBox;
   var <scrollView, <timelineView, <trackPanelView, <rulerView;
   var playheadRout;
 
@@ -10,7 +10,7 @@ ESTimelineWindow : Window {
   }
 
   init { |argTimeline|
-    var leftPanelWidth = 80;
+    var leftPanelWidth = 105;
     var rightPanelWidth = this.bounds.width - leftPanelWidth;
 
     timeline = argTimeline;
@@ -24,7 +24,7 @@ ESTimelineWindow : Window {
       Pen.addRect(Rect(view.bounds.width - 1, 0, 1, view.bounds.height));
       Pen.color = Color.gray(0.7);
       Pen.fill;
-    });
+    }).background_(Color.gray(/*0.86*/ 0.83));
 
     tempoKnob = EZKnob(topPanel, Rect(20, 2.5, 110, 35),
       label: "tempoBPM",
@@ -40,28 +40,29 @@ ESTimelineWindow : Window {
     funcEditButt = Button(this, Rect(160, 5, 150, 30)).states_([["Prep / Cleanup funcs"]]).action_({ ESFuncEditView(timeline); timelineView.focus });
 
 
-    newButt = Button(this, Rect(350, 5, 65, 30)).states_([["New"]]).action_({ timelineView.timelineController.new });
+    newButt = Button(this, Rect(350, 5, 60, 30)).states_([["New"]]).action_({ timelineView.timelineController.new });
 
-    saveIDEButt = Button(this, Rect(420, 5, 100, 30)).states_([["Save As"]]).action_({
+    saveIDEButt = Button(this, Rect(415, 5, 80, 30)).states_([["Save As"]]).action_({
       timelineView.timelineController.saveAsDialog;
       timelineView.focus;
     });
-    loadIDEButt = Button(this, Rect(525, 5, 100, 30)).states_([["Open"]]).action_({
+    loadIDEButt = Button(this, Rect(500, 5, 65, 30)).states_([["Open"]]).action_({
       timelineView.timelineController.openDialog;
       timelineView.focus;
     });
 
-    undoButt = Button(this, Rect(665, 5, 70, 30)).states_([["Undo"]]).action_({ timeline.undo; timelineView.focus; });
-    redoButt = Button(this, Rect(740, 5, 70, 30)).states_([["Redo"]]).action_({ timeline.redo; timelineView.focus; });
+    //665
+    undoButt = Button(this, Rect(605, 5, 70, 30)).states_([["Undo"]]).action_({ timeline.undo; timelineView.focus; });
+    redoButt = Button(this, Rect(680, 5, 70, 30)).states_([["Redo"]]).action_({ timeline.redo; timelineView.focus; });
 
     if (timeline.parentClip.notNil) {
-      useParentClockBox = CheckBox(this, Rect(855, 10, 20, 20)).value_(timeline.parentClip.useParentClock).action_({ |view|
+      useParentClockBox = CheckBox(this, Rect(795, 10, 20, 20)).value_(timeline.parentClip.useParentClock).action_({ |view|
         timeline.parentClip.useParentClock = view.value;
         timelineView.focus;
       });
-      StaticText(this, Rect(875, 10, 120, 20)).string_("useParentClock").font_(Font.sansSerif(16));
+      StaticText(this, Rect(815, 10, 120, 20)).string_("useParentClock").font_(Font.sansSerif(16));
     } {  //925
-      Button(this, Rect(855, 5, 200, 30)).states_([["Open as clip in new timeline"]]).action_({
+      Button(this, Rect(795, 5, 200, 30)).states_([["Open as clip in new timeline"]]).action_({
         //ESTimelineWindow(bounds: this.bounds, timeline: ESTimeline([ESTrack([ESTimelineClip(0, if (timeline.duration == 0) { 10 } { timeline.duration }, timeline)])], timeline.tempo));
         //this.close;
         timeline.encapsulateSelf;
@@ -69,15 +70,21 @@ ESTimelineWindow : Window {
       })
     };
 
-    snapToGridBox = CheckBox(this, Rect(1080, 10, 20, 20)).value_(timeline.snapToGrid).action_({ |view|
+    snapToGridBox = CheckBox(this, Rect(1020, 10, 20, 20)).value_(timeline.snapToGrid).action_({ |view|
       timeline.snapToGrid = view.value;
       timelineView.focus;
     });
-    StaticText(this, Rect(1100, 10, 120, 20)).string_("snapToGrid:  1 / ").font_(Font.sansSerif(16));
-    gridDivisionBox = NumberBox(this, Rect(1220, 10, 70, 20)).value_(timeline.gridDivision).action_({ |view|
+    StaticText(this, Rect(1040, 10, 120, 20)).string_("snapToGrid:  1 / ").font_(Font.sansSerif(16));
+    gridDivisionBox = NumberBox(this, Rect(1160, 10, 70, 20)).value_(timeline.gridDivision).action_({ |view|
       timeline.gridDivision = view.value;
       timelineView.focus;
     }).clipLo_(1).decimals_(0);
+
+    StaticText(this, Rect(1290, 10, 140, 20)).string_("useMixerChannel").font_(Font.sansSerif(16));
+    useMixerChannelBox = CheckBox(this, Rect(1270, 10, 20, 20)).value_(timeline.useMixerChannel).action_({ |view|
+      timeline.useMixerChannel = view.value;
+      timelineView.focus;
+    });
 
     //Button(this, Rect(1200, 5, 100, 30)).states_([["Load legacy"]]).action_({timeline.restoreUndoPoint(Document.current.string, false, true); timelineView.focus;});
 
@@ -166,7 +173,7 @@ ESTimelineWindow : Window {
             };
           };
 
-          if ((args[2] == \mute) or: (args[2] == \solo)) {
+          if ((args[2] == \mute) or: (args[2] == \solo) or: (args[2] == \name) or: (args[2] == \useMixerChannel)) {
             trackPanelView.refresh;
             timelineView.refresh;
           } {
@@ -174,6 +181,9 @@ ESTimelineWindow : Window {
             timelineView.trackViews[args[0]].refresh;
             //~window.timelineView.trackViews[]
           };
+        }
+        { \useMixerChannel } {
+          trackPanelView.refresh;
         }
         { \tracks } {
           //{

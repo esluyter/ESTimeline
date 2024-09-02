@@ -1,15 +1,15 @@
 ESTrack {
-  var <clips, <mute, <solo = false;
+  var <clips, <mute, <name, <useMixerChannel, <solo = false;
   var <>timeline;
   var <isPlaying = false;
   var playRout;
   var dependantFunc;
 
-  storeArgs { ^[clips, mute] }
+  storeArgs { ^[clips, mute, name, useMixerChannel] }
 
-  *new { |clips, mute = false|
+  *new { |clips, mute = false, name, useMixerChannel = true|
     clips = clips ?? [];
-    ^super.newCopyArgs(clips, mute).init;
+    ^super.newCopyArgs(clips, mute, name, useMixerChannel).init;
   }
 
   init {
@@ -113,6 +113,15 @@ ESTrack {
     this.release;
   }
 
+  displayName {
+    ^if (name.isNil) { this.index.asSymbol } { name.asSymbol };
+  }
+
+  name_ { |val|
+    name = val;
+    this.changed(\name);
+  }
+
   mute_ { |val|
     mute = val;
     this.changed(\mute);
@@ -121,6 +130,11 @@ ESTrack {
   solo_ { |val|
     solo = val;
     this.changed(\solo);
+  }
+
+  useMixerChannel_ { |val|
+    useMixerChannel = val;
+    this.changed(\useMixerChannel)
   }
 
   shouldPlay {
