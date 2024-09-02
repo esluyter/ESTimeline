@@ -2,6 +2,7 @@ ESTimelineWindow : Window {
   var <timeline;
   var <topPanel, <topPlug, <tempoKnob, <newButt, <saveIDEButt, <loadIDEButt, <undoButt, <redoButt, <funcEditButt, <useParentClockBox, <snapToGridBox, <gridDivisionBox, <useMixerChannelBox, <newTimelineClipButt;
   var <scrollView, <timelineView, <trackPanelView, <rulerView;
+  var <mixerWindow;
   var playheadRout;
 
   *new { |name = "Timeline", bounds, timeline|
@@ -127,9 +128,13 @@ ESTimelineWindow : Window {
     };
 
     this.view.minHeight_(100);
-    this.onClose_({ timelineView.release; });
+    this.onClose_({ timelineView.release; if (mixerWindow.notNil) { mixerWindow.close }; });
     this.makeDependant;
     this.makeViewDependant;
+
+    if (timeline.useMixerChannel) {
+      mixerWindow = ESMixerWindow(timeline, this);
+    };
   }
 
   makeDependant {
@@ -213,6 +218,10 @@ ESTimelineWindow : Window {
           }
           { \useMixerChannel } {
             trackPanelView.refresh;
+            if (mixerWindow.notNil) { mixerWindow.close };
+            if (timeline.useMixerChannel) {
+              mixerWindow = ESMixerWindow(timeline, this);
+            };
           }
           { \initMixerChannels } {
             //if (mixer.notNil) { mixer.close };

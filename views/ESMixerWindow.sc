@@ -690,4 +690,8 @@ ESMixerWindow {
       };
     //}; // end try
   }
+
+  close {
+    window.close;
+  }
 }
