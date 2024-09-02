@@ -267,14 +267,14 @@ ESTimelineController {
       var func = { |obj, what|
         if (what == \restoreUndoPoint) {
           timelineView.startTime = -2;
-          timelineView.duration = timeline.duration.postln + 5;
+          timelineView.duration = timeline.duration + 5;
           timeline.removeDependant(func);
         };
       };
 
+      timeline.addDependant(func);
       timeline.restoreUndoPoint(File.readAllString(path).interpret);
       //timeline.restoreUndoPoint(Document.current.string.interpret);
-      timeline.addDependant(func);
       lastPath = path;
     }, path: lastPath);
   }

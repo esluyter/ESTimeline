@@ -632,6 +632,7 @@ ESTimelineView : UserView {
               Pen.addRect(Rect(left, top + trackHeight, 2, trackHeights[i] - trackHeight));
               Pen.fill;
             };
+
             if (timeline.now > clip.endTime) {
               // "scheduling playhead" in gray
               Pen.color = Color.gray(0.5, 0.5);
@@ -655,7 +656,7 @@ ESTimelineView : UserView {
             };
           };
 
-          top = top + trackHeights[i];
+          top = top + (trackHeights[i] ?? 0); // for some reason this happens sometimes
         };
       });
       dragView = View(this, Rect(0, 0, 2, trackHeight)).visible_(false).background_(Color.red).acceptsMouse_(false);
