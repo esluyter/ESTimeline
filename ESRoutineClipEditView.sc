@@ -1,7 +1,7 @@
 ESRoutineClipEditView : ESClipEditView {
   *new { |clip, timeline|
     var panelFont = Font("Helvetica", 16);
-    var funcButton, cleanupFuncButton, funcView, cleanupFuncView, sidePanel, nameField, startTimeView, durationView, offsetView, colorView, randSeedField, isSeededBox, addLatencyBox, fastForwardMenu;
+    var funcButton, stopFuncButton, funcView, stopFuncView, sidePanel, nameField, startTimeView, durationView, offsetView, colorView, randSeedField, isSeededBox, addLatencyBox, fastForwardMenu;
 
     if (editorWindow.notNil) { editorWindow.close };
     editorWindow = Window("Routine Clip Editor", Rect(0, 0, 1000, 600))
@@ -13,26 +13,26 @@ ESRoutineClipEditView : ESClipEditView {
       [["func", Color.gray(0.3), Color.gray(0.7)],
         ["func", Color.black, Color.white]])
     .value_(1).action_({
-      funcButton.value_(1); cleanupFuncButton.value_(0);
-      funcView.visible_(true); cleanupFuncView.visible_(false); })
+      funcButton.value_(1); stopFuncButton.value_(0);
+      funcView.visible_(true); stopFuncView.visible_(false); })
     .font_(panelFont)
     .focusColor_(Color.clear);
 
-    cleanupFuncButton = Button(editorWindow, Rect(670, 0, 120, 30)).states_(
-      [["cleanupFunc", Color.gray(0.3), Color.gray(0.7)],
-        ["cleanupFunc", Color.black, Color.white]])
+    stopFuncButton = Button(editorWindow, Rect(670, 0, 120, 30)).states_(
+      [["stopFunc", Color.gray(0.3), Color.gray(0.7)],
+        ["stopFunc", Color.black, Color.white]])
     .value_(0).action_({
-      funcButton.value_(0); cleanupFuncButton.value_(1);
-      funcView.visible_(false); cleanupFuncView.visible_(true); })
+      funcButton.value_(0); stopFuncButton.value_(1);
+      funcView.visible_(false); stopFuncView.visible_(true); })
     .font_(panelFont)
     .focusColor_(Color.clear);
 
     funcView = CodeView(editorWindow, Rect(0, 30, 800, 570)).font_(Font.monospace(16)).string_(clip.func.asESDisplayString);
-    cleanupFuncView = CodeView(editorWindow, Rect(0, 30, 800, 570)).font_(Font.monospace(16)).string_(clip.cleanupFunc.asESDisplayString).visible_(false);
+    stopFuncView = CodeView(editorWindow, Rect(0, 30, 800, 570)).font_(Font.monospace(16)).string_(clip.stopFunc.asESDisplayString).visible_(false);
 
     if (timeline.useEnvir) {
       funcView.interpretEnvir_(timeline.envir);
-      cleanupFuncView.interpretEnvir_(timeline.envir);
+      stopFuncView.interpretEnvir_(timeline.envir);
     };
 
     sidePanel = View(editorWindow, Rect(810, 10, 180, 570));
@@ -87,7 +87,7 @@ ESRoutineClipEditView : ESClipEditView {
       if (funcView.visible) {
         Document.new("Edit Routine Clip Func", funcView.string).promptToSave_(false).front;
       } {
-        Document.new("Edit Routine Clip Cleanup Func", cleanupFuncView.string).promptToSave_(false).front;
+        Document.new("Edit Routine Clip Cleanup Func", stopFuncView.string).promptToSave_(false).front;
       };
     });
     Button(sidePanel, Rect(0, 460, 180, 25)).string_("Copy from IDE").action_({
@@ -95,7 +95,7 @@ ESRoutineClipEditView : ESClipEditView {
       if (funcView.visible) {
         funcView.string_(Document.current.string);
       } {
-        cleanupFuncView.string_(Document.current.string);
+        stopFuncView.string_(Document.current.string);
       }
     });
 
@@ -103,7 +103,7 @@ ESRoutineClipEditView : ESClipEditView {
     Button(sidePanel, Rect(0, 540, 180, 30)).string_("Save").font_(panelFont.copy.size_(14)).action_({
       clip.name = nameField.string.asSymbol;
       clip.func = ("{" ++ funcView.string ++ "}").interpret;
-      clip.cleanupFunc = ("{" ++ cleanupFuncView.string ++ "}").interpret;
+      clip.stopFunc = ("{" ++ stopFuncView.string ++ "}").interpret;
       clip.randSeed = randSeedField.string.asInteger;
       clip.isSeeded = isSeededBox.value;
       clip.addLatency = addLatencyBox.value;
