@@ -118,7 +118,7 @@ ESSynthClip : ESClip {
       ^cs[1..cs.size-2];
     };
     if (args.asArray.size == 0) {
-      ^"[]";
+      ^"[\n  \n]";
     };
     //^args.asArray.asCompileString;
     str = "[\n";

@@ -1,9 +1,9 @@
 ESTimelineView : UserView {
   var <timeline;
-  var <trackViews, <playheadView, playheadRout;
+  var <trackViews, <playheadView;
   var <dragView, <leftGuideView, <rightGuideView;
   var <startTime, <duration;
-  var <trackHeight;
+  var <trackHeight, <heightRatio = 1;
   var clickPoint, clickTime, scrolling = false, originalDuration;
   var hoverClip, hoverCode, hoverClipStartTime, hoverClipOffset;
   var hoverTime = 0, hoverTrack = 0, hoverClipIndex = 0;
@@ -253,16 +253,14 @@ ESTimelineView : UserView {
         timeline.addUndoPoint;
       };
     });
-
-    // call update method on changed
-    timeline.addDependant(this);
-    this.onClose = { timeline.removeDependant(this) };
   }
 
   makeTrackViews {
     // call this when number of tracks changes
     var width = this.bounds.width;
     var height = this.bounds.height;
+
+    heightRatio = height / this.parent.bounds.height;
 
     trackViews.do(_.remove);
     trackHeight = height / timeline.tracks.size;
@@ -297,28 +295,6 @@ ESTimelineView : UserView {
     rightGuideView = View(this, Rect(0, 0, 1, height)).visible_(false).background_(Color.gray(0.6)).acceptsMouse_(false);
 
     this.changed(\makeTrackViews);
-  }
-
-  // called when the timeline is changed
-  update { |argtimeline, what, value|
-    if (what == \isPlaying) {
-      if (value) {
-        var waitTime = 30.reciprocal; // 30 fps
-        playheadRout.stop; // just to make sure
-        playheadRout = {
-          inf.do { |i|
-            playheadView.refresh;
-            if (timeline.optimizeView.not) {
-              this.refresh;
-            };
-            waitTime.wait;
-          };
-        }.fork(AppClock) // lower priority clock for GUI updates
-      } {
-        playheadRout.stop;
-        playheadView.refresh;
-      };
-    };
   }
 
   clipAtPoint { |point|
