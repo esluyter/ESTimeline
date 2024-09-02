@@ -232,6 +232,16 @@ ESTimeline {
     }
   }
 
+  mixerChannel { |name|
+    if (mixerChannels[name].notNil) {
+      ^mixerChannels[name];
+    };
+    if (parentClip.notNil) {
+      ^parentClip.track.timeline.mixerChannel(name);
+    };
+    ^nil;
+  }
+
   initDependantFunc {
     dependantFunc = { |theTrack, what, value|
       this.changed(\track, [tracks.indexOf(theTrack), theTrack, what, value].flat);
