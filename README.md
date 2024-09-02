@@ -209,10 +209,7 @@ SynthDef(\sin, { |out, freq = 440, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
   - option-click to remove them
   - to adjust the envelope range, right click, clip actions > env actions > "set env range keeping breakpoint values"
     - now you can change the frequency range of the envelope, say min `100` max `5000`
-    - ok to save changes -- this will keep your values intact so long as they fall within the new range
-
-<img src="img/tutorial/7.png" />
-    
+    - ok to save changes -- this will keep your values intact so long as they fall within the new range    
 - hit cmd-e again to leave envelope breakpoint editor mode
 
 ### Bulk edit Synths -- To make this envelope affect all your Synths:
@@ -225,6 +222,9 @@ SynthDef(\sin, { |out, freq = 440, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
 - double click to deselect all clips, then:
 - drag the edges of the envelope clip to resize it, so that it covers the entire range of your Synth clips
 - cmd-e to edit the breakpoints again
+
+<img src="img/tutorial/7.png" />
+
 - you should hear it is now controlling all the synths' pitches
 - make sure you've left breakpoint edit mode when you want to move clips around
 
