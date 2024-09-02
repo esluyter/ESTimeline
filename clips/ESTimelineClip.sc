@@ -64,12 +64,13 @@ ESTimelineClip : ESClip {
     playRout = {
       // start the clip from specified start offset
       this.prStart(startOffset, clock);
-
+      /*
       // wait the appropriate time, then stop if there hasn't been a goto
       waitTime.wait;
       if (timeline.now.fuzzyEqual((offset + duration), 0.1).asBoolean) {
         this.stop;
       };
+      */
     }.fork(clock);
 
     // make sure clip stops when parent timeline reaches end

@@ -735,19 +735,36 @@ ESTimelineView : UserView {
           var clip = this.clipAtX(track, left)[0];
           if ((clip.class == ESTimelineClip)/* and: { clip.useParentClock.not }*/ and: { timeline.isPlaying }) {
             if (clip.timeline.isPlaying) {
-              var leftOffset = this.absoluteTimeToPixels(clip.startTime + startTime - clip.offset);
-              // sounding playhead in black
-              left = this.absoluteTimeToPixels(clip.timeline.soundingNow) + leftOffset;
-              Pen.addRect(Rect(left, top, 2, trackHeight));
-              Pen.color = Color.black;
-              Pen.fill;
+              var thisStartTime = clip.startTime + startTime;
 
-              // "scheduling playhead" in gray
-              if (clip.timeline.now < (clip.offset + clip.duration)) {
-                Pen.color = Color.gray(0.5, 0.5);
-                left = this.absoluteTimeToPixels(clip.timeline.now) + leftOffset;
-                Pen.addRect(Rect(left, top, 2, trackHeight));
+              var thisTrackHeight = (trackHeight / clip.timeline.tracks.size);
+              clip.timeline.tracks.do { |thisTrack, j|
+                var leftOffset = this.absoluteTimeToPixels(thisStartTime - clip.offset);
+                var soundingNow = clip.timeline.soundingNow;
+                var now = clip.timeline.now;
+
+                thisTrack.currentClips.do { |thisClip|
+                  if (thisClip.class == ESTimelineClip) {
+                    leftOffset = this.absoluteTimeToPixels(thisClip.startTime + thisStartTime - thisClip.offset);
+
+                    soundingNow = thisClip.timeline.soundingNow;
+                    now = thisClip.timeline.now;
+                  };
+                };
+
+                // sounding playhead in black
+                left = this.absoluteTimeToPixels(soundingNow) + leftOffset;
+                Pen.addRect(Rect(left, top + (j * thisTrackHeight), 2, thisTrackHeight));
+                Pen.color = Color.black;
                 Pen.fill;
+
+                // "scheduling playhead" in gray
+                if (clip.timeline.now < (clip.offset + clip.duration)) {
+                  Pen.color = Color.gray(0.5, 0.5);
+                  left = this.absoluteTimeToPixels(now) + leftOffset;
+                  Pen.addRect(Rect(left, top + (j * thisTrackHeight), 2, thisTrackHeight));
+                  Pen.fill;
+                };
               };
 
               // also draw timeline playhead for envelopes
