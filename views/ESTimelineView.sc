@@ -721,6 +721,43 @@ ESTimelineView : UserView {
       .drawFunc_({
         var left = this.absoluteTimeToPixels(timeline.soundingNow);
         var top = timeline.envHeightMultiplier * trackHeight * envOffset;
+        var func = { |clip, thisStartTime, thisTrackHeight, thisTop|
+          thisStartTime = clip.startTime + thisStartTime;
+          thisTrackHeight = (thisTrackHeight / clip.timeline.tracks.size);
+          clip.timeline.tracks.do { |thisTrack, j|
+            var leftOffset = this.absoluteTimeToPixels(thisStartTime - clip.offset);
+            var soundingNow = clip.timeline.soundingNow;
+            var now = clip.timeline.now;
+            var drawn = false;
+
+            thisTrack.currentClips.do { |thisClip|
+              if (thisClip.class == ESTimelineClip) {
+                /*leftOffset = this.absoluteTimeToPixels(thisClip.startTime + thisStartTime - thisClip.offset);
+
+                soundingNow = thisClip.timeline.soundingNow;
+                now = thisClip.timeline.now;*/
+                func.(thisClip, thisStartTime, thisTrackHeight, thisTop + (j * thisTrackHeight));
+                drawn = true;
+              };
+            };
+
+            if (drawn.not) {
+              // sounding playhead in black
+              left = this.absoluteTimeToPixels(soundingNow) + leftOffset;
+              Pen.addRect(Rect(left, thisTop + (j * thisTrackHeight), 2, thisTrackHeight));
+              Pen.color = Color.black;
+              Pen.fill;
+
+              // "scheduling playhead" in gray
+              if (clip.timeline.now < (clip.offset + clip.duration)) {
+                Pen.color = Color.gray(0.5, 0.5);
+                left = this.absoluteTimeToPixels(now) + leftOffset;
+                Pen.addRect(Rect(left, thisTop + (j * thisTrackHeight), 2, thisTrackHeight));
+                Pen.fill;
+              };
+            };
+          };
+        };
 
         // draw playhead for tempo envelope
         Pen.addRect(Rect(left, 0, 2, top));
@@ -735,37 +772,7 @@ ESTimelineView : UserView {
           var clip = this.clipAtX(track, left)[0];
           if ((clip.class == ESTimelineClip)/* and: { clip.useParentClock.not }*/ and: { timeline.isPlaying }) {
             if (clip.timeline.isPlaying) {
-              var thisStartTime = clip.startTime + startTime;
-
-              var thisTrackHeight = (trackHeight / clip.timeline.tracks.size);
-              clip.timeline.tracks.do { |thisTrack, j|
-                var leftOffset = this.absoluteTimeToPixels(thisStartTime - clip.offset);
-                var soundingNow = clip.timeline.soundingNow;
-                var now = clip.timeline.now;
-
-                thisTrack.currentClips.do { |thisClip|
-                  if (thisClip.class == ESTimelineClip) {
-                    leftOffset = this.absoluteTimeToPixels(thisClip.startTime + thisStartTime - thisClip.offset);
-
-                    soundingNow = thisClip.timeline.soundingNow;
-                    now = thisClip.timeline.now;
-                  };
-                };
-
-                // sounding playhead in black
-                left = this.absoluteTimeToPixels(soundingNow) + leftOffset;
-                Pen.addRect(Rect(left, top + (j * thisTrackHeight), 2, thisTrackHeight));
-                Pen.color = Color.black;
-                Pen.fill;
-
-                // "scheduling playhead" in gray
-                if (clip.timeline.now < (clip.offset + clip.duration)) {
-                  Pen.color = Color.gray(0.5, 0.5);
-                  left = this.absoluteTimeToPixels(now) + leftOffset;
-                  Pen.addRect(Rect(left, top + (j * thisTrackHeight), 2, thisTrackHeight));
-                  Pen.fill;
-                };
-              };
+              func.(clip, startTime, trackHeight, top);
 
               // also draw timeline playhead for envelopes
               left = this.absoluteTimeToPixels(timeline.soundingNow);
