@@ -8,6 +8,7 @@ ESTrack {
   storeArgs { ^[clips, mute] }
 
   *new { |clips, mute = false|
+    clips = clips ?? [];
     ^super.newCopyArgs(clips, mute).init;
   }
 
