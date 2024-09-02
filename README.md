@@ -466,14 +466,6 @@ SynthDef(\verb, { |out, verbbus, gate = 1, amp = 1|
 
 <br />
 <br />
-<details>
-  <summary>Out of date screenshots</summary>
-  <img src="img/ss2.png" />
-  <img src="img/sse.png" width="500" />
-  
-  <img src="img/ssee1.png" width="400" /><img src="img/sss1.png" width="400" /><img src="img/rss.png" width="400" /><img src="img/ssep.png" width="400" />
-  <img src="img/fss.png" width="400" />
-</details>
 
 <details>
   <summary>Out of date video demo: Timelines inside of timelines with optionally separate play clocks</summary>
