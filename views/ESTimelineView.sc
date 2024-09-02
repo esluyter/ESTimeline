@@ -498,6 +498,7 @@ ESTimelineView : UserView {
         MenuAction.separator(""),
         MenuAction("Edit Clip (e)", { timelineController.editClip(hoverClip) }),
         MenuAction("Split Clip (s)", { if (hoverClip.notNil) { timelineController.splitClip(hoverClip, hoverTime) } }),
+        MenuAction("Mute/unmute Clip (m)", { timelineController.toggleMuteClips(hoverClip, this.selectedClips) }),
         MenuAction("Delete Clip (⌫)", { if (hoverClip.notNil) { hoverTrack.removeClip(hoverClip.index) } }),
       ).title_("Clip actions"),
       MenuAction.separator(""),
