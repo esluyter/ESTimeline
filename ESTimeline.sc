@@ -77,6 +77,20 @@ ESTimeline {
     mixerChannels = ();
   }
 
+  prFreeMixerChannels { |callback|
+    if (useMixerChannel) {
+      MixerChannelReconstructor.queueDelay = 0.0001;
+
+      MixerChannelReconstructor.queueBundle(Server.default, nil, (func: {
+        mixerChannels.do { |mc|
+          mc.release;
+          mc.free;
+        };
+        callback.value;
+      }));
+    }
+  }
+
   initMixerChannels {
     // already checks if we're usingMixerChannel
     this.prFreeMixerChannels({
@@ -486,20 +500,6 @@ ESTimeline {
     this.clips.do { |clip|
       clip.cleanup;
     };
-  }
-
-  prFreeMixerChannels { |callback|
-    if (useMixerChannel) {
-      MixerChannelReconstructor.queueDelay = 0.0001;
-
-      MixerChannelReconstructor.queueBundle(Server.default, nil, (func: {
-        mixerChannels.do { |mc|
-          mc.release;
-          mc.free;
-        };
-        callback.value;
-      }));
-    }
   }
 
   prFree {
