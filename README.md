@@ -16,6 +16,8 @@ Timelines inside of timelines with optionally separate play clocks:
 - Non-prescriptive: no server architecture is forced on you, possible to disable timeline-specific clock and environment so as to interact with the timeline as part of a larger project; the basic goal is only to "execute this code at this particular time"
 - Comment, Synth, Pattern, Routine, and Env clip types
   - Bulk editing selected clip parameters
+  - Env clips can manage their own bus
+  - Clips can reference other clips in the same timeline, to e.g. apply an Env to a Synth parameter
   - Pattern, Routine, Env, and Timeline clips can "fast forward" to start playing in the middle
     - (there is no way to fast forward a Synth, that I know of....)
   - Pattern and Routine clips can be seeded so random number generation is deterministic
@@ -39,7 +41,6 @@ Timelines inside of timelines with optionally separate play clocks:
   - Clock follow: e.g. sync up with an Ableton timeline or midi show control
 - Track/clips
   - Set default params per track (e.g. pan: -1)
-  - Name clips to access them from other clips - e.g. to set Synth params
   - Reference clips to create clones that all change together
 - Envelopes
   - More live interaction - e.g. map a controller to a bus and record its movements to an envelope
