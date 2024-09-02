@@ -126,54 +126,8 @@ ESMixerChannelEnv {
     curveIndex = nil;
 
     if (mods.isShift) {
-      var thisEnv = env;
       var thisTime = ((x - left) * pratio) + startTime;
-      var thisLevel = thisEnv[thisTime];
-      var levels = [thisEnv.levels[0]];
-      var times = [];
-      var curves = [];
-      var time = 0;
-      var inserted = false;
-
-      var curve;
-      var level;
-      thisEnv.times.do { |timeDiff, i|
-        curve = if (thisEnv.curves.isArray) { thisEnv.curves[i] } { thisEnv.curves };
-        level = thisEnv.levels[i + 1] ?? level;
-        if (inserted.not) {
-          if ((time + timeDiff) > thisTime) {
-            var ratio = (thisTime - time) / timeDiff;
-            levels = levels.add(thisLevel);
-            times = times.add(thisTime - time);
-            if (curve.isNumber) {
-              curves = curves.add(curve * ratio);
-              curves = curves.add(curve * (1 - ratio));
-            } {
-              curves = curves.add(curve);
-              curves = curves.add(curve);
-            };
-            levels = levels.add(level);
-            times = times.add(time + timeDiff - thisTime);
-            inserted = true;
-          } {
-            levels = levels.add(level);
-            times = times.add(timeDiff);
-            curves = curves.add(curve);
-          };
-          time = time + timeDiff;
-        } {
-          levels = levels.add(level);
-          times = times.add(timeDiff);
-          curves = curves.add(curve);
-        }
-      };
-      if (inserted.not) {
-        levels = levels.add(thisLevel);
-        times = times.add(thisTime - time);
-        curves = curves.add(curve);
-      };
-      env = Env(levels, times, curves);
-      template.changed(\env);
+      this.addBreakPoint(thisTime);
     };
 
     if (mods.isAlt and: hoverIndex.notNil) {
@@ -503,5 +457,71 @@ ESMixerChannelEnv {
     synth = nil;
     bus.free;
     bus = nil;
+  }
+
+  addBreakPoint { |thisTime = 0, thisLevel, notify = true, insertTime = 0|
+    var thisEnv = env;
+    var levels = [env.levels[0]];
+    var times = [], curves = [];
+    var time = 0, inserted = false;
+    var curve, level;
+    thisLevel = thisLevel ?? env[thisTime];
+
+    thisEnv.times.do { |timeDiff, i|
+      curve = if (thisEnv.curves.isArray) { thisEnv.curves[i] } { thisEnv.curves };
+      level = thisEnv.levels[i + 1] ?? level;
+      if (inserted.not) {
+        if ((time + timeDiff) > thisTime) {
+          var ratio = (thisTime - time) / timeDiff;
+          levels = levels.add(thisLevel);
+          times = times.add(thisTime - time);
+          if (curve.isNumber) {
+            curves = curves.add(curve * ratio);
+            curves = curves.add(curve * (1 - ratio));
+          } {
+            curves = curves.add(curve);
+            curves = curves.add(curve);
+          };
+          if (insertTime > 0) {
+            levels = levels.add(thisLevel);
+            times = times.add(insertTime);
+            curves = curves.add(0);
+          };
+          levels = levels.add(level);
+          times = times.add(time + timeDiff - thisTime);
+          inserted = true;
+        } {
+          levels = levels.add(level);
+          times = times.add(timeDiff);
+          curves = curves.add(curve);
+        };
+        time = time + timeDiff;
+      } {
+        levels = levels.add(level);
+        times = times.add(timeDiff);
+        curves = curves.add(curve);
+      }
+    };
+    if (inserted.not) {
+      levels = levels.add(thisLevel);
+      times = times.add(thisTime - time);
+      curves = curves.add(curve);
+    };
+    env = Env(levels, times, curves);
+    if (notify) {
+      template.changed(\env);
+    };
+  }
+
+  insertTime { |timeA, timeB|
+    var thisStartTime, thisEndTime, thisDuration;
+    #thisStartTime, thisEndTime = [timeA, timeB].sort;
+    thisDuration = thisEndTime - thisStartTime;
+
+    this.addBreakPoint(thisStartTime, insertTime: thisDuration);
+  }
+
+  deleteTime { |timeA, timeB|
+
   }
 }

@@ -888,10 +888,12 @@ ESTimeline {
 
   insertTime { |timeA, timeB|
     tracks.do(_.insertTime(timeA, timeB));
+    this.envs.do(_.insertTime(timeA, timeB));
   }
 
   deleteTime { |timeA, timeB|
     tracks.do(_.deleteTime(timeA, timeB));
+    this.envs.do(_.deleteTime(timeA, timeB));
   }
 }
 
