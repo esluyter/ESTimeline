@@ -24,7 +24,7 @@ ESTimelineClip : ESClip {
     this.changed(\timeline, [what, val]);
   }
 
-  play { |startOffset = 0.0, clock|
+  play { |startOffset = 0.0, clock, maxDuration = inf|
     clock = timeline.prMakeClock;
 
     // stop if we're playing
@@ -41,7 +41,7 @@ ESTimelineClip : ESClip {
       this.prStart(startOffset, clock);
 
       // wait the appropriate time, then stop
-      (duration - startOffset + (Server.default.latency * clock.tempo)).wait;
+      min(duration - startOffset, maxDuration).wait;
       this.stop;
     }.fork(clock);
   }
@@ -64,6 +64,12 @@ ESTimelineClip : ESClip {
     var trackHeight;
     var thisLeft;
     var division;
+
+    /*
+    left is the left side of the entire clip
+    clipLeft is the leftmost visible edge
+    */
+    //[left, width, clipLeft, clipWidth].postln;
 
     clipLeft = clipLeft ?? left;
     clipWidth = clipWidth ?? width;
@@ -112,11 +118,11 @@ ESTimelineClip : ESClip {
             var thisTop = top + rulerHeight + (trackHeight * i) + 2;
             var thisHeight = trackHeight - 3;
 
-            // this stuff is all just for ESTimelineClips:
-            var thisClipLeft = max(left, thisLeft);
+            // this stuff is all just for nested ESTimelineClips:
+            var thisClipLeft = max(clipLeft, thisLeft);
             var thisClipWidth = thisWidth - (thisClipLeft - thisLeft);
-            if ((thisClipLeft + thisClipWidth) > (left + width)) {
-              thisClipWidth = (left + width) - thisClipLeft;
+            if ((thisClipLeft + thisClipWidth) > (clipLeft + clipWidth)) {
+              thisClipWidth = (clipLeft + clipWidth) - thisClipLeft;
             };
 
             clip.draw(thisLeft, thisTop, thisWidth, thisHeight, false, thisClipLeft, thisClipWidth);
@@ -128,14 +134,14 @@ ESTimelineClip : ESClip {
       if (timeline.isPlaying) {
         // sounding playhead in black
         thisLeft = ((timeline.soundingNow - offset) * tratio) + left;
-        Pen.addRect(Rect(thisLeft, 0, 2, height));
+        Pen.addRect(Rect(thisLeft, top, 2, height));
         Pen.color = Color.black;
         Pen.fill;
 
         // "scheduling playhead" in gray
         Pen.color = Color.gray(0.5, 0.5);
         thisLeft = ((timeline.now - offset) * tratio) + left;
-        Pen.addRect(Rect(thisLeft, 0, 2, height));
+        Pen.addRect(Rect(thisLeft, top, 2, height));
         Pen.fill;
       };
 

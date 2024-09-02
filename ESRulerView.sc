@@ -126,7 +126,7 @@ ESRulerView : UserView {
         }.fork(AppClock) // lower priority clock for GUI updates
       } {
         playheadRout.stop;
-        playheadView.refresh;
+        defer { playheadView.refresh };
       };
     };
   }

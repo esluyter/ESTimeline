@@ -95,8 +95,11 @@ ESTimeline {
     //if (clock.notNil) { clock.stop; clock = nil };
 
     //playbar = this.now;
-    isPlaying = false;
-    this.changed(\isPlaying, false);
+    {
+      (Server.default.latency * playClock.tempo).wait;
+      isPlaying = false;
+      this.changed(\isPlaying, false);
+    }.fork(playClock);
   }
 
   prMakeClock { |altClock|
