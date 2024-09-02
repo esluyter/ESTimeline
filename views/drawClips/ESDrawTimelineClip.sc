@@ -83,7 +83,7 @@ ESDrawTimelineClip : ESDrawClip {
         };
       };
 
-
+      /*
       if (clip.timeline.isPlaying and: clip.useParentClock.not) {
         // sounding playhead in black
         thisLeft = ((clip.timeline.soundingNow - clip.offset) * tratio) + left;
@@ -97,7 +97,7 @@ ESDrawTimelineClip : ESDrawClip {
         Pen.addRect(Rect(thisLeft, top, 2, height));
         Pen.fill;
       };
-
+      */
       Pen.addRect(Rect(left, top + rulerHeight + 1, width, height - rulerHeight - 1));
       Pen.strokeColor = if (clip.timeline.useEnvir) { Color.gray(0.4) } { Color.gray(0.8) };
       Pen.width = 1;
