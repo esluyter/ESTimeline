@@ -162,7 +162,7 @@ Platform.userExtensionDir
 ### Scrolling and zooming:
 - use trackpad to scroll left and right or click and drag ruler at top
 - cmd-scroll to zoom in and out horizontally
-- opt-scroll to zoom in and out vertically (when there are more than one track)
+- opt-scroll to zoom in and out vertically
 
 ### SynthDefs:
 - put your SynthDef in the timeline's prep function (click the "edit prep/cleanup funcs" button) e.g.
