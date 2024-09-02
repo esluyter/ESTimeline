@@ -8,8 +8,23 @@ ESFuncEditView : ESClipEditView {
     .background_(Color.gray(0.9))
     .front;
 
-    funcButton = Button(editorWindow, Rect(0, 0, 100, 30)).states_([["initFunc"], ["initFunc", Color.white, Color.gray(0.6)]]).value_(1).action_({ funcButton.value_(1); cleanupFuncButton.value_(0); funcView.visible_(true); cleanupFuncView.visible_(false); });
-    cleanupFuncButton = Button(editorWindow, Rect(100, 0, 100, 30)).states_([["cleanupFunc"], ["cleanupFunc", Color.white, Color.gray(0.6)]]).value_(0).action_({ funcButton.value_(0); cleanupFuncButton.value_(1); funcView.visible_(false); cleanupFuncView.visible_(true); });
+    funcButton = Button(editorWindow, Rect(668, 0, 100, 30)).states_(
+      [["initFunc", Color.gray(0.3), Color.gray(0.7)],
+        ["initFunc", Color.black, Color.white]])
+    .value_(1).action_({
+      funcButton.value_(1); cleanupFuncButton.value_(0);
+      funcView.visible_(true); cleanupFuncView.visible_(false); })
+    .font_(panelFont)
+    .focusColor_(Color.clear);
+
+    cleanupFuncButton = Button(editorWindow, Rect(770, 0, 120, 30)).states_(
+      [["cleanupFunc", Color.gray(0.3), Color.gray(0.7)],
+        ["cleanupFunc", Color.black, Color.white]])
+    .value_(0).action_({
+      funcButton.value_(0); cleanupFuncButton.value_(1);
+      funcView.visible_(false); cleanupFuncView.visible_(true); })
+    .font_(panelFont)
+    .focusColor_(Color.clear);
 
     funcView = CodeView(editorWindow, Rect(0, 30, 900, 570)).font_(Font.monospace(16)).string_(timeline.initFuncString);
     cleanupFuncView = CodeView(editorWindow, Rect(0, 30, 900, 570)).font_(Font.monospace(16)).string_(timeline.cleanupFuncString).visible_(false);
@@ -19,6 +34,23 @@ ESFuncEditView : ESClipEditView {
     StaticText(sidePanel, Rect(0, 0, 90, 20)).string_("bootOnInit").font_(panelFont);
     bootBox = CheckBox(sidePanel, Rect(0, 15, 20, 20)).value_(timeline.bootOnInit);
     StaticText(sidePanel, Rect(0, 35, 90, 200)).align_(\topLeft).string_("If this is checked, the initFunc will be wrapped in a waitForBoot");
+
+    Button(sidePanel, Rect(0, 410, 90, 25)).string_("Open in IDE").action_({
+      // open / load whichever view is currently visible
+      if (funcView.visible) {
+        Document.new("Edit Timeline Init Func", funcView.string).promptToSave_(false).front;
+      } {
+        Document.new("Edit Timeline Cleanup Func", cleanupFuncView.string).promptToSave_(false).front;
+      };
+    });
+    Button(sidePanel, Rect(0, 440, 90, 25)).string_("Copy from IDE").action_({
+      // copy to whichever currently visible
+      if (funcView.visible) {
+        funcView.string_(Document.current.string);
+      } {
+        cleanupFuncView.string_(Document.current.string);
+      }
+    });
 
     Button(sidePanel, Rect(0, 485, 90, 30)).string_("Cancel").font_(panelFont.copy.size_(14)).action_({ editorWindow.close });
     Button(sidePanel, Rect(0, 520, 90, 30)).string_("Save").font_(panelFont.copy.size_(14)).action_({

@@ -25,8 +25,10 @@ ESSynthClipEditView : ESClipEditView {
     startTimeView = NumberBox(sidePanel, Rect(0, 20, 180, 20)).font_(Font.monospace(16)).value_(clip.startTime);
     StaticText(sidePanel, Rect(0, 50, 180, 20)).string_("duration").font_(panelFont);
     durationView = NumberBox(sidePanel, Rect(0, 70, 180, 20)).font_(Font.monospace(16)).value_(clip.duration);
+    /* not yet relevant for synth clips
     StaticText(sidePanel, Rect(0, 100, 180, 20)).string_("offset").font_(panelFont);
     offsetView = NumberBox(sidePanel, Rect(0, 120, 180, 20)).font_(Font.monospace(16)).value_(clip.offset);
+    */
     StaticText(sidePanel, Rect(0, 150, 180, 20)).string_("color").font_(panelFont);
     colorView = UserView(sidePanel, Rect(0, 170, 180, 20)).drawFunc_({ |view|
       Pen.use {
