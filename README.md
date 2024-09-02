@@ -5,7 +5,7 @@ The distant goal is that anything you can do in SuperCollider could be sequenced
 
 ![screenshot](img/ss1.png)
 <img src="img/sse.png" width="500" />
-<img src="img/sss.png" width="400" /><img src="img/rss.png" width="400" /><img src="img/fss.png" width="400" />
+<img src="img/ssee.png" width="400" /><img src="img/sss.png" width="400" /><img src="img/rss.png" width="400" /><img src="img/fss.png" width="400" />
 
 ## Features
 - Comment, Synth, Pattern, Routine, and Env clip types
