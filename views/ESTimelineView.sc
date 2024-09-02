@@ -491,6 +491,7 @@ ESTimelineView : UserView {
       Menu(
         MenuAction("Add Env for Synth argument", { timelineController.addEnvForSynth(hoverClip) }),
         MenuAction("Set Env range keeping breakpoint values", { timelineController.setEnvRange(hoverClip, this.selectedClips) }),
+        MenuAction("Bulk edit selected clips", { timelineController.bulkEditSelectedClips(hoverClip, this.selectedClips) }),
         MenuAction("Bulk edit Synth arguments", { timelineController.bulkEditSynthArgs(hoverClip, this.selectedClips) }),
         MenuAction("Bulk edit Synth defName", { timelineController.bulkEditSynthDefName(hoverClip, this.selectedClips) }),
         MenuAction.separator(""),

@@ -132,6 +132,13 @@ ESTimelineController {
     );
   }
 
+  bulkEditSelectedClips { |clip, selectedClips|
+    ESBulkEditWindow.code("Bulk edit selected clips:", if (clip.notNil) { "{ |clip|\n  if (clip.class == " ++ clip.class ++ ") {\n  }\n}" } { "{ |clip|\n  \n}" }, callback: { |string|
+      var func = string.interpret;
+      selectedClips.do(func);
+    });
+  }
+
   bulkEditSynthArgs { |clip, selectedClips|
     var arr = selectedClips;
     if (arr.size == 0) { arr = [clip] };
