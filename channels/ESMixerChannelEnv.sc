@@ -3,6 +3,7 @@ ESMixerChannelEnv {
   var <hoverIndex, <editingFirst, <originalCurve, <curveIndex;
   var left, top, width, height, pratio, tratio, envHeight, startTime;
   var <>template;
+  var image;
 
   hoverIndex_ { |val|
     if (val != hoverIndex) {
@@ -23,7 +24,13 @@ ESMixerChannelEnv {
   }
 
   prDraw { |aleft, atop, awidth, aheight, apratio, atratio, aenvHeight, astartTime|
-    var n, nratio, firstI, lastI, prevY, thisEnv = env, points;
+    var points;
+    var valStringFunc = { |val|
+      // this is a real hack
+      (if (min == 0) { val.ampdb.round(0.01).asString ++ " dB" } { val.round(0.01).asString });
+    };
+    var minString = valStringFunc.(min);
+    var maxString = valStringFunc.(max);
     left = aleft;
     top = atop;
     width = awidth;
@@ -32,35 +39,31 @@ ESMixerChannelEnv {
     tratio = atratio;
     envHeight = aenvHeight;
     startTime = astartTime;
-    //var minString = clip.min.asString;
-    //var maxString = clip.max.asString;
-    //var minWidth, maxWidth;
-    //var font = Font.monospace(10);
-    n = (width / (envHeight / 50).max(1)).asInteger;
-    nratio = width / n;
 
-    points = this.envBreakPoints;
-    firstI = ((0 - left) / nratio).asInteger.clip(0, n);
-    lastI = ((Window.screenBounds.width - left) / nratio).asInteger.clip(0, n);
-    prevY = top + ((1 - thisEnv[startTime + (firstI * pratio)]) * height);
-    (firstI..lastI).do { |i|
-      var thisY, thisX;
-      i = i * nratio;
-      thisX = left + i;
-      thisY = top + ((1 - thisEnv[startTime + (i * pratio)]) * height);
-      Pen.addRect(Rect(thisX, min(prevY, thisY), nratio, max(1, abs(prevY - thisY))));
-      prevY = thisY;
+    image.free;
+    image = Image((width.asInteger)@((height + 1).asInteger));
+    width.asInteger.do { |x|
+      var x2time = { |x| x * pratio + startTime };
+      var val2y = { |val| ((1 - val) * height).asInteger };
+      var time = x2time.(x);
+      var nextTime = x2time.(x + 1);
+      var val = env[time];
+      var nextVal = env[nextTime];
+      var y = val2y.(val);
+      var nextY = val2y.(nextVal);
+      var thisTop = min(y, nextY);
+      var thisHeight = max(1, abs(y - nextY));
+      image.setPixels(Int32Array.fill(thisHeight, {Image.colorToPixel(Color.gray(0.6))}), Rect(x, thisTop, 1, thisHeight));
     };
-    Pen.color = Color.gray(0.6);
-    Pen.fill;
+    Pen.drawImage(left@top, image);
 
     // draw breakpoints
+    points = this.envBreakPoints;
     points.do { |point, i|
       if (i == hoverIndex) {
         var val = this.valueAtIndex(i);
-        // this is a real hack
-        var valString = (if (min == 0) { val.ampdb.round(0.01).asString ++ " dB" } { val.asString });
-        Pen.stringAtPoint(valString, point.x@(if (point.y - 20 < top) { point.y + 20 } { point.y - 20 }), Font.sansSerif(15), Color.gray(0.5));
+        var valString = valStringFunc.(val);
+        Pen.stringAtPoint(valString, (point.x + 8)@(if (point.y - 12 < top) { point.y + 12 } { point.y - 13 }), Font.sansSerif(12), Color.gray(0.5));
         Pen.fillColor = Color.white;
         Pen.strokeColor = Color.gray(0.5);
         Pen.addOval(Rect(point.x - 2.5, point.y - 2.5, 6, 6));
@@ -71,6 +74,11 @@ ESMixerChannelEnv {
         Pen.fillColor = Color.gray(0.5);
         Pen.fill;
       };
+    };
+
+    if (height > 30) {
+      Pen.stringAtPoint(maxString, (left + 2)@(top + 2), Font.sansSerif(10), Color.gray(0.8));
+      Pen.stringAtPoint(minString, (left + 2)@(top + height - 10), Font.sansSerif(10), Color.gray(0.8));
     };
   }
 
