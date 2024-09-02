@@ -299,6 +299,9 @@ ESTimeline {
       };
     };
     contenders.sort({ |a, b| (a.startTime + (a.duration / 2) - this.now).abs < (b.startTime + (b.duration / 2) - this.now).abs });
+    contenders.do { |contender|
+      if ((contender.startTime <= this.now) and: (contender.endTime >= this.now)) { ^contender };
+    };
     ^contenders[0];
   }
 
