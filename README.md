@@ -55,9 +55,8 @@ Also note that because timelines are built to execute user-supplied code they ar
 - **Non-prescriptive:**
   - the basic goal is only to "execute this code at this particular time"
     - although the competing goal is to make it easy to do the things you want to do, which is subjective
-  - for the moment just real-time but some of this could be translated easily to work NRT
+  - for the moment just real-time but I am working on NRT support
     - there are certain things impossible in NRT, i.e. to do with real-time input
-    - ddwMixerChannel doesn't yet work NRT so this would be a big rewrite
   - as little architecture as possible is forced on you
     - possible to disable ddwMixerChannel, timeline-specific clock and environment so as to interact with the timeline as part of a larger project
     - possible to play clips with any bus, target, addAction, etc. for full flexibility
@@ -74,7 +73,7 @@ Also note that because timelines are built to execute user-supplied code they ar
 
 ## Hypothetical features
 These are all things I would like to implement someday:
-- NRT: this will be difficult unless ddwMixerChannel gains NRT support
+- NRT: should be possible to "bounce" the timeline's Synth, Pattern, and Env clips through their MixerChannels; this work is in process
 - Clock follow: e.g. sync up with an Ableton timeline or midi show control
 - More clip types
   - audio file
