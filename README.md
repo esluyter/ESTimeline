@@ -103,7 +103,7 @@ Platform.userExtensionDir
 ### SynthDefs:
 - put your SynthDef in the timeline's prep function (click the "edit prep/cleanup funcs" button) e.g.
 ```
-SynthDef(\sin, { |out, freq = 100, gate = 1, amp = 0.1, preamp = 1.5, attack = 0.001, release = 0.01, pan, verbbus, verbamt, vibrato = 0.2|
+SynthDef(\sin, { |out, freq = 200, gate = 1, amp = 0.1, preamp = 1.5, attack = 0.001, release = 0.01, pan, verbbus, verbamt, vibrato = 0.2|
   var env, sig;
   var lfo = XLine.ar(0.01, vibrato, ExpRand(0.5, 2.0)) * SinOsc.ar(5.4 + (LFDNoise3.kr(0.1) * 0.5));
   gate = gate + Impulse.kr(0);
