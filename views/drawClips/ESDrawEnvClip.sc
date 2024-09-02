@@ -19,22 +19,35 @@ ESDrawEnvClip : ESDrawClip {
     var font = Font.monospace(10);
 
     var thisEnv = clip.env.value;
-    var image = Image((width.asInteger)@((height + 1).asInteger));
-    width.asInteger.do { |x|
-      var x2time = { |x| x * pratio + clip.offset };
-      var val2y = { |val| ((1 - val) * height).asInteger };
-      var time = x2time.(x);
-      var nextTime = x2time.(x + 1);
-      var val = thisEnv[time];
-      var nextVal = thisEnv[nextTime];
-      var y = val2y.(val);
-      var nextY = val2y.(nextVal);
-      var thisTop = min(y, nextY);
-      var thisHeight = max(1, abs(y - nextY));
-      image.setPixels(Int32Array.fill(thisHeight, {Image.colorToPixel(Color.gray(1, 0.8))}), Rect(x, thisTop, 1, thisHeight));
+    var image;
+
+    if (clip.armed) {
+      Pen.addRect(Rect(left, top, width, height));
+      Pen.strokeColor = Color.red;
+      Pen.width = 3;
+      Pen.stroke;
     };
-    Pen.drawImage(left@top, image);
-    image.free;
+
+    if (clip.useLiveInput.not) {
+      image = Image((width.asInteger)@((height + 1).asInteger));
+      width.asInteger.do { |x|
+        var x2time = { |x| x * pratio + clip.offset };
+        var val2y = { |val| ((1 - val) * height).asInteger };
+        var time = x2time.(x);
+        var nextTime = x2time.(x + 1);
+        var val = thisEnv[time];
+        var nextVal = thisEnv[nextTime];
+        var y = val2y.(val);
+        var nextY = val2y.(nextVal);
+        var thisTop = min(y, nextY);
+        var thisHeight = max(1, abs(y - nextY));
+        image.setPixels(Int32Array.fill(thisHeight, {Image.colorToPixel(Color.gray(1, 0.8))}), Rect(x, thisTop, 1, thisHeight));
+      };
+      Pen.drawImage(left@top, image);
+      image.free;
+    } {
+      Pen.stringAtPoint(ESStringShortener.trim("live", width + 5, Font.sansSerif(height / 3)), (left + 3.5)@(top + (height / 2)), Font.sansSerif(height / 3), Color.gray(1, 0.2));
+    };
 
     if (editingMode) {
       var thisEnv = clip.envToPlay;

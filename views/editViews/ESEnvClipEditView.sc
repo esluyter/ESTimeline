@@ -2,7 +2,7 @@ ESEnvClipEditView : ESClipEditView {
 
   *new { |clip, timeline|
     var panelFont = Font("Helvetica", 16);
-    var busView, makeBusBox, makeBusRateMenu, targetView, addActionView, codeView, minView, maxView, curveView, isExponentialBox, keepBreakpointValuesBox;
+    var busView, makeBusBox, makeBusRateMenu, targetView, addActionView, useLiveInputBox, liveInputMenu, ccNumField, recordArmButt, codeView, minView, maxView, curveView, isExponentialBox, keepBreakpointValuesBox;
     var adjustBg = {
       busView.background_(if (makeBusBox.value) { Color.gray(0.8) } { Color.white });
     };
@@ -20,28 +20,11 @@ ESEnvClipEditView : ESClipEditView {
         clip.duration =  durationView.string.interpret;
         clip.offset = offsetView.string.interpret;
 
-        /*
-        { |min, max, isExponential, curve|
-          min = min.interpret;
-          max = max.interpret;
-          curve = curve.interpret;
-          if ((isExponential and: ((min.sign != max.sign))).not) {
-            arr.do { |clip|
-              if (clip.class == ESEnvClip) {
-                var oldLevels = clip.env.levels;
-                var values = oldLevels.collect(clip.prValueScale(_));
-                var newLevels;
-                clip.min = min;
-                clip.max = max;
-                clip.curve = curve;
-                clip.isExponential = isExponential;
-                newLevels = values.collect(clip.prValueUnscale(_));
-                clip.env = Env(newLevels, clip.env.times, clip.env.curves);
-              };
-            };
-          };
-        }
-        */
+        clip.useLiveInput = useLiveInputBox.value;
+        clip.liveInput = liveInputMenu.value;
+        clip.ccNum = ccNumField.string.interpret;
+        clip.armed = recordArmButt.value.asBoolean;
+
         if (keepBreakpointValuesBox.value.not) {
           // keep Env the same but change breakpoint values bc of range adjustment.
           clip.min = minView.value;
@@ -82,18 +65,32 @@ ESEnvClipEditView : ESClipEditView {
     });
 
     StaticText(editorWindow, Rect(20, 30, 180, 20)).string_("bus").font_(panelFont);
-    busView = TextField(editorWindow, Rect(10, 50, 350, 40)).string_(if (clip.makeBus.not) { clip.bus.asESDisplayString } { "" }).font_(Font.monospace(16));
+    busView = TextField(editorWindow, Rect(10, 50, 270, 40)).string_(if (clip.makeBus.not) { clip.bus.asESDisplayString } { "" }).font_(Font.monospace(16));
 
-    StaticText(editorWindow, Rect(365, 30, 100, 30)).string_(". . . or:");
-    makeBusBox = CheckBox(editorWindow, Rect(415, 30, 20, 20)).value_(clip.makeBus).action_(adjustBg);
-    StaticText(editorWindow, Rect(440, 30, 200, 20)).string_("makeBus with rate:").font_(panelFont);
-    makeBusRateMenu = PopUpMenu(editorWindow, Rect(415, 50, 180, 30)).items_(["audio", "control"]).value_([\audio, \control].indexOf(clip.makeBusRate));
+    StaticText(editorWindow, Rect(285, 30, 100, 30)).string_(". . . or:");
+    makeBusBox = CheckBox(editorWindow, Rect(335, 30, 20, 20)).value_(clip.makeBus).action_(adjustBg);
+    StaticText(editorWindow, Rect(360, 30, 200, 20)).string_("makeBus with rate:").font_(panelFont);
+    makeBusRateMenu = PopUpMenu(editorWindow, Rect(335, 50, 180, 30)).items_(["audio", "control"]).value_([\audio, \control].indexOf(clip.makeBusRate));
 
     StaticText(editorWindow, Rect(20, 100, 180, 20)).string_("target").font_(panelFont);
-    targetView = TextField(editorWindow, Rect(10, 120, 290, 40)).string_(clip.target.asESDisplayString).font_(Font.monospace(16));
+    targetView = TextField(editorWindow, Rect(10, 120, 230, 40)).string_(clip.target.asESDisplayString).font_(Font.monospace(16));
 
-    StaticText(editorWindow, Rect(315, 100, 180, 20)).string_("addAction").font_(panelFont);
-    addActionView = TextField(editorWindow, Rect(305, 120, 290, 40)).string_(clip.addAction.asESDisplayString).font_(Font.monospace(16));
+    StaticText(editorWindow, Rect(255, 100, 180, 20)).string_("addAction").font_(panelFont);
+    addActionView = TextField(editorWindow, Rect(245, 120, 270, 40)).string_(clip.addAction.asESDisplayString).font_(Font.monospace(16));
+
+    View(editorWindow, Rect(535, 20, 1, 160)).background_(Color.gray(0.5, 0.3));
+
+    useLiveInputBox = CheckBox(editorWindow, Rect(555, 30, 20, 20)).value_(clip.useLiveInput);
+    StaticText(editorWindow, Rect(580, 30, 180, 20)).string_("use live input:").font_(panelFont);
+    ccNumField = TextField(editorWindow, Rect(720, 50, 80, 30)).string_(clip.ccNum).visible_(false);
+    liveInputMenu = PopUpMenu(editorWindow, Rect(555, 50, 160, 30)).items_(["Mouse X", "Mouse Y", "MIDI Control #", "MIDI Pitch", "MIDI Notes", "MIDI Velocity", "MIDI Gate"]).action_({ |view|
+      if (view.value == 2) {
+        ccNumField.visible_(true);
+      } {
+        ccNumField.visible_(false);
+      };
+    }).valueAction_(clip.liveInput);
+    recordArmButt = Button(editorWindow, Rect(555, 90, 120, 25)).states_([["record arm"], ["record armed", Color.gray(1), Color.hsv(0, 0.75, 0.75)]]).font_(Font.sansSerif(13)).value_(clip.armed);
 
     StaticText(editorWindow, Rect(20, 175, 50, 20)).string_("env").font_(panelFont);
     StaticText(editorWindow, Rect(50, 177, 480, 20)).string_("... edit code if you must or use cmd-e for mouse breakpoint editor mode").font_(Font.sansSerif(13));

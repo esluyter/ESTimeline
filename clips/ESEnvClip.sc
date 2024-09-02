@@ -1,5 +1,5 @@
 ESEnvClip : ESClip {
-  var <env, <bus, <>target, <>addAction, <min, <max, <>curve, <>isExponential, <makeBus = false, <>makeBusRate;
+  var <env, <bus, <>target, <>addAction, <min, <max, <>curve, <>isExponential, <makeBus = false, <>makeBusRate, <useLiveInput, <>liveInput, <>ccNum, <armed;
   var <synth;
 
   //classvar <buses;  // event format name -> [bus, nClips] -- when nClips becomes 0 bus should be freed.
@@ -8,6 +8,8 @@ ESEnvClip : ESClip {
   max_ { |val| max = val; this.changed(\max); }
   env_ { |val| env = val; this.sanitizeEnv; this.changed(\env); }
   bus_ { |val| bus = val; this.changed(\bus); }
+  armed_ { |val| armed = val; this.changed(\armed); }
+  useLiveInput_ { |val| useLiveInput = val; this.changed(\useLiveInput) }
   rate { ^this.bus.value.rate }
   makeBus_ { |val|
     if (val != makeBus) {
@@ -74,19 +76,19 @@ ESEnvClip : ESClip {
     };
   }
 
-  *new { |startTime, duration, offset = 0, color, name, env, bus, target, addAction = 'addToHead', min = 0, max = 1, curve = 0, isExponential = false, makeBus = true, makeBusRate = \audio, mute = false, prep = false|
+  *new { |startTime, duration, offset = 0, color, name, env, bus, target, addAction = 'addToHead', min = 0, max = 1, curve = 0, isExponential = false, makeBus = true, makeBusRate = \audio, mute = false, useLiveInput = false, liveInput = 0, ccNum = 0, armed = false, prep = false|
     env = env ?? Env([0.5, 0.5], [0], [0]);
-    ^super.new(startTime, duration, offset, color, name, mute: mute).init(env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate, prep);
+    ^super.new(startTime, duration, offset, color, name, mute: mute).init(env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate, mute, useLiveInput, liveInput, ccNum, armed, prep);
   }
 
-  storeArgs { ^[startTime, duration, offset, color, name, env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate, mute] }
+  storeArgs { ^[startTime, duration, offset, color, name, env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate, mute, useLiveInput, liveInput, ccNum, armed] }
 /*
   duplicate {
     //this.asCompileString.interpret.track_(track);
     ^this.class.new(*(this.storeArgs)).track_(track).prep;
   }
 */
-  init { |argEnv, argBus, argTarget, argAddAction, argMin, argMax, argCurve, argExp, argMakeBus, argMakeBusRate, argPrep|
+  init { |argEnv, argBus, argTarget, argAddAction, argMin, argMax, argCurve, argExp, argMakeBus, argMakeBusRate, argMute, argUseLiveInput, argLiveInput, argCcNum, argArmed, prep|
     env = argEnv;
     bus = argBus;
     target = argTarget;
@@ -97,8 +99,13 @@ ESEnvClip : ESClip {
     isExponential = argExp;
     makeBusRate = argMakeBusRate;
     makeBus = argMakeBus;
+    useLiveInput = argUseLiveInput;
+    liveInput = argLiveInput;
+    ccNum = argCcNum;
+    armed = argArmed;
+
     this.sanitizeEnv;
-    if (argPrep) { this.prep };
+    if (prep) { this.prep };
   }
 
   prep {
@@ -179,7 +186,7 @@ ESEnvClip : ESClip {
 
   prTitle { ^"Env" }
 
-  defaultColor { ^Color.hsv(0.58, 0.45, 0.65, 0.7) }
+  defaultColor { ^if (useLiveInput) { Color.hsv(0.56, 0.45, 0.75, 0.7) } { Color.hsv(0.58, 0.45, 0.65, 0.7) } }
 
   guiClass { ^ESEnvClipEditView }
   drawClass { ^ESDrawEnvClip }

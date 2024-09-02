@@ -469,6 +469,10 @@ ESTimelineView : UserView {
       if ((key == 78) and: (mods.isCmd)) { timelineController.new };
       // m - mute clip
       if (char == $m) { timelineController.toggleMuteClips(hoverClip, this.selectedClips); };
+      // a - arm clip
+      if (char == $a) { if (hoverClip.class == ESEnvClip) { hoverClip.armed = hoverClip.armed.not; }; };
+      // i - use live input
+      if (char == $i) { if (hoverClip.class == ESEnvClip) { hoverClip.useLiveInput = hoverClip.useLiveInput.not; }; };
       if (char == $S) { timelineController.newSynthClip(hoverTrack, newClipStartTime, newClipDuration); };
       if (char == $T) {
         if (this.selectedClips.size == 0) {
