@@ -165,9 +165,13 @@ ESPatternClip : ESClip {
         var x = left + (t * width / duration);
         var eventHeight = 2;
         event.freq.asArray.do { |freq, i|
-          var eventWidth = event.sustain.asArray.wrapAt(i) * width / duration;
-          var y = freq.explin(20, 20000, top + height, top);
-          Pen.color = Color.gray(1, event.amp.asArray.wrapAt(i).ampdb.linexp(-60.0, 0.0, 0.05, 1.0));
+          var eventWidth, y, amp;
+          amp = event.amp.asArray.wrapAt(i);
+          if (amp.isNumber.not) { amp = 0.1 };
+          if (freq.isNumber.not) { freq = 500 };
+          eventWidth = event.sustain.asArray.wrapAt(i) * width / duration;
+          y = freq.explin(20, 20000, top + height, top);
+          Pen.color = Color.gray(1, amp.ampdb.linexp(-60.0, 0.0, 0.05, 1.0));
           Pen.addRect(Rect(x, y, eventWidth, eventHeight));
           Pen.fill;
         };

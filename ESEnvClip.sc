@@ -462,4 +462,16 @@ ESEnvClip : ESClip {
   }
 
   hasEditingMode { ^true }
+
+  asMap { ^bus.asMap }
+
+  /*
+  embedInStream { |inval|
+    ^this.asMap.embedInStream(inval);
+  }
+  */
+
+  asStream { ^Routine { loop { this.asMap.yield } } }
+
+  + { ^this }
 }
