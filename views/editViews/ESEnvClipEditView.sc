@@ -105,6 +105,7 @@ ESEnvClipEditView : ESClipEditView {
         channelMenu.visible = true;
         smoothText.visible = true;
         smoothBox.visible = true;
+        smoothBox.value = if (view.value <= 3) { 0.1 } { 0 };
       } {
         channelText.visible = false;
         channelMenu.visible = false;

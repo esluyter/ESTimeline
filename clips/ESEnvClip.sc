@@ -1,7 +1,7 @@
 ESEnvClip : ESClip {
   var <env, <bus, <>target, <>addAction, <min, <max, <>curve, <>isExponential, <makeBus = false, <makeBusRate, <useLiveInput, <>liveInput, <>ccNum, <armed, <>midiChannel, <>midiSmooth;
   var <synth, envPlayRout;
-  var <recordedLevels, <recordedTimes, <oscFunc, <recordedOffset, <midiFunc, <midiRout;
+  var <recordedLevels, <recordedTimes, <oscFunc, <recordedOffset, <midiFunc, <midiFuncOff, <midiRout;
 
   //classvar <buses;  // event format name -> [bus, nClips] -- when nClips becomes 0 bus should be freed.
 
@@ -228,6 +228,7 @@ ESEnvClip : ESClip {
       Server.default.latency.wait;
       synth = nil;
       midiFunc.free; midiFunc = nil;
+      midiFuncOff.free; midiFuncOff = nil;
       midiRout.stop; midiRout = nil;
     }.fork(SystemClock);
 
@@ -330,6 +331,8 @@ ESEnvClip : ESClip {
           { 2 } { track.timeline.listener.ccValue(ccNum, midiChannel) }
           { 3 } { track.timeline.listener.bendValue(midiChannel) }
           { 4 } { track.timeline.listener.noteValue(midiChannel) }
+          { 5 } { track.timeline.listener.noteValue(midiChannel) }
+          { 6 } { track.timeline.listener.velValue(midiChannel) }
           { 0 };
 
           defName = (defName ++ "midi").asSymbol;
@@ -358,10 +361,42 @@ ESEnvClip : ESClip {
                 synth.set(\val, val);
               }, chan: chan);
             }
+            { 5 } { // mono note
+              var notes = [];
+              midiFunc = MIDIFunc.noteOn({ |vel, num|
+                if (notes.indexOf(num).notNil) { notes.remove(num) };
+                notes = notes.add(num);
+                val = num.linlin(0, 127, 0.0, 1.0);
+                synth.set(\val, val);
+              }, chan: chan);
+              midiFuncOff = MIDIFunc.noteOff({ |vel, num|
+                notes.remove(num);
+                if (notes.size > 0) {
+                  val = notes.last.linlin(0, 127, 0.0, 1.0);
+                  synth.set(\val, val);
+                };
+              }, chan: chan);
+            }
             { 6 } { // vel
               midiFunc = MIDIFunc.noteOn({ |vel, num|
                 val = vel.linlin(0, 127, 0.0, 1.0);
                 synth.set(\val, val);
+              }, chan: chan);
+            }
+            { 7 } { // gated vel
+              var notes = [];
+              midiFunc = MIDIFunc.noteOn({ |vel, num|
+                if (notes.indexOf(num).notNil) { notes.remove(num) };
+                notes = notes.add(num);
+                val = vel.linlin(0, 127, 0.0, 1.0);
+                synth.set(\val, val);
+              }, chan: chan);
+              midiFuncOff = MIDIFunc.noteOff({ |vel, num|
+                notes.remove(num);
+                if (notes.size == 0) {
+                  val = 0;
+                  synth.set(\val, val);
+                };
               }, chan: chan);
             }
             { "This MIDI input not yet implemented".warn; };
