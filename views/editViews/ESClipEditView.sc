@@ -22,7 +22,7 @@ ESClipEditView {
       editorWindow.onClose_({});
       editorWindow.close;
     };
-    editorWindow = Window(this.title, Rect(Window.availableBounds.width - 1100, 0, 1000, 600))
+    editorWindow = Window(this.title, Rect(Window.availableBounds.width - 1480, 0, 1000, 600))
     .background_(Color.gray(0.9))
     .front
     .onClose_{ thisClip = nil };
