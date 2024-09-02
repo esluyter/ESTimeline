@@ -31,7 +31,13 @@ ESSynthClip : ESClip {
     var argsValue = args.value.asArray;
     var freqIndex = argsValue.indexOf(\freq);
     var ampIndex = argsValue.indexOf(\amp);
-    if ((height > 30) and: (width > 30)) {
+
+    if (left < 0) {
+      width = width + left;
+      left = 0;
+    };
+
+    if ((height > 30) and: (width > 15)) {
       argsValue.pairsDo { |key, val, i|
         var line = "" ++ key ++ ":  " ++ val;
         while { max(0, width - 5) < (QtGUI.stringBounds(line, font).width) } {

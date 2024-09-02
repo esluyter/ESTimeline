@@ -36,27 +36,16 @@ ESTimelineView : UserView {
       MenuAction("Split Clip (s)", { if (hoverClip.notNil) { timeline.tracks[hoverTrack].splitClip(hoverClipIndex, hoverTime) } }),
       MenuAction("Delete Clip (⌫)", { if (hoverClipIndex.notNil) { timeline.tracks[hoverTrack].removeClip(hoverClipIndex) } }),
       MenuAction.separator(""),
-      MenuAction("Add Track Before (cmd+T)", { timeline.addTrack(hoverTrack) }),
-      MenuAction("Add Track After (cmd+t)", { timeline.addTrack(hoverTrack + 1) }),
+      MenuAction("Add Track Before (Cmd+T)", { timeline.addTrack(hoverTrack) }),
+      MenuAction("Add Track After (Cmd+t)", { timeline.addTrack(hoverTrack + 1) }),
       MenuAction("Delete Track (Cmd+⌫)", { timeline.removeTrack(hoverTrack) }),
     );
 
     this.drawFunc_({
-      var division = (60 / (this.bounds.width / this.duration)).ceil;
-      Pen.use {
-        Pen.color = Color.black;
-        (this.startTime + this.duration + 1).asInteger.do { |i|
-          if (i % division == 0) {
-            var left = this.absoluteTimeToPixels(i);
-            Pen.addRect(Rect(left, 0, 1, 20));
-            Pen.fill;
-            Pen.stringAtPoint(i.asString, (left + 3)@0, Font("Courier New", 16));
-          }
-        };
-      };
+
     }).mouseWheelAction_({ |view, x, y, mods, xDelta, yDelta|
       var xTime = view.pixelsToAbsoluteTime(x);
-      if (mods.isCmd) { view.duration = view.duration * yDelta.linexp(-100, 100, 0.5, 2, nil); };
+      if (mods.isCmd) { view.duration = view.duration * (-1 * yDelta).linexp(-100, 100, 0.5, 2, nil); };
       if (mods.isAlt) {
         var ratio = yDelta.linexp(-100, 100, 0.5, 2, nil);
         var diff = y - this.parent.visibleOrigin.y;
@@ -83,8 +72,6 @@ ESTimelineView : UserView {
         hoverClipStartTime = hoverClip.startTime;
         hoverClipOffset = hoverClip.offset;
       };
-
-      if (y < 20) { scrolling = true } { scrolling = false };
 
       if ((clickCount > 1) and: hoverClip.notNil) {
         // edit the clip on double click
@@ -118,16 +105,6 @@ ESTimelineView : UserView {
     }).mouseMoveAction_({ |view, x, y, mods|
       var yDelta = y - clickPoint.y;
       var xDelta = x - clickPoint.x;
-      // drag timeline
-      if (scrolling) {
-        if (mods.isAlt) { // hold option to zoom in opposite direction
-          yDelta = yDelta.neg;
-        };
-        duration = (originalDuration * yDelta.linexp(-100, 100, 0.5, 2, nil));
-        startTime = (clickTime - this.pixelsToRelativeTime(clickPoint.x));
-        startTime = (xDelta.linlin(0, this.bounds.width, startTime, startTime - duration, nil));
-        this.refresh;
-      };
 
       switch (hoverCode)
       {1} { // drag left edge
@@ -178,11 +155,11 @@ ESTimelineView : UserView {
 
       switch (hoverCode)
       {1} { // left edge
-        dragView.bounds_(dragView.bounds.origin_(this.absoluteTimeToPixels(hoverClip.startTime)@(i * trackHeight + 20)));
+        dragView.bounds_(dragView.bounds.origin_(this.absoluteTimeToPixels(hoverClip.startTime)@(i * trackHeight)));
         dragView.visible_(true);
       }
       {2} { // right edge
-        dragView.bounds_(dragView.bounds.origin_((this.absoluteTimeToPixels(hoverClip.endTime) - 2)@(i * trackHeight + 20)));
+        dragView.bounds_(dragView.bounds.origin_((this.absoluteTimeToPixels(hoverClip.endTime) - 2)@(i * trackHeight)));
         dragView.visible_(true);
       }
       { // default
@@ -250,9 +227,9 @@ ESTimelineView : UserView {
     var height = this.bounds.height;
 
     trackViews.do(_.remove);
-    trackHeight = (height - 20) / timeline.tracks.size;
+    trackHeight = height / timeline.tracks.size;
     trackViews = timeline.tracks.collect { |track, i|
-      var top = i * trackHeight + 20;
+      var top = i * trackHeight;
       ESTrackView(this, Rect(0, top, width, trackHeight), track)
     };
 
@@ -303,7 +280,7 @@ ESTimelineView : UserView {
 
   clipAtPoint { |point|
     timeline.tracks.do { |track, i|
-      var top = i * trackHeight + 20;
+      var top = i * trackHeight;
       if (point.y.inRange(top, top + trackHeight)) {
         track.clips.do { |clip, j|
           // if clip within bounds...
@@ -326,7 +303,7 @@ ESTimelineView : UserView {
 
   trackAtY { |y|
     timeline.tracks.do { |track, i|
-      var bottom = (i + 1) * trackHeight + 20;
+      var bottom = (i + 1) * trackHeight;
       if (y < bottom) {
         ^i;
       };
@@ -342,11 +319,13 @@ ESTimelineView : UserView {
 
   startTime_ { |val|
     startTime = val;
+    this.changed(\startTime, val);
     this.refresh;
   }
 
   duration_ { |val|
     duration = val;
+    this.changed(\duration, val);
     this.refresh;
   }
 
