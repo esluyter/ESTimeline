@@ -327,6 +327,7 @@ ESEnvClip : ESClip {
           var chan = if (midiChannel == 16) { nil } { midiChannel };
           var val = switch (liveInput)
           { 2 } { track.timeline.listener.ccValue(ccNum, midiChannel) }
+          { 3 } { track.timeline.listener.bendValue(midiChannel) }
           { 0 };
 
           defName = (defName ++ "midi").asSymbol;
@@ -343,6 +344,12 @@ ESEnvClip : ESClip {
                 synth.set(\val, val)
               }, ccNum, chan);
             }
+            { 3 } { // pitch bend
+              midiFunc = MIDIFunc.bend({ |midiVal|
+                val = midiVal.linlin(0, 16383, 0.0, 1.0);
+                synth.set(\val, val);
+              }, chan);
+            };
             { "This MIDI input not yet implemented".warn; };
 
             if (armed) {
@@ -360,7 +367,7 @@ ESEnvClip : ESClip {
                   level = val;
                   time = track.timeline.soundingNow;
                   if (level != prevLevel) {
-                    var smoothThresh = if (liveInput == 2) { 0.1 } { 0 };
+                    var smoothThresh = if ((liveInput == 2) or: (liveInput == 3)) { 0.1 } { 0 };
                     if ((prevTime - prevPointTime) > smoothThresh) {
                       prevTime = prevTime - smoothThresh;
                       recordedLevels = recordedLevels.add(prevLevel);
