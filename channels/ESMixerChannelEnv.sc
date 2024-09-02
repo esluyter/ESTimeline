@@ -196,10 +196,9 @@ ESMixerChannelEnv {
     };
     points = breakPointCache.copy;//this.envBreakPoints;
     if (hoverIndex.notNil) {
-      var indices = if (indexSelection.notNil) { (indexSelection[0]..indexSelection[1]) } { [hoverIndex] };
+      var indices = if (indexSelection.notNil and: { (indexSelection[0] <= hoverIndex) and: (indexSelection[1] >= hoverIndex) }) { (indexSelection[0]..indexSelection[1]) } { [hoverIndex] };
 
       indices.do { |index|
-        var newEnv, offset;
         // adjust breakpoint
         var prevPoint = points[max(0, indices.first - 1)];
         var nextPoint = if (indices.last < (points.size - 1)) { points[indices.last + 1] } { (left + width)@0 };
@@ -207,8 +206,9 @@ ESMixerChannelEnv {
         var adjustedY = (points[index].y + yDelta).clip(top, top + height);
         points[index] = adjustedX@adjustedY;
         if (editingFirst) { points[0] = left@adjustedY; };
-        this.env = this.envFromBreakPoints(points);
       };
+
+      this.env = this.envFromBreakPoints(points);
     } {
       // adjust curve if not over breakpoint and alt key pressed
       if (mods.isAlt) {

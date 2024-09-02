@@ -150,7 +150,7 @@ ESTimelineView : UserView {
       };
 
       // alt to duplicate clip
-      if (mods.isAlt and: hoverClip.notNil) {
+      if (mods.isAlt and: hoverClip.notNil and: editingMode.not) {
         if (this.selectedClips.includes(hoverClip)) {
           duplicatedClips = this.selectedClips.asArray.collect { |clip|
             var duplicatedClip = clip.duplicate;
@@ -217,7 +217,7 @@ ESTimelineView : UserView {
     this.mouseMoveAction = { |view, x, y, mods|
       var yDelta = y - clickPoint.y;
       var xDelta = x - clickPoint.x;
-      var doTimeSelectionOverEnv;
+      var doTimeSelectionOverEnv, doTimeSelectionOverEnvClip;
 
       if (editingMode.not) {
         switch (hoverCode)
@@ -349,7 +349,7 @@ ESTimelineView : UserView {
           var i = hoverClip.track.index;
           i.do { |j| top = top + trackHeights[j] };
           //                        not the best
-          hoverClip.drawClip.prMouseMove(x, y - top, xDelta, yDelta, mods, *this.clipBounds(hoverClip));
+          doTimeSelectionOverEnvClip = hoverClip.drawClip.prMouseMove(x, y - top, xDelta, yDelta, mods, *this.clipBounds(hoverClip));
         };
       };// end editingMode
 
@@ -362,7 +362,7 @@ ESTimelineView : UserView {
       };
 
       // select time/clips if start dragging from empty area
-      if (hoverClip.isNil and: (hoverEnv.isNil or: { doTimeSelectionOverEnv })) {
+      if ((hoverClip.isNil or: { doTimeSelectionOverEnvClip }) and: (hoverEnv.isNil or: { doTimeSelectionOverEnv })) {
         if (xDelta.abs > 1) {
           var timeA = this.pixelsToAbsoluteTime(clickPoint.x);
           var timeB = this.pixelsToAbsoluteTime(x);
@@ -756,7 +756,7 @@ ESTimelineView : UserView {
   clipBounds { |clip|
     var left = this.absoluteTimeToPixels(clip.startTime);
     var width = this.relativeTimeToPixels(clip.duration);
-    ^[left, 3, width, trackHeight - 4, editingMode, nil, nil, this.selectedClips.includes(clip)];
+    ^[left, 3, width, trackHeight - 4, editingMode, nil, nil, this.selectedClips.includes(clip), true, timeSelection.collect({ |time| this.absoluteTimeToPixels(time) }), if (timeSelection.notNil) { timeSelection - clip.startTime } { nil }];
   }
 
   startTime_ { |val|

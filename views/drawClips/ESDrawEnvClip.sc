@@ -1,5 +1,6 @@
 ESDrawEnvClip : ESDrawClip {
   var <hoverIndex, <editingFirst, <originalCurve, <curveIndex;
+  var indexSelection, breakPointCache;
 
   hoverIndex_ { |val|
     if (val != hoverIndex) {
@@ -8,7 +9,7 @@ ESDrawEnvClip : ESDrawClip {
     };
   }
 
-  prDraw { |left, top, width, height, editingMode, clipLeft, clipWidth|
+  prDraw { |left, top, width, height, editingMode, clipLeft, clipWidth, selected, drawBorder, timeSelectionPixels|
     var pratio = clip.duration / width;
     var tratio = pratio.reciprocal;
     var line = clip.bus.asESDisplayString ++ "  -> " ++ clip.bus.value.asCompileString;
@@ -38,6 +39,13 @@ ESDrawEnvClip : ESDrawClip {
     if (editingMode) {
       var thisEnv = clip.envToPlay;
       var points = this.envBreakPoints(thisEnv, left, top, width, height);
+
+      if (timeSelectionPixels.notNil) {
+        Pen.addRect(Rect(timeSelectionPixels[0], top, timeSelectionPixels[1] - timeSelectionPixels[0], height));
+        Pen.color = Color.gray(1, 0.1);
+        Pen.fill;
+      };
+
       points.do { |point, i|
         Pen.addOval(Rect(point.x - 3, point.y - 3, 6, 6));
         Pen.strokeColor = Color.white;
@@ -78,9 +86,10 @@ ESDrawEnvClip : ESDrawClip {
     ^clip.prTitle;
   }
 
-  prMouseMove { |x, y, xDelta, yDelta, mods, left, top, width, height|
+  prMouseMove { |x, y, xDelta, yDelta, mods, left, top, width, height, editingMode, clipLeft, clipWidth, selected, drawBorder, timeSelectionPixels|
     var thisEnv = clip.envToPlay;
     var points;
+    var ret = false;
     if (hoverIndex == 0) {
       clip.env = Env([thisEnv.levels[0]] ++ thisEnv.levels, [0] ++ thisEnv.times, if (thisEnv.curves.isArray) { [thisEnv.curves[0]] ++ thisEnv.curves } { thisEnv.curves });
       clip.offset = 0;
@@ -88,35 +97,52 @@ ESDrawEnvClip : ESDrawClip {
       editingFirst = true;
       thisEnv = clip.envToPlay;
     };
-    points = this.envBreakPoints(thisEnv, left, top, width, height);
+    points = breakPointCache.copy;//this.envBreakPoints(thisEnv, left, top, width, height);
     if (hoverIndex.notNil) {
+      var indices = if (indexSelection.notNil and: { (indexSelection[0] <= hoverIndex) and: (indexSelection[1] >= hoverIndex) }) { (indexSelection[0]..indexSelection[1]) } { [hoverIndex] };
       var env, offset;
-      // adjust breakpoint
-      var prevPoint = points[max(0, hoverIndex - 1)];
-      var nextPoint = if (hoverIndex < (points.size - 1)) { points[hoverIndex + 1] } { (left + width)@0 };
-      var adjustedX = x.clip(prevPoint.x, nextPoint.x).clip(left, left + width);
-      var adjustedY = y.clip(top, top + height);
-      points[hoverIndex] = adjustedX@adjustedY;
-      if (editingFirst) { points[0] = left@adjustedY; };
+
+      indices.do { |index|
+        // adjust breakpoint
+        /*
+        var prevPoint = points[max(0, hoverIndex - 1)];
+        var nextPoint = if (hoverIndex < (points.size - 1)) { points[hoverIndex + 1] } { (left + width)@0 };
+        var adjustedX = x.clip(prevPoint.x, nextPoint.x).clip(left, left + width);
+        var adjustedY = y.clip(top, top + height);
+        points[hoverIndex] = adjustedX@adjustedY;
+        if (editingFirst) { points[0] = left@adjustedY; };
+        */
+        // adjust breakpoint
+        var prevPoint = points[max(0, indices.first - 1)];
+        var nextPoint = if (indices.last < (points.size - 1)) { points[indices.last + 1] } { (left + width)@0 };
+        var adjustedX = (points[index].x + xDelta).clip(prevPoint.x, nextPoint.x).clip(left, left + width);
+        var adjustedY = (points[index].y + yDelta).clip(top, top + height);
+        points[index] = adjustedX@adjustedY;
+        if (editingFirst) { points[0] = left@adjustedY; };
+      };
+
       #env, offset = this.envFromBreakPoints(points, left, top, width, height);
       clip.env = env;
       clip.offset = offset;
     } {
-      // adjust curve if not over breakpoint and no modifiers
-      if (mods == 0) {
+      // adjust curve if not over breakpoint and alt key pressed
+      if (mods.isAlt) {
         var curves = if (thisEnv.curves.isArray) { thisEnv.curves } { thisEnv.curves.dup(thisEnv.times.size) };
         curveIndex = curveIndex ?? this.segmentIndex(points, x@y);
         originalCurve = originalCurve ?? curves[curveIndex];
         if (originalCurve.isNumber) {
           var slope = thisEnv.levels[curveIndex + 1] - thisEnv.levels[curveIndex];
-          curves[curveIndex] = originalCurve + (yDelta * 0.1 * slope.sign);
+          curves[curveIndex] = (originalCurve + (yDelta * 0.1 * slope.sign));
           clip.env = Env(thisEnv.levels, thisEnv.times, curves);
         };
+      } {
+        ret = true;
       };
     };
+    ^ret;
   }
 
-  prMouseDown { |x, y, mods, buttNum, clickCount, left, top, width, height|
+  prMouseDown { |x, y, mods, buttNum, clickCount, left, top, width, height, editingMode, clipLeft, clipWidth, selected, drawBorder, timeSelectionPixels, timeSelection|
     editingFirst = false;
     originalCurve = nil;
     curveIndex = nil;
@@ -201,6 +227,32 @@ ESDrawEnvClip : ESDrawClip {
       hoverIndex = nil;
       clip.env = Env(levels, times, curves);
       clip.offset = 0;
+    };
+
+    if (hoverIndex.notNil and: timeSelection.notNil) {
+      var env = clip.envToPlay;
+      var t = 0;
+      var startI, endI;
+      env.times.do { |timediff, i|
+        if (startI.isNil and: { t > timeSelection[0] }) {
+          startI = i;
+        };
+        if (endI.isNil and: { t > timeSelection[1] }) {
+          endI = i - 1;
+        };
+
+        t = t + timediff;
+      };
+      if (endI.isNil and: { t > timeSelection[1] }) {
+        endI = env.times.size - 1;
+      };
+      if (endI.isNil) { endI = env.times.size };
+      if (startI.isNil) { startI = endI };
+      indexSelection = [startI, endI];
+      breakPointCache = this.envBreakPoints(env, left, top, width, height);
+    } {
+      indexSelection = nil;
+      breakPointCache = this.envBreakPoints(clip.envToPlay, left, top, width, height);
     };
   }
 

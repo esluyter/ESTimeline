@@ -6,7 +6,7 @@ ESDrawClip {
   }
 
   // draw this clip on a UserView using Pen
-  draw { |left, top, width, height, editingMode = false, clipLeft, clipWidth, selected = false, drawBorder = true| // these last two are for ESTimelineClips
+  draw { |left, top, width, height, editingMode = false, clipLeft, clipWidth, selected = false, drawBorder = true, timeSelectionPixels| // these last two are for ESTimelineClips
     var font = Font("Helvetica", 14, true);
 
     if (clip.track.shouldPlay) {
@@ -61,11 +61,11 @@ ESDrawClip {
           if (clip.track.timeline.useEnvir) {
             clip.track.timeline.envir.use {
               ~thisTimeline = clip.track.timeline;
-              title = this.prDraw(left, top, width, height, editingMode, clipLeft, clipWidth, selected, drawBorder);
+              title = this.prDraw(left, top, width, height, editingMode, clipLeft, clipWidth, selected, drawBorder, timeSelectionPixels);
             }
           } {
             ~thisTimeline = clip.track.timeline;
-            title = this.prDraw(left, top, width, height, editingMode, clipLeft, clipWidth, selected, drawBorder);
+            title = this.prDraw(left, top, width, height, editingMode, clipLeft, clipWidth, selected, drawBorder, timeSelectionPixels);
           };
         /*
         } {
