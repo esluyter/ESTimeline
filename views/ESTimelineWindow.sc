@@ -45,7 +45,11 @@ ESTimelineWindow : Window {
       layout: 'line2',
       initVal: timeline.tempoBPM,
     );
-    tempoKnob.knobView.mode_(\vert).step_(0.001).shift_scale_(5);
+    tempoKnob.knobView.mode_(\vert).step_(0.001).shift_scale_(5).setContextMenuActions(
+      MenuAction("Add automation envelope", {
+        timelineView.timelineController.addTempoEnv;
+      })
+    );
 
     funcEditButt = Button(this, Rect(160, 5, 150, 30)).states_([["Prep / Cleanup funcs"]]).action_({ ESFuncEditView(timeline); timelineView.focus });
 
