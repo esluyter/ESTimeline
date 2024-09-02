@@ -113,7 +113,7 @@ Quarks.install("ddwMixerChannel")
 
 <br />
 
-*This tutorial uses mac keyboard shortcuts. I believe for other platforms you can substitute ctrl and alt.*
+*This tutorial uses mac keyboard shortcuts. I think for other platforms you can substitute ctrl and alt.*
 
 <br />
 
@@ -223,8 +223,9 @@ SynthDef(\sin, { |out, freq = 440, gate = 1, amp = 0.1, preamp = 1.5, attack = 0
 ### Editing Envelopes:
 - cmd-e to enter envelope breakpoint editor mode
   - click and drag on a breakpoint to move it around,
-  - click and drag between breakpoints to adjust the curve,
+  - opt-drag between breakpoints to adjust the curve,
   - shift-click to add breakpoints,
+  - select multiple breakpoints to move them together
   - option-click to remove them
   - to adjust the envelope range, right click, clip actions > env actions > "set env range keeping breakpoint values"
     - now you can change the frequency range of the envelope, say min `100` max `5000`
@@ -349,7 +350,8 @@ Show the mixing interface:
   - shift-click to add breakpoints
   - opt-click to remove them
   - click and drag on breakpoints to adjust them
-  - click and drag between breakpoints to adjust curves
+  - opt-drag between breakpoints to adjust curves
+  - select multiple breakpoints to move them together
 
 <img src="img/tutorial/12.png" />
 <img src="img/tutorial/13.png" />
@@ -442,8 +444,9 @@ SynthDef(\verb, { |out, verbbus, gate = 1, amp = 1|
 - Zooming
   - cmd-scroll zoom horizontally
   - opt-scroll zoom vertically
-- Envelope breakpoint editing (cmd-e to toggle this mode)
-  - click and drag to move breakpoints or adjust curves
+- Envelope breakpoint editing (cmd-e to toggle editing of Env clips)
+  - click and drag to move breakpoints
+  - opt-drag to adjust curves
   - shift-click to add breakpoint
   - opt-click to remvove breakpoint
 - Selecting
