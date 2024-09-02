@@ -58,7 +58,9 @@ Note that this is a work in progress and all is subject to revision.
   - Each timeline clip can optionally use its own TempoClock, and optionally use its own Environment 
   - Each timeline (and timeline clip) has an init / free hook for e.g. allocating and freeing resources
 - **Undo and redo** at each timeline level
-- **Save and recall** Easy to export timeline to IDE as plain text, save as .scd, and load it back again
+- **Save and recall**
+  - Save as plain text files in SC array format
+  - Once you have saved, the timeline will update a backup file every time you add an undo point, in case of crash
 
 ## Hypothetical features
 - Time features
