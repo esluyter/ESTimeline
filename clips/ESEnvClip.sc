@@ -1,5 +1,5 @@
 ESEnvClip : ESClip {
-  var <env, <bus, <>target, <>addAction, <min, <max, <>curve, <>isExponential, <makeBus = false, <makeBusRate, <useLiveInput, <>liveInput, <>ccNum, <armed, <>midiChannel;
+  var <env, <bus, <>target, <>addAction, <min, <max, <>curve, <>isExponential, <makeBus = false, <makeBusRate, <useLiveInput, <>liveInput, <>ccNum, <armed, <>midiChannel, <>midiSmooth;
   var <synth, envPlayRout;
   var <recordedLevels, <recordedTimes, <oscFunc, <recordedOffset, <midiFunc, <midiRout;
 
@@ -118,14 +118,14 @@ ESEnvClip : ESClip {
 
               Out.perform(rate, out, sig);
             }).add;
-            SynthDef(('ESEnvClip_' ++ rate ++ '_' ++ type ++ '_midi').asSymbol, { |out, gate = 1, tempo = 1, min = 0, max = 1, val|
+            SynthDef(('ESEnvClip_' ++ rate ++ '_' ++ type ++ '_midi').asSymbol, { |out, gate = 1, tempo = 1, min = 0, max = 1, val, lag|
               var sig = val;
 
               if (rate == \ar) {
                 sig = K2A.ar(sig);
               };
 
-              sig = Lag2.perform(rate, sig, 0.1);
+              sig = Lag2.perform(rate, sig, lag);
 
               switch (type)
               {\curve} {
@@ -145,19 +145,19 @@ ESEnvClip : ESClip {
     };
   }
 
-  *new { |startTime, duration, offset = 0, color, name, env, bus, target, addAction = 'addToHead', min = 0, max = 1, curve = 0, isExponential = false, makeBus = true, makeBusRate = \audio, mute = false, useLiveInput = false, liveInput = 0, ccNum = 0, armed = false, midiChannel = 16, prep = false|
+  *new { |startTime, duration, offset = 0, color, name, env, bus, target, addAction = 'addToHead', min = 0, max = 1, curve = 0, isExponential = false, makeBus = true, makeBusRate = \audio, mute = false, useLiveInput = false, liveInput = 0, ccNum = 0, armed = false, midiChannel = 16, midiSmooth = 0.1, prep = false|
     env = env ?? Env([0.5, 0.5], [0], [0]);
-    ^super.new(startTime, duration, offset, color, name, mute: mute).init(env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate, mute, useLiveInput, liveInput, ccNum, armed, midiChannel, prep);
+    ^super.new(startTime, duration, offset, color, name, mute: mute).init(env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate, mute, useLiveInput, liveInput, ccNum, armed, midiChannel, midiSmooth, prep);
   }
 
-  storeArgs { ^[startTime, duration, offset, color, name, env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate, mute, useLiveInput, liveInput, ccNum, armed, midiChannel] }
+  storeArgs { ^[startTime, duration, offset, color, name, env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate, mute, useLiveInput, liveInput, ccNum, armed, midiChannel, midiSmooth] }
 /*
   duplicate {
     //this.asCompileString.interpret.track_(track);
     ^this.class.new(*(this.storeArgs)).track_(track).prep;
   }
 */
-  init { |argEnv, argBus, argTarget, argAddAction, argMin, argMax, argCurve, argExp, argMakeBus, argMakeBusRate, argMute, argUseLiveInput, argLiveInput, argCcNum, argArmed, argMidiChannel, prep|
+  init { |argEnv, argBus, argTarget, argAddAction, argMin, argMax, argCurve, argExp, argMakeBus, argMakeBusRate, argMute, argUseLiveInput, argLiveInput, argCcNum, argArmed, argMidiChannel, argMidiSmooth, prep|
     env = argEnv;
     bus = argBus;
     target = argTarget;
@@ -173,6 +173,7 @@ ESEnvClip : ESClip {
     ccNum = argCcNum;
     armed = argArmed;
     midiChannel = argMidiChannel;
+    midiSmooth = argMidiSmooth;
 
     this.sanitizeEnv;
     if (prep) { this.prep };
@@ -332,7 +333,7 @@ ESEnvClip : ESClip {
 
           defName = (defName ++ "midi").asSymbol;
           Server.default.bind {
-            synth = Synth(defName, [out: bus.value, min: min, max: max, curve: curve, val: val], target.value, addAction.value);
+            synth = Synth(defName, [out: bus.value, min: min, max: max, curve: curve, val: val, lag: midiSmooth], target.value, addAction.value);
           };
 
           {
@@ -373,7 +374,7 @@ ESEnvClip : ESClip {
                   level = val;
                   time = track.timeline.soundingNow;
                   if (level != prevLevel) {
-                    var smoothThresh = if ((liveInput == 2) or: (liveInput == 3)) { 0.1 } { 0 };
+                    var smoothThresh = midiSmooth / 2;//if ((liveInput == 2) or: (liveInput == 3)) { 0.1 } { 0 };
                     if ((prevTime - prevPointTime) > smoothThresh) {
                       prevTime = prevTime - smoothThresh;
                       recordedLevels = recordedLevels.add(prevLevel);
