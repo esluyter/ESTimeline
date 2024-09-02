@@ -256,8 +256,6 @@ ESEnvClip : ESClip {
     };
   }
 
-  hasEditingMode { ^true }
-
   asMap { ^bus.asMap }
 
   prHasOffset { ^true } // whether to show offset parameter for editing

@@ -295,4 +295,7 @@ ESDrawEnvClip : ESDrawClip {
       if ((points[i].x < thisPoint.x) and: (point.x > thisPoint.x)) { ^i };
     };
   }
+
+
+  hasEditingMode { ^true }
 }

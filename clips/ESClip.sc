@@ -113,7 +113,6 @@ ESClip {
   defaultColor { ^Color.gray(1); }
   guiClass { ^ESClipEditView }
   drawClass { ^ESDrawClip }
-  hasEditingMode { ^false }
 
   // helper methods
   endTime { ^startTime + duration }
@@ -125,7 +124,7 @@ ESClip {
       ret = Color.white.lighten(ret, 0.5);
     };
     if (editingMode) {
-      if (this.hasEditingMode) {
+      if (this.drawClip.hasEditingMode) {
         ret = Color.black.darken(ret, 0.5);
       } {
         ret = ret.alpha_(ret.alpha * 0.5);
