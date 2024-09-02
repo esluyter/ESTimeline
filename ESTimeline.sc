@@ -274,5 +274,13 @@ ESTimeline {
   clips {
     ^tracks.collect(_.clips).flat;
   }
+
+  insertTime { |timeA, timeB|
+    tracks.do(_.insertTime(timeA, timeB));
+  }
+
+  deleteTime { |timeA, timeB|
+    tracks.do(_.deleteTime(timeA, timeB));
+  }
 }
 

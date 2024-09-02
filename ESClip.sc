@@ -143,7 +143,8 @@ ESClip {
       left = 0;
     };
     lines.do { |line, i|
-      while { max(0, width - 5) < (QtGUI.stringBounds(line, font).width) } {
+      var thisFont = if (i > 0) { font } { font.copy.size_(17) };
+      while { max(0, width - 5) < (QtGUI.stringBounds(line, thisFont).width) } {
         if (line.size == 1) {
           line = "";
         } {
@@ -152,7 +153,7 @@ ESClip {
       };
       strTop = (2+(i * 16));
       if (strTop < height) {
-        Pen.stringAtPoint(line, (left+3.5)@(strTop + top), if (i > 0) { font } { font.copy.size_(17) }, Color.gray(0.0, 0.7));
+        Pen.stringAtPoint(line, (left+3.5)@(strTop + top), thisFont, Color.gray(0.0, 0.7));
       };
     };
     Pen.color = Color.gray(0.7);
