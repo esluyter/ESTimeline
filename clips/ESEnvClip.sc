@@ -6,7 +6,7 @@ ESEnvClip : ESClip {
 
   min_ { |val| min = val; this.changed(\min); }
   max_ { |val| max = val; this.changed(\max); }
-  env_ { |val| env = val; this.changed(\env); }
+  env_ { |val| env = val; this.sanitizeEnv; this.changed(\env); }
   bus_ { |val| bus = val; this.changed(\bus); }
   rate { ^this.bus.value.rate }
   makeBus_ { |val|
@@ -95,6 +95,7 @@ ESEnvClip : ESClip {
     isExponential = argExp;
     makeBusRate = argMakeBusRate;
     makeBus = argMakeBus;
+    this.sanitizeEnv;
     if (argPrep) { this.prep };
   }
 
@@ -180,6 +181,39 @@ ESEnvClip : ESClip {
 
   guiClass { ^ESEnvClipEditView }
   drawClass { ^ESDrawEnvClip }
+
+  sanitizeEnv {
+    var thisEnv = env.value;
+    var levels = thisEnv.levels;
+    var times = thisEnv.times;
+    var curves = thisEnv.curves;
+    var changed = false;
+
+    if (times.size > (levels.size - 1)) {
+      times = times[0..(levels.size - 2)];
+      changed = true;
+    };
+    if (times.size < (levels.size - 1)) {
+      times = times ++ (0.dup(levels.size - 1 - times.size));
+      changed = true;
+    };
+
+    if (curves.isArray) {
+      if (curves.size > (levels.size - 1)) {
+        curves = curves[0..(levels.size - 2)];
+        changed = true;
+      };
+      if (curves.size < (levels.size - 1)) {
+        curves = curves ++ (0.dup(levels.size - 1 - times.size));
+        changed = true;
+      };
+    };
+
+    if (changed) {
+      "sanitized env:".postln;
+      env = Env(levels, times, curves).postcs;
+    }
+  }
 
   envToPlay { |startOffset = 0, addFinalBreakpoint = false|
     var thisEnv = env.value;
