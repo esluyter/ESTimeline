@@ -248,42 +248,47 @@ ESEnvClip : ESClip {
     };
   }
 
-  prStart { |startOffset = 0.0, clock|
-    if (useLiveInput.not) {
-      var thisEnv = this.envToPlay(startOffset, true);
-      if (bus.value.notNil) {
-        var defName = if (this.rate == 'control') { 'ESEnvClip_kr' } { 'ESEnvClip_ar' } ++ if (this.isExponential) { "_exp_" } { "_curve_" };
-        var envs = [];
-        var levels = thisEnv.levels;
-        var times = thisEnv.times;
-        var curves = thisEnv.curves;
-        if (curves.isArray.not) { curves = curves.dup(times.size) };
-        while { levels.size > 512 } {
-          var thisLevels = levels[0..511];
-          var thisTimes = times[0..510];
-          var thisCurves = curves[0..510];
-          levels = levels[511..];
-          times = times[511..];
-          curves = curves[511..];
-          envs = envs.add(Env(thisLevels, thisTimes, thisCurves));
-        };
-        envs = envs.add(Env(levels, times, curves));
+  prEnvs { |thisEnv|
+    // break long envs apart into 512-sized chunks
+    var envs = [];
+    var levels = thisEnv.levels;
+    var times = thisEnv.times;
+    var curves = thisEnv.curves;
+    if (curves.isArray.not) { curves = curves.dup(times.size) };
+    while { levels.size > 512 } {
+      var thisLevels = levels[0..511];
+      var thisTimes = times[0..510];
+      var thisCurves = curves[0..510];
+      levels = levels[511..];
+      times = times[511..];
+      curves = curves[511..];
+      envs = envs.add(Env(thisLevels, thisTimes, thisCurves));
+    };
+    envs = envs.add(Env(levels, times, curves));
+    ^envs;
+  }
 
-        envPlayRout = {
-          envs.do { |e|
-            var size = e.levels.size.nextPowerOfTwo;
-            var time = e.duration;
-            if (size > 512) {
-              ("ERROR: Envelope should have max 512 points. This envelope needs " ++ size) .error;
-            };
-            Server.default.bind {
-              synth.release;
-              synth = Synth((defName ++ size).asSymbol, [env: e.asArrayForInterpolation.collect(_.reference).unbubble, out: bus.value, tempo: clock.tempo, min: min, max: max, curve: curve], target.value, addAction.value);
-            };
-            time.wait;
+  prStart { |startOffset = 0.0, clock|
+    if (bus.value.isNil) { ^false };
+
+    if (useLiveInput.not) {
+      var defName = if (this.rate == 'control') { 'ESEnvClip_kr' } { 'ESEnvClip_ar' } ++ if (this.isExponential) { "_exp_" } { "_curve_" };
+      var envs = this.prEnvs(this.envToPlay(startOffset, true)); // break long envs into 512-sized chunks
+
+      envPlayRout = {
+        envs.do { |e|
+          var size = e.levels.size.nextPowerOfTwo;
+          var time = e.duration;
+          if (size > 512) {
+            ("ERROR: Envelope should have max 512 points. This envelope needs " ++ size) .error;
           };
-        }.fork(clock);
-      };
+          Server.default.bind {
+            synth.release;
+            synth = Synth((defName ++ size).asSymbol, [env: e.asArrayForInterpolation.collect(_.reference).unbubble, out: bus.value, tempo: clock.tempo, min: min, max: max, curve: curve], target.value, addAction.value);
+          };
+          time.wait;
+        };
+      }.fork(clock);
     } { // useLiveInput
       if (bus.value.notNil) {
         var defName = if (this.rate == 'control') { 'ESEnvClip_kr' } { 'ESEnvClip_ar' };
