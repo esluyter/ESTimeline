@@ -520,7 +520,26 @@ ESMixerWindow {
             var clip = template.fx[index];
             clip.guiClass.new(clip, timeline, template, index);
           };
-        }).setContextMenuActions(
+        })
+        .canReceiveDragHandler_(true)
+        .beginDragAction_({ index })
+        .receiveDragHandler_({ |view|
+          var dragIndex = View.currentDrag;
+          if (dragIndex != index) {
+            // this will only work to rearrange fx on same channel....
+            // TODO: dragging fx across channels
+            //var thisIndex = if (dragIndex < index) { index - 1 } { index };
+            var clip = template.fx.removeAt(dragIndex);
+            var fxEnvs = template.envs.fx.removeAt(dragIndex);
+            template.fx = template.fx.insert(index, clip);
+            template.envs.fx = template.envs.fx.insert(index, fxEnvs);
+            this.buildMixer;
+          };
+        })
+        .mouseMoveAction_({ |view|
+          view.beginDrag;
+        })
+        .setContextMenuActions(
           MenuAction("Delete", {
             template.fx.removeAt(index);
             timeline.addUndoPoint;
