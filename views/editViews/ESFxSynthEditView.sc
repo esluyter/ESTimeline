@@ -10,12 +10,16 @@ ESFxSynthEditView : ESClipEditView {
 
     this.prNew(clip, timeline, {
       var func = funcView.string.interpret;
+      var nameChanged = false;
       if (func.isNil) {
         ESBulkEditWindow.ok
       } {
         clip.func = func;
       };
       clip.doPlayFunc = doPlayFuncBox.value;
+      if (clip.name != nameField.string.asSymbol) {
+        nameChanged = true;
+      };
       clip.name = nameField.string.asSymbol;
       clip.args = argsView.value;
       clip.defName = ("{" ++ defNameView.string ++ "}").interpret;
@@ -23,6 +27,9 @@ ESFxSynthEditView : ESClipEditView {
       argsView.free;
       argsView.init(clip.args.copy, clip.argControls);
 
+      if (nameChanged) {
+        template.changed(\fx);
+      };
       timeline.addUndoPoint;
     });
 
