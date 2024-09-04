@@ -34,6 +34,17 @@ ESTimeline {
     };
     this.changed(\envs);
   }
+  tempoAtTime { |time|
+    if (tempoEnv.notNil) {
+      ^tempoEnv.valueAtTime(time) / 60;
+    } {
+      if (parentClip.notNil) {
+        ^parentClip.track.timeline.tempoAtTime(time + parentClip.startTime - parentClip.offset);
+      } {
+        ^tempo;
+      };
+    };
+  }
   tempo {
     if (parentClip.notNil and: { parentClip.useParentClock }) {
       ^parentClip.track.timeline.tempo;
@@ -730,7 +741,7 @@ ESTimeline {
     };
   }
 
-  restoreUndoPoint { |undoPoint, clearUndoStack = false, legacy = false, keepMaster = true, useAllFields = false|
+  restoreUndoPoint { |undoPoint, clearUndoStack = false, legacy = false, keepMaster = true, useAllFields = false, keepTempoEnv = true|
     var arr;
     var thisTempo;
     // leave gridDivision, snapToGrid, and useMixerChannel as they were
@@ -795,7 +806,9 @@ ESTimeline {
 
     this.init;
 
-    this.tempoEnv = dummyTempoEnv;
+    if (keepTempoEnv) {
+      this.tempoEnv = dummyTempoEnv;
+    };
 
     currentState = this.asUndoPoint;
     this.changed(\restoreUndoPoint);
@@ -874,7 +887,7 @@ ESTimeline {
       mixerChannelTemplates.do({ |template| template.releaseDependants });
       mixerChannelTemplates = (master: mixerChannelTemplates[\master]);
       this.init;
-      newTimeline.restoreUndoPoint(currentState, keepMaster: false);
+      newTimeline.restoreUndoPoint(currentState, keepMaster: false, keepTempoEnv: false);
       this.changed(\encapsulateSelf);
     }
   }
