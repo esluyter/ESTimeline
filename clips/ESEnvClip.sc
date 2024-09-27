@@ -2,7 +2,7 @@ ESEnvClip : ESClip {
   var <env, <bus, <>target, <>addAction, <min, <max, <>curve, <>isExponential, <makeBus = false, <makeBusRate, <useLiveInput, <>liveInput, <>ccNum, <armed, <>midiChannel, <>midiSmooth;
   var <synth, envPlayRout;
   var <recordedLevels, <recordedTimes, <oscFunc, <recordedOffset, <midiFunc, <midiFuncOff, <midiRout;
-  var prevLevel;
+  var prevLevel = 0.5;
 
   //classvar <buses;  // event format name -> [bus, nClips] -- when nClips becomes 0 bus should be freed.
 
@@ -345,7 +345,7 @@ ESEnvClip : ESClip {
           };
         } { // midi input
           var chan = if (midiChannel == 16) { nil } { midiChannel };
-          var val = switch (liveInput)
+          prevLevel = switch (liveInput)
           { 2 } { track.timeline.listener.ccValue(ccNum, midiChannel) }
           { 3 } { track.timeline.listener.bendValue(midiChannel) }
           { 4 } { track.timeline.listener.noteValue(midiChannel) }
@@ -355,7 +355,7 @@ ESEnvClip : ESClip {
 
           defName = (defName ++ "midi").asSymbol;
           Server.default.bind {
-            synth = Synth(defName, [out: bus.value, min: min, max: max, curve: curve, val: val, lag: midiSmooth], target.value, addAction.value);
+            synth = Synth(defName, [out: bus.value, min: min, max: max, curve: curve, val: prevLevel, lag: midiSmooth], target.value, addAction.value);
           };
 
           {
@@ -363,20 +363,20 @@ ESEnvClip : ESClip {
             switch (liveInput)
             { 2 } { // cc
               midiFunc = MIDIFunc.cc({ |midiVal|
-                val = midiVal.linlin(0, 127, 0.0, 1.0);
-                synth.set(\val, val)
+                prevLevel = midiVal.linlin(0, 127, 0.0, 1.0);
+                synth.set(\val, prevLevel)
               }, ccNum, chan);
             }
             { 3 } { // pitch bend
               midiFunc = MIDIFunc.bend({ |midiVal|
-                val = midiVal.linlin(0, 16383, 0.0, 1.0);
-                synth.set(\val, val);
+                prevLevel = midiVal.linlin(0, 16383, 0.0, 1.0);
+                synth.set(\val, prevLevel);
               }, chan);
             }
             { 4 } { // note
               midiFunc = MIDIFunc.noteOn({ |vel, num|
-                val = num.linlin(0, 127, 0.0, 1.0);
-                synth.set(\val, val);
+                prevLevel = num.linlin(0, 127, 0.0, 1.0);
+                synth.set(\val, prevLevel);
               }, chan: chan);
             }
             { 5 } { // mono note
@@ -384,21 +384,21 @@ ESEnvClip : ESClip {
               midiFunc = MIDIFunc.noteOn({ |vel, num|
                 if (notes.indexOf(num).notNil) { notes.remove(num) };
                 notes = notes.add(num);
-                val = num.linlin(0, 127, 0.0, 1.0);
-                synth.set(\val, val);
+                prevLevel = num.linlin(0, 127, 0.0, 1.0);
+                synth.set(\val, prevLevel);
               }, chan: chan);
               midiFuncOff = MIDIFunc.noteOff({ |vel, num|
                 notes.remove(num);
                 if (notes.size > 0) {
-                  val = notes.last.linlin(0, 127, 0.0, 1.0);
-                  synth.set(\val, val);
+                  prevLevel = notes.last.linlin(0, 127, 0.0, 1.0);
+                  synth.set(\val, prevLevel);
                 };
               }, chan: chan);
             }
             { 6 } { // vel
               midiFunc = MIDIFunc.noteOn({ |vel, num|
-                val = vel.linlin(0, 127, 0.0, 1.0);
-                synth.set(\val, val);
+                prevLevel = vel.linlin(0, 127, 0.0, 1.0);
+                synth.set(\val, prevLevel);
               }, chan: chan);
             }
             { 7 } { // gated vel
@@ -406,24 +406,24 @@ ESEnvClip : ESClip {
               midiFunc = MIDIFunc.noteOn({ |vel, num|
                 if (notes.indexOf(num).notNil) { notes.remove(num) };
                 notes = notes.add(num);
-                val = vel.linlin(0, 127, 0.0, 1.0);
-                synth.set(\val, val);
+                prevLevel = vel.linlin(0, 127, 0.0, 1.0);
+                synth.set(\val, prevLevel);
               }, chan: chan);
               midiFuncOff = MIDIFunc.noteOff({ |vel, num|
                 notes.remove(num);
                 if (notes.size == 0) {
-                  val = 0;
-                  synth.set(\val, val);
+                  prevLevel = 0;
+                  synth.set(\val, prevLevel);
                 };
               }, chan: chan);
             }
             { "This MIDI input not yet implemented".warn; };
 
             if (armed) {
-              var prevLevel = val;
+              var prevPrevLevel = prevLevel;
               var prevTime = track.timeline.soundingNow;
               var prevPointTime = prevTime;
-              recordedLevels = [val];
+              recordedLevels = [prevLevel];
               recordedTimes = [];
               recordedOffset = startOffset * -1;
 
@@ -431,13 +431,13 @@ ESEnvClip : ESClip {
                 var time, level;
 
                 loop {
-                  level = val;
+                  level = prevLevel;
                   time = track.timeline.soundingNow;
-                  if (level != prevLevel) {
+                  if (level != prevPrevLevel) {
                     var smoothThresh = midiSmooth / 2;//if ((liveInput == 2) or: (liveInput == 3)) { 0.1 } { 0 };
                     if ((prevTime - prevPointTime) > smoothThresh) {
                       prevTime = prevTime - smoothThresh;
-                      recordedLevels = recordedLevels.add(prevLevel);
+                      recordedLevels = recordedLevels.add(prevPrevLevel);
                       recordedTimes = recordedTimes.add(prevTime - prevPointTime);
                     } {
                       prevTime = prevPointTime;
@@ -447,7 +447,7 @@ ESEnvClip : ESClip {
                     prevPointTime = time;
                   };
                   prevTime = time;
-                  prevLevel = level;
+                  prevPrevLevel = level;
                   0.005.wait;
                 };
               }.fork(SystemClock);
