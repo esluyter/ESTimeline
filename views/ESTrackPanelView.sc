@@ -126,8 +126,13 @@ ESTrackPanelView : UserView {
       .canReceiveDragHandler_(true)
       .receiveDragHandler_({
         var thisTrack = View.currentDrag;
-        timeline.removeTrack(thisTrack.index, false);
-        timeline.addTrack(i, thisTrack);
+        if (thisTrack.index != i) {
+          /*
+          timeline.removeTrack(thisTrack.index, false);
+          timeline.addTrack(i, thisTrack);
+          */
+          timeline.moveTrack(thisTrack.index, i);
+        };
       });
       StaticText(view, Rect(2, 4, 18, 25)).string_(i.asString).stringColor_(Color.gray(0.4)).font_(Font.monospace(14));
 
@@ -135,7 +140,9 @@ ESTrackPanelView : UserView {
         nameText: StaticText(view, Rect(2, 35, width - 4, timelineView.trackHeight - 35)).align_(\topLeft).string_(track.name ?? "").stringColor_(Color.gray(0.5)).font_(Font.sansSerif(14, true)).canReceiveDragHandler_(true)
         .receiveDragHandler_({
           var thisTrack = View.currentDrag;
-          timeline.moveTrack(thisTrack.index, i);
+          if (thisTrack.index != i) {
+            timeline.moveTrack(thisTrack.index, i);
+          };
         }).mouseDownAction_({ |view, x, y, mods, buttNum, clickCount|
           if (clickCount > 1) {
             var nextName = track.name ?? "";
