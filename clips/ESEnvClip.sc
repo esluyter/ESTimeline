@@ -2,6 +2,7 @@ ESEnvClip : ESClip {
   var <env, <bus, <>target, <>addAction, <min, <max, <>curve, <>isExponential, <makeBus = false, <makeBusRate, <useLiveInput, <>liveInput, <>ccNum, <armed, <>midiChannel, <>midiSmooth;
   var <synth, envPlayRout;
   var <recordedLevels, <recordedTimes, <oscFunc, <recordedOffset, <midiFunc, <midiFuncOff, <midiRout;
+  var prevLevel;
 
   //classvar <buses;  // event format name -> [bus, nClips] -- when nClips becomes 0 bus should be freed.
 
@@ -232,20 +233,24 @@ ESEnvClip : ESClip {
       midiRout.stop; midiRout = nil;
     }.fork(SystemClock);
 
-    if (useLiveInput and: armed) {
+    if (useLiveInput) {
       {
         (Server.default.latency * 2).wait; // make sure all OSC messages have been recieved
         oscFunc.free; oscFunc = nil;
-        if (recordedLevels.size == 1) {
-          recordedLevels = recordedLevels.add(recordedLevels[0]);
-          recordedTimes = [duration];
+
+        if (armed) {
+          if (recordedLevels.size == 1) {
+            recordedLevels = recordedLevels.add(recordedLevels[0]);
+            recordedTimes = [duration];
+          };
+          this.env = Env(recordedLevels, recordedTimes, 0);
+          this.armed = false;
+          this.useLiveInput = false;
+          this.offset = recordedOffset;
         };
-        this.env = Env(recordedLevels, recordedTimes, 0);
-        this.armed = false;
-        this.useLiveInput = false;
-        this.offset = recordedOffset;
       }.fork(SystemClock);
     };
+
   }
 
   prEnvs { |thisEnv|
@@ -301,7 +306,7 @@ ESEnvClip : ESClip {
           };
 
           if (armed) {
-            var prevLevel;
+            //var prevLevel;
             var prevTime;
             var prevPointTime;
             recordedLevels = [];
@@ -326,6 +331,14 @@ ESEnvClip : ESClip {
                   prevPointTime = time;
                 };
                 prevTime = time;
+                prevLevel = level;
+              };
+            }, "/mouse");
+          } { // not armed
+            oscFunc = OSCFunc({ |msg|
+              var thisId, time, level;
+              #thisId, time, level = msg[2..];
+              if (id == thisId) {
                 prevLevel = level;
               };
             }, "/mouse");
@@ -574,7 +587,11 @@ ESEnvClip : ESClip {
   }
 
   valueNow {
-    ^this.valueAtTime(track.timeline.now - startTime);
+    if (useLiveInput) {
+      ^this.prValueScale(prevLevel);
+    } {
+      ^this.valueAtTime(track.timeline.now - startTime);
+    }
   }
 
   valueAtIndex { |i|
