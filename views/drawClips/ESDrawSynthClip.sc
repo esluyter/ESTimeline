@@ -39,7 +39,7 @@ ESDrawSynthClip : ESDrawClip {
       left = clipLeft;
     };
 
-    if ((height > 30) and: (width > 15)) {
+    if ((height > 30) and: (width > 45)) {
       argsValue.pairsDo { |key, val, i|
         var line = "" ++ key ++ ":  " ++ clip.getArg(key).asESDisplayString ++ " -> " ++ val.value;
         line = ESStringShortener.trim(line, width - 5, font);
