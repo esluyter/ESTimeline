@@ -46,17 +46,7 @@ ESDrawPatternClip : ESDrawClip {
     var t = 0.0;
     var instrument = Set(8);
 
-    /*
-    var string = this.patternString;
-    var lines = string.split($\n);
-    var font = Font.monospace(10);
-    lines.do { |line, i|
-      line = ESStringShortener.trim(line, width - 5, font);
-      Pen.stringAtPoint(line, (left+3.5)@(top+20+(i * 10)), font, Color.gray(1.0, 0.4));
-    };
-    */
-
-    //try {
+    if (clip.duration != inf) {
       this.drawData.do { |event|
         if (event.isRest.not) {
           var x = left + (t * width / clip.duration);
@@ -78,10 +68,8 @@ ESDrawPatternClip : ESDrawClip {
       };
       // return the title of the clip
       ^clip.prTitle(instrument.asArray.join(" / ") ++ ": " ++ clip.pattern.class);
-    /*
     } {
       ^clip.prTitle;
     };
-    */
   }
 }
