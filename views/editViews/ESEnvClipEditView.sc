@@ -8,6 +8,8 @@ ESEnvClipEditView : ESClipEditView {
     };
 
     this.prNew(clip, timeline, {
+      var duration = durationView.string.interpret;
+      var startTime = startTimeView.string.interpret;
       var env = ("{" ++ codeView.string ++ "}").interpret;
       if (env.isNil) {
         ESBulkEditWindow.ok
@@ -16,8 +18,8 @@ ESEnvClipEditView : ESClipEditView {
         clip.target = ("{" ++ targetView.string ++ "}").interpret;
         clip.addAction = ("{" ++ addActionView.string ++ "}").interpret;
         clip.color = colorView.background;
-        clip.startTime = startTimeView.string.interpret;
-        clip.duration =  durationView.string.interpret;
+        clip.startTime = startTime;
+        clip.duration =  duration;
         clip.offset = offsetView.string.interpret;
 
         clip.armed = recordArmButt.value.asBoolean;

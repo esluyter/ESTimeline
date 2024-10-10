@@ -9,8 +9,8 @@ ESDrawEnvClip : ESDrawClip {
     };
   }
 
-  prDraw { |left, top, width, height, editingMode, clipLeft, clipWidth, selected, drawBorder, timeSelectionPixels|
-    var pratio = clip.duration / width;
+  prDraw { |left, top, width, height, editingMode, clipLeft, clipWidth, selected, drawBorder, timeSelectionPixels, timeSelection, clipDuration|
+    var pratio = clipDuration / width;
     var tratio = pratio.reciprocal;
     var line = clip.bus.asESDisplayString ++ "  -> " ++ clip.bus.value.asCompileString;
     var minString = clip.min.asString;
@@ -52,7 +52,7 @@ ESDrawEnvClip : ESDrawClip {
 
     if (editingMode) {
       var thisEnv = clip.envToPlay;
-      var points = this.envBreakPoints(thisEnv, left, top, width, height);
+      var points = this.envBreakPoints(thisEnv, left, top, width, height, clipDuration);
 
       if (timeSelectionPixels.notNil) {
         Pen.addRect(Rect(timeSelectionPixels[0], top, timeSelectionPixels[1] - timeSelectionPixels[0], height));
@@ -100,7 +100,7 @@ ESDrawEnvClip : ESDrawClip {
     ^clip.prTitle;
   }
 
-  prMouseMove { |x, y, xDelta, yDelta, mods, left, top, width, height, editingMode, clipLeft, clipWidth, selected, drawBorder, timeSelectionPixels|
+  prMouseMove { |x, y, xDelta, yDelta, mods, left, top, width, height, editingMode, clipLeft, clipWidth, selected, drawBorder, timeSelectionPixels, timeSelection, clipDuration|
     var thisEnv = clip.envToPlay;
     var points;
     var ret = false;
@@ -109,8 +109,8 @@ ESDrawEnvClip : ESDrawClip {
       clip.offset = 0;
       hoverIndex = 1;
       editingFirst = true;
-      thisEnv = clip.envToPlay.postcs;
-      breakPointCache = this.envBreakPoints(thisEnv, left, top, width, height);
+      thisEnv = clip.envToPlay;
+      breakPointCache = this.envBreakPoints(thisEnv, left, top, width, height, clipDuration);
     };
     points = breakPointCache.copy;//this.envBreakPoints(thisEnv, left, top, width, height);
     if (hoverIndex.notNil) {
@@ -136,7 +136,7 @@ ESDrawEnvClip : ESDrawClip {
         if (editingFirst) { points[0] = left@adjustedY; };
       };
 
-      #env, offset = this.envFromBreakPoints(points, left, top, width, height);
+      #env, offset = this.envFromBreakPoints(points, left, top, width, height, clipDuration);
       clip.env = env;
       clip.offset = offset;
     } {
@@ -157,13 +157,13 @@ ESDrawEnvClip : ESDrawClip {
     ^ret;
   }
 
-  prMouseDown { |x, y, mods, buttNum, clickCount, left, top, width, height, editingMode, clipLeft, clipWidth, selected, drawBorder, timeSelectionPixels, timeSelection|
+  prMouseDown { |x, y, mods, buttNum, clickCount, left, top, width, height, editingMode, clipLeft, clipWidth, selected, drawBorder, timeSelectionPixels, timeSelection, clipDuration|
     editingFirst = false;
     originalCurve = nil;
     curveIndex = nil;
 
     if (mods.isShift) {
-      var pratio = clip.duration / width;
+      var pratio = clipDuration / width;
       var tratio = pratio.reciprocal;
       var thisEnv = clip.envToPlay;
       var thisTime = ((x - left) * pratio);
@@ -264,16 +264,16 @@ ESDrawEnvClip : ESDrawClip {
       if (endI.isNil) { endI = env.times.size };
       if (startI.isNil) { startI = endI };
       indexSelection = [startI, endI];
-      breakPointCache = this.envBreakPoints(env, left, top, width, height);
+      breakPointCache = this.envBreakPoints(env, left, top, width, height, clipDuration);
     } {
       indexSelection = nil;
-      breakPointCache = this.envBreakPoints(clip.envToPlay, left, top, width, height);
+      breakPointCache = this.envBreakPoints(clip.envToPlay, left, top, width, height, clipDuration);
     };
   }
 
-  prHover { |x, y, hoverTime, left, top, width, height|
+  prHover { |x, y, hoverTime, left, top, width, height, editingMode, clipLeft, clipWidth, selected, drawBorder, timeSelectionPixels, timeSelection, clipDuration|
     var thisEnv = clip.envToPlay;
-    var points = this.envBreakPoints(thisEnv, left, top, width, height);
+    var points = this.envBreakPoints(thisEnv, left, top, width, height, clipDuration);
     this.hoverIndex = this.nearestBreakPointIndex(points, (x@y));
   }
 
@@ -281,8 +281,8 @@ ESDrawEnvClip : ESDrawClip {
     this.hoverIndex = nil;
   }
 
-  envBreakPoints { |thisEnv, left, top, width, height|
-    var pratio = clip.duration / width;
+  envBreakPoints { |thisEnv, left, top, width, height, clipDuration|
+    var pratio = clipDuration / width;
     var tratio = pratio.reciprocal;
     var time = 0;
     var points = [];
@@ -297,8 +297,8 @@ ESDrawEnvClip : ESDrawClip {
     ^points;
   }
 
-  envFromBreakPoints { |points, left, top, width, height|
-    var pratio = clip.duration / width;
+  envFromBreakPoints { |points, left, top, width, height, clipDuration|
+    var pratio = clipDuration / width;
     var tratio = pratio.reciprocal;
     var curves = clip.envToPlay.curves;
     var times = [];

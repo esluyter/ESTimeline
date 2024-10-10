@@ -900,9 +900,10 @@ ESTimelineView : UserView {
   pixelsToAbsoluteTime { |pixels| ^this.pixelsToRelativeTime(pixels) + startTime }
 
   clipBounds { |clip|
+    var clipDuration = if (clip.duration == inf) { this.endTime - clip.startTime } { clip.duration };
     var left = this.absoluteTimeToPixels(clip.startTime);
-    var width = this.relativeTimeToPixels(clip.duration);
-    ^[left, 3, width, trackHeight - 4, editingMode, nil, nil, this.selectedClips.includes(clip), true, timeSelection.collect({ |time| this.absoluteTimeToPixels(time) }), if (timeSelection.notNil) { timeSelection - clip.startTime } { nil }];
+    var width = this.relativeTimeToPixels(clipDuration);
+    ^[left, 3, width, trackHeight - 4, editingMode, nil, nil, this.selectedClips.includes(clip), true, timeSelection.collect({ |time| this.absoluteTimeToPixels(time) }), if (timeSelection.notNil) { timeSelection - clip.startTime } { nil }, clipDuration];
   }
 
   startTime_ { |val|

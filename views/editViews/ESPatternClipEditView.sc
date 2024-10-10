@@ -4,6 +4,8 @@ ESPatternClipEditView : ESClipEditView {
     var codeView, randSeedField, isSeededBox;
 
     this.prNew(clip, timeline, {
+      var duration = durationView.string.interpret;
+      var startTime = startTimeView.string.interpret;
       var pattern = ("{" ++ codeView.string ++ "}").interpret;
       if (pattern.isNil) {
         ESBulkEditWindow.ok;
@@ -13,8 +15,8 @@ ESPatternClipEditView : ESClipEditView {
         clip.randSeed = randSeedField.string.asInteger;
         clip.isSeeded = isSeededBox.value;
         clip.color = colorView.background;
-        clip.startTime = startTimeView.string.interpret;
-        clip.duration =  durationView.string.interpret;
+        clip.startTime = startTime;
+        clip.duration =  duration;
         clip.offset = offsetView.string.interpret;
 
         timeline.addUndoPoint;

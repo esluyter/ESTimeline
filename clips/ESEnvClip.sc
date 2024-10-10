@@ -241,7 +241,7 @@ ESEnvClip : ESClip {
         if (armed) {
           if (recordedLevels.size == 1) {
             recordedLevels = recordedLevels.add(recordedLevels[0]);
-            recordedTimes = [duration];
+            recordedTimes = [if (duration == inf) { 0.1 } { duration }];
           };
           this.env = Env(recordedLevels, recordedTimes, 0);
           this.armed = false;
@@ -525,7 +525,7 @@ ESEnvClip : ESClip {
     var times = thisEnv.times;
     var curves = thisEnv.curves;
 
-    var thisDuration = duration - startOffset;
+    var thisDuration = if (duration == inf) { thisEnv.duration } { duration } - startOffset;
 
     if (playOffset < 0) {
       levels = [levels[0]] ++ levels;

@@ -4,6 +4,8 @@ ESRoutineClipEditView : ESClipEditView {
     var funcButton, stopFuncButton, funcView, stopFuncView, randSeedField, isSeededBox, addLatencyBox, fastForwardMenu;
 
     this.prNew(clip, timeline, {
+      var duration = durationView.string.interpret;
+      var startTime = startTimeView.string.interpret;
       var func = ("{" ++ funcView.string ++ "}").interpret;
       var stopFunc = ("{" ++ stopFuncView.string ++ "}").interpret;
       if ((func.isNil) or: (stopFunc.isNil)) {
@@ -16,8 +18,8 @@ ESRoutineClipEditView : ESClipEditView {
         clip.isSeeded = isSeededBox.value;
         clip.addLatency = addLatencyBox.value;
         clip.color = colorView.background;
-        clip.startTime = startTimeView.string.interpret;
-        clip.duration =  durationView.string.interpret;
+        clip.startTime = startTime;
+        clip.duration =  duration;
         clip.offset = offsetView.string.interpret;
         clip.fastForward = fastForwardMenu.value;
 

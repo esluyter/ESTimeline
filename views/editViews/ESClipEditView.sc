@@ -115,14 +115,17 @@ ESClipEditView {
     var panelFont = Font.sansSerif(16);
 
     this.prNew(clip, timeline, {
+      var duration = durationView.string.interpret;
+      var startTime = startTimeView.string.interpret;
+
       var string = funcView.string;
       var lines = string.split($\n);
       clip.name = lines[0].asSymbol;
       clip.comment = lines[1..].join($\n);
 
       clip.color = colorView.background;
-      clip.startTime = startTimeView.string.interpret;
-      clip.duration =  durationView.string.interpret;
+      clip.startTime = startTime;
+      clip.duration =  duration;
 
       timeline.addUndoPoint;
     });
