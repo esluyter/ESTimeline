@@ -78,7 +78,7 @@ ESDrawTimelineClip : ESDrawClip {
               thisClipWidth = (clipLeft + clipWidth) - thisClipLeft;
             };
 
-            thisClip.drawClip.draw(thisLeft, thisTop, thisWidth, thisHeight, false, thisClipLeft, thisClipWidth, selected, false);
+            thisClip.drawClip.draw(thisLeft, thisTop, thisWidth, thisHeight, false, thisClipLeft, thisClipWidth, selected, false, nil, nil, thisClip.duration);
           };
         };
       };

@@ -7,12 +7,12 @@ ESBulkEditWindow {
     var top = Window.availableBounds.height - height - 200;
     var funcView;
     editorWindow !? { editorWindow.close };
-    editorWindow = Window(title, Rect(left, top, width, height)).front;
+    editorWindow = Window(title, Rect(left, top, width, height)).alwaysOnTop_(true).front;
     StaticText(editorWindow, Rect(100, 22, 500, 20)).string_(title).font_(Font.sansSerif(20));
     funcView = CodeView(editorWindow, Rect(20, 50, width - 40, 180)).string_(string);
     Button(editorWindow, Rect(100, 240, 197.5, 40)).string_("OK").font_(Font.sansSerif(14)).action_({
       callback.value(funcView.string);
-      editorWindow.close;
+      //editorWindow.close;
     });
     Button(editorWindow, Rect(302.5, 240, 197.5, 40)).string_("Cancel").font_(Font.sansSerif(14)).action_({
       editorWindow.close;
@@ -24,7 +24,7 @@ ESBulkEditWindow {
     var left = ((Window.availableBounds.width - width) / 2);
     var top = Window.availableBounds.height - height - 200;
     editorWindow !? { editorWindow.close };
-    editorWindow = Window(title, Rect(left, top, width, height)).front;
+    editorWindow = Window(title, Rect(left, top, width, height)).alwaysOnTop_(true).front;
     StaticText(editorWindow, Rect(100, 30, 500, 20)).string_(title).font_(Font.sansSerif(20));
     Button(editorWindow, Rect(100, 220, 197.5, 40)).string_("OK").font_(Font.sansSerif(14)).action_({
       okFunc.value;
@@ -42,7 +42,7 @@ ESBulkEditWindow {
     var top = Window.availableBounds.height - height - 200;
     var keyField, valField, checkBox, extraField;
     editorWindow !? { editorWindow.close };
-    editorWindow = Window(title, Rect(left, top, width, height)).front;
+    editorWindow = Window(title, Rect(left, top, width, height)).alwaysOnTop_(true).front;
     StaticText(editorWindow, Rect(100, 30, 500, 20)).string_(title).font_(Font.sansSerif(20));
     StaticText(editorWindow, Rect(0, 80, 90, 40)).align_(\right).string_(keyLabel).font_(Font.sansSerif(16));
     keyField = TextField(editorWindow, Rect(100, 80, 400, 40)).string_(keyDefault).font_(Font.monospace(16));
@@ -59,7 +59,7 @@ ESBulkEditWindow {
       //var key = keyField.string.asSymbol;
       //var val = ("{" ++ valField.string ++ "}").interpret;
       callback.(keyField.string, valField.string, checkBox.value, extraField.string);
-      editorWindow.close;
+      //editorWindow.close;
     });
     Button(editorWindow, Rect(302.5, 220, 197.5, 40)).string_("Cancel").font_(Font.sansSerif(14)).action_({ editorWindow.close });
   }
@@ -70,7 +70,7 @@ ESBulkEditWindow {
     var top = Window.availableBounds.height - height - 200;
     var keyField, valField;
     editorWindow !? { editorWindow.close };
-    editorWindow = Window(title, Rect(left, top, width, height)).front;
+    editorWindow = Window(title, Rect(left, top, width, height)).alwaysOnTop_(true).front;
     StaticText(editorWindow, Rect(100, 30, 400, 20)).string_(title).font_(Font.sansSerif(20));
     StaticText(editorWindow, Rect(0, 80, 90, 40)).align_(\right).string_("value").font_(Font.sansSerif(16));
     valField = TextField(editorWindow, Rect(100, 80, 400, 40)).string_(valDefault).font_(Font.monospace(16));

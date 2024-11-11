@@ -6,7 +6,7 @@ ESDrawClip {
   }
 
   // draw this clip on a UserView using Pen
-  draw { |left, top, width, height, editingMode = false, clipLeft, clipWidth, selected = false, drawBorder = true, timeSelectionPixels, timeSelection, clipDuration| // these last two are for ESTimelineClips
+  draw { |left, top, width, height, editingMode = false, clipLeft, clipWidth, selected = false, drawBorder = true, timeSelectionPixels, timeSelection, clipDuration| // xxthese last twoxx [clipLeft and clipWidth]? are for ESTimelineClips
     var font = Font("Helvetica", 14, true);
 
     if (clip.track.shouldPlay) {
