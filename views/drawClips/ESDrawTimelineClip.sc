@@ -66,6 +66,7 @@ ESDrawTimelineClip : ESDrawClip {
           Pen.stringAtPoint(ESStringShortener.trim(track.mixerChannelName.asString, clipWidth - 5, Font.sansSerif(10)), (clipLeft + 5)@(thisTop + trackHeight - 13), Font.sansSerif(10), Color.gray(0.5));
         };
         track.clips.do { |thisClip|
+          // TODO: fix thisClip.duration for inf clips
           if ((thisClip.endTime > clip.offset) and: (thisClip.startTime < (clip.offset + clip.duration))) {
             var thisLeft = ((thisClip.startTime - clip.offset) * tratio) + left;
             var thisWidth = (thisClip.duration * tratio);
