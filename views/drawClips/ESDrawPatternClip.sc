@@ -26,7 +26,7 @@ ESDrawPatternClip : ESDrawClip {
             freq: event.freq,
             amp: event.amp,
             sustain: event.sustain,
-            dur: event.dur,
+            dur: event.delta,//event.dur,  // oops my bad, this should have been delta. TODO: fix the naming of the key
             // because it doesn't work to specify the isRest parameter directly, as
             // mentioned in part 0
             restdummy: if (event.isRest) { Rest() } { 1 }

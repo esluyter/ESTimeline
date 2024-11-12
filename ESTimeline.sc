@@ -953,5 +953,7 @@ ESTimeline {
     tracks.do(_.deleteTime(timeA, timeB));
     this.envs.do(_.deleteTime(timeA, timeB));
   }
+
+  makeWindow { ^ESTimelineWindow(timeline: ~timeline) }
 }
 
