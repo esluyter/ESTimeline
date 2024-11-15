@@ -503,7 +503,7 @@ ESTimelineView : UserView {
         if (mods.isAlt) {
           timelineController.toggleSnap;
         } {
-          timelineController.splitClip(hoverClip, snappedHoverTime);
+          timelineController.splitClip(hoverClip, snappedHoverTime, this.selectedClips);
         };
       };
       // cmd-s save cmd-o open cmd-n new

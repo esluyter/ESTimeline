@@ -37,6 +37,8 @@ ESRulerView : UserView {
     timelineView = argtimelineView;
     timeline = argtimeline;
 
+    this.cacheTicks;
+
     this.drawFunc_({
       var division = (60 / (this.bounds.width / this.duration)).ceil.nextPowerOfTwo;
       var timeSelection = timelineView.timeSelection;

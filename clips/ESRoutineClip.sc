@@ -6,7 +6,7 @@ ESRoutineClip : ESClip {
 
   storeArgs { ^[startTime, duration, offset, color, name, func, stopFunc, prepFunc, cleanupFunc, randSeed, isSeeded, addLatency, fastForward, mute] }
 
-  *new { |startTime, duration, offset = 0, color, name, func, stopFunc, prepFunc, cleanupFunc, randSeed, isSeeded = true, addLatency = false, fastForward = 1, mute = false|
+  *new { |startTime, duration, offset = 0, color, name, func, stopFunc, prepFunc, cleanupFunc, randSeed, isSeeded = false, addLatency = false, fastForward = 1, mute = false|
     ^super.new(startTime, duration, offset, color, name, mute: mute).init(func, stopFunc, prepFunc, cleanupFunc, randSeed, isSeeded, addLatency, fastForward);
   }
 

@@ -19,8 +19,14 @@ ESTimelineController {
   goto { |val| timeline.goto(val) }
   toggleSnap { timeline.snapToGrid = timeline.snapToGrid.not }
 
-  splitClip { |clip, time|
-    if (clip.notNil) { clip.track.splitClip(clip.index, time) };
+  splitClip { |thisClip, time, selectedClips|
+    if (thisClip.notNil and: selectedClips.includes(thisClip).not) {
+      thisClip.track.splitClip(thisClip.index, time) ;
+    } {
+      selectedClips.do { |clip|
+        clip.track.splitClip(clip.index, time);
+      };
+    };
   }
 
   toggleMuteClips { |thisClip, selectedClips|
@@ -169,7 +175,7 @@ ESTimelineController {
   }
 
   newRoutineClip { |track, startTime, duration|
-    track.addClip(ESRoutineClip(startTime, duration ?? 5, func: {}));
+    track.addClip(ESRoutineClip(startTime, duration ?? 1, func: {}));
   }
 
   newEnvClip { |track, startTime, duration|

@@ -3,6 +3,12 @@ ESSynthClip : ESClip {
   var <func, <doPlayFunc;
   var <synth;
 
+  classvar defaultFunc;
+
+  *initClass {
+    defaultFunc = "{ |freq = 440, amp = 0.1, pan|\n  var sig = SinOsc.ar(freq);\n  Pan2.ar(sig, pan, amp);\n}".interpret;
+  }
+
   // changed: args is now required to be array
 
   autoDefName { ^("ESSynthClip_temp" ++ id).asSymbol }
@@ -13,11 +19,11 @@ ESSynthClip : ESClip {
   doPlayFunc_ { |val| doPlayFunc = val; this.prep; this.changed(\doPlayFunc, val); }
   func_ { |val| func = val; this.prep; this.changed(\func, val); }
 
-  storeArgs { ^[startTime, duration, offset, color, name, defName, args, target, addAction, mute, func, doPlayFunc] }
+  storeArgs { ^[startTime, duration, offset, color, name, defName, if (args == []) { nil } { args }, target, addAction, mute, if (func == defaultFunc) { nil } { func }, doPlayFunc] }
 
   *new { |startTime, duration, offset = 0, color, name, defName = 'default', args, target, addAction = 'addToHead', mute = false, func, doPlayFunc = false|
     args = args ?? [];
-    func = func ? "{ |freq = 440, amp = 0.1, pan|\n  var sig = SinOsc.ar(freq);\n  Pan2.ar(sig, pan, amp);\n}".interpret;
+    func = func ? defaultFunc;
     ^super.new(startTime, duration, offset, color, name, mute: mute).init(defName, args, target, addAction, func, doPlayFunc);
   }
 

@@ -20,6 +20,8 @@ ESTimeline {
   classvar <nextId = 0, <timelines;
   var <id; // for referencing e.g. with faders on global mixer
 
+  clock { ^this.playClock } // the clock variable is not necessarily the clock the timeline plays on
+
   *initClass { freeQueue = []; timelines = (); }
 
   *at { |val| ^timelines[val] }
@@ -135,7 +137,7 @@ ESTimeline {
     this.changed(\useMixerChannel);
   }
 
-  storeArgs { ^[tracks, this.tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames, tempoEnv] }
+  storeArgs { ^[tracks, this.tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, if (mixerChannelTemplates.size == 0) { nil } { mixerChannelTemplates }, if (globalMixerChannelNames == [\master]) { nil } { globalMixerChannelNames }, tempoEnv] }
   defaultUndoPoint { ^[[ESTrack([])], 1, nil, nil, bootOnPrep, useEnvir, optimizeView, 4, false, useMixerChannel, (), [\master]].asESArray }
 
   *newInitMixerChannels { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = true, gridDivision = 4, snapToGrid = false, useMixerChannel = true, mixerChannelTemplates, globalMixerChannelNames, tempoEnv, initMidi = true|
@@ -149,7 +151,7 @@ ESTimeline {
     ^super.newCopyArgs(tracks, tempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, gridDivision, snapToGrid, useMixerChannel, mixerChannelTemplates, globalMixerChannelNames).tempoEnv_(tempoEnv).initId.initEnvir.initDependantFunc.init(true, initMidi: initMidi);
   }
 
-  *new { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = false, gridDivision = 4, snapToGrid = false, useMixerChannel = false, mixerChannelTemplates, globalMixerChannelNames, tempoEnv, initMidi = true|
+  *new { |tracks, tempo = 1, prepFunc, cleanupFunc, bootOnPrep = true, useEnvir = true, optimizeView = true, gridDivision = 4, snapToGrid = false, useMixerChannel = false, mixerChannelTemplates, globalMixerChannelNames, tempoEnv, initMidi = true|
     tracks = tracks ?? [ESTrack()];
 
     mixerChannelTemplates = mixerChannelTemplates ?? ();
