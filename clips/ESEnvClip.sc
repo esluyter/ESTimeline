@@ -146,7 +146,7 @@ ESEnvClip : ESClip {
     };
   }
 
-  *new { |startTime, duration, offset = 0, color, name, env, bus, target, addAction = 'addToHead', min = 0, max = 1, curve = 0, isExponential = false, makeBus = true, makeBusRate = \audio, mute = false, useLiveInput = false, liveInput = 0, ccNum = 0, armed = false, midiChannel = 16, midiSmooth = 0.1, prep = false|
+  *new { |startTime, duration, offset = 0, color, name, env, bus, target, addAction = 'addToHead', min = 0, max = 1, curve = 0, isExponential = false, makeBus = true, makeBusRate = \control, mute = false, useLiveInput = false, liveInput = 0, ccNum = 0, armed = false, midiChannel = 16, midiSmooth = 0.1, prep = false|
     env = env ?? Env([0.5, 0.5], [0], [0]);
     ^super.new(startTime, duration, offset, color, name, mute: mute).init(env, bus, target, addAction, min, max, curve, isExponential, makeBus, makeBusRate, mute, useLiveInput, liveInput, ccNum, armed, midiChannel, midiSmooth, prep);
   }

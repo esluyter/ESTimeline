@@ -180,6 +180,9 @@ ESTimelineController {
 
   newEnvClip { |track, startTime, duration|
     var thisDuration = duration ?? 5;
+    if (duration == inf) {
+      thisDuration = 0;
+    };
     track.addClip(ESEnvClip(startTime, thisDuration, env: Env([0.5, 0.5], [thisDuration], 0), prep: true));
   }
 
@@ -227,7 +230,7 @@ ESTimelineController {
         curve: curve,
         isExponential: isExponential
       ); // dont prep here anymore because it needs to know its track
-      envClip.env = Env(envClip.prValueUnscale(value).dup(2), [thisClip.duration], [0]);
+      envClip.env = Env(envClip.prValueUnscale(value).dup(2), [if (thisClip.duration == inf) { 0 } { thisClip.duration }], [0]);
       timeline.tracks[thisTrackIndex].addClip(envClip);
       envClip.prep;
 
