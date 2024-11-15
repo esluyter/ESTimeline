@@ -8,8 +8,10 @@ ESMidiListener {
   }
 
   init {
-    MIDIClient.init;
-    MIDIIn.connectAll;
+    if (MIDIClient.initialized.not) {
+      MIDIClient.init;
+      MIDIIn.connectAll;
+    };
 
     ccValues = 17.collect { 0.dup(127) };
 
