@@ -776,7 +776,13 @@ ESTimeline {
 
     #tracks, thisTempo, prepFunc, cleanupFunc, bootOnPrep, useEnvir, optimizeView, dummyGD, dummySTG, dummyUMC, mixerChannelTemplates, globalMixerChannelNames, dummyTempoEnv = arr;
 
+    // TODO: remove duplicated code from *new
+    tracks = tracks ?? [ESTrack()];
+
+    mixerChannelTemplates = mixerChannelTemplates ?? ();
     mixerChannelTemplates = ESEvent.newFrom(mixerChannelTemplates);
+
+    globalMixerChannelNames = globalMixerChannelNames ?? [\master];
 
     // prep fx and legacy support
     mixerChannelTemplates.keysValuesDo { |key, value|
