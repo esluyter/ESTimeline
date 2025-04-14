@@ -962,6 +962,6 @@ ESTimeline {
     this.envs.do(_.deleteTime(timeA, timeB));
   }
 
-  makeWindow { ^ESTimelineWindow(timeline: ~timeline) }
+  makeWindow { ^ESTimelineWindow(timeline: this) }
 }
 
